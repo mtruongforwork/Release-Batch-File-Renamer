@@ -295,6 +295,52 @@ public class SettingsPage : PageBase
         // ---- Quyền riêng tư & giới thiệu ----
         var about = Card(content, Loc.T("SettingsPrivacy") + " · " + Loc.T("SettingsAbout"));
         about.Children.Add(Caption(Loc.T("SettingsPrivacyHint")));
+
+        // C8: thời hạn giữ lịch sử/journal và xoá dữ liệu hoạt động theo yêu cầu.
+        var retentionCaption = Caption(Loc.T("SettingsRetention"));
+        retentionCaption.Margin = new Thickness(0, 12, 0, 4);
+        about.Children.Add(retentionCaption);
+
+        var retention = new ComboBox { MinWidth = 240, HorizontalAlignment = HorizontalAlignment.Left };
+        AutomationProperties.SetName(retention, "History retention");
+        foreach (var days in AppSettings.RetentionChoices)
+            retention.Items.Add(new ComboBoxItem { Content = Loc.F("SettingsRetentionDays", days), Tag = days.ToString() });
+        SelectByTag(retention, AppSettings.NormalizeRetentionDays(_settings.HistoryRetentionDays).ToString());
+        retention.SelectionChanged += (_, _) =>
+        {
+            if (retention.SelectedItem is ComboBoxItem { Tag: string tag } && int.TryParse(tag, out var days))
+            {
+                _settings.HistoryRetentionDays = AppSettings.NormalizeRetentionDays(days);
+                SettingsStore.Save(_settings);
+                BFR.Core.HistoryStore.DefaultRetention = TimeSpan.FromDays(_settings.HistoryRetentionDays);
+            }
+        };
+        about.Children.Add(retention);
+
+        var erase = new Ui.Button
+        {
+            Content = Loc.T("SettingsEraseActivity"),
+            Appearance = Ui.ControlAppearance.Secondary,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 10, 0, 0)
+        };
+        AutomationProperties.SetName(erase, "Clear history and undo data");
+        var eraseStatus = Caption(string.Empty);
+        eraseStatus.Margin = new Thickness(0, 6, 0, 0);
+        erase.Click += (_, _) =>
+        {
+            var answer = MessageBox.Show(Window.GetWindow(this), Loc.T("SettingsEraseConfirm"),
+                Loc.T("SettingsEraseActivity"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+            if (answer != MessageBoxResult.Yes) return;
+
+            var result = ActivityMaintenance.EraseAll();
+            eraseStatus.Text = result.Failed == 0
+                ? Loc.F("SettingsEraseDone", result.FilesDeleted)
+                : Loc.F("SettingsEraseDoneFailed", result.FilesDeleted, result.Failed);
+        };
+        about.Children.Add(erase);
+        about.Children.Add(eraseStatus);
+
         about.Children.Add(Caption(Loc.F("SettingsVersion", BFR.Core.AppVersion.Current)));
 
         var rateButton = new Ui.Button

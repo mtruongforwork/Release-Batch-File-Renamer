@@ -28,6 +28,7 @@
     <sys:String x:Key="StatusInvalidName">名称无效</sys:String>
     <sys:String x:Key="StatusPathTooLong">路径过长</sys:String>
     <sys:String x:Key="StatusLocked">文件被占用</sys:String>
+    <sys:String x:Key="StatusProtected">受保护的系统文件夹</sys:String>
     <sys:String x:Key="StatusMissingData">缺少数据</sys:String>
     <sys:String x:Key="NoRuleTrace">（无规则）</sys:String>
     <sys:String x:Key="ConfirmTitle">确认</sys:String>
@@ -198,6 +199,12 @@
     <sys:String x:Key="SettingsLicenseTrial">专业版（试用）— 还剩 {0} 天。</sys:String>
     <sys:String x:Key="SettingsPrivacy">隐私</sys:String>
     <sys:String x:Key="SettingsPrivacyHint">100% 本地处理。详见分发包中的 PRIVACY_POLICY.md。</sys:String>
+    <sys:String x:Key="SettingsRetention">历史记录和撤销数据保留时间</sys:String>
+    <sys:String x:Key="SettingsRetentionDays">{0} 天</sys:String>
+    <sys:String x:Key="SettingsEraseActivity">立即清除历史记录和撤销数据</sys:String>
+    <sys:String x:Key="SettingsEraseConfirm">删除所有历史记录、撤销日志、文件夹监视日志和临时文件？此前的重命名将无法再撤销。预设、设置和许可证会保留。</sys:String>
+    <sys:String x:Key="SettingsEraseDone">已删除 {0} 个文件。</sys:String>
+    <sys:String x:Key="SettingsEraseDoneFailed">已删除 {0} 个文件；{1} 个无法删除（正在使用）。</sys:String>
     <sys:String x:Key="SettingsAbout">关于</sys:String>
     <sys:String x:Key="SettingsVersion">版本 {0}</sys:String>
     <sys:String x:Key="SettingsClose">关闭</sys:String>    <sys:String x:Key="UpgradeHeader">升级到 Batch File Renamer 专业版</sys:String>
@@ -488,6 +495,7 @@
     <sys:String x:Key="CoreDuplicateInBatch">批次内重名：“{0}”</sys:String>
     <sys:String x:Key="CoreAutoResolved">自动处理重名 → {0}</sys:String>
     <sys:String x:Key="CoreRegexTimeout">正则表达式过慢（超时）</sys:String>
+    <sys:String x:Key="CoreProtectedZone">位于受保护的系统区域内</sys:String>
     <sys:String x:Key="CoreRegexInvalid">正则表达式无效</sys:String>
     <sys:String x:Key="CoreListNoMatch">按列表（无匹配）</sys:String>
     <sys:String x:Key="CoreDictEmpty">替换词典（空）</sys:String>

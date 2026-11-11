@@ -53,6 +53,15 @@ public sealed class AppSettings
 
     /// <summary>Giá hiển thị của Pro (dự phòng khi Store không trả giá). Không hard-code trong mã nguồn.</summary>
     public string? ProPriceText { get; set; }
+
+    /// <summary>Số ngày giữ lịch sử, journal hoàn tác và nhật ký (C8). Chỉ nhận các giá trị trong <see cref="RetentionChoices"/>.</summary>
+    public int HistoryRetentionDays { get; set; } = 30;
+
+    public static readonly int[] RetentionChoices = { 7, 30, 90, 365 };
+
+    /// <summary>Đưa giá trị bất kỳ (kể cả từ tệp bị sửa) về một lựa chọn hợp lệ gần nhất; mặc định 30.</summary>
+    public static int NormalizeRetentionDays(int days) =>
+        Array.IndexOf(RetentionChoices, days) >= 0 ? days : 30;
 }
 
 /// <summary>

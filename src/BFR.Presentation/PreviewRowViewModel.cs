@@ -69,6 +69,7 @@ public sealed class PreviewRowViewModel : ObservableObject
         PreviewStatus.PathTooLong => _strings.T("StatusPathTooLong"),
         PreviewStatus.Locked => _strings.T("StatusLocked"),
         PreviewStatus.MissingData => _strings.T("StatusMissingData"),
+        PreviewStatus.Protected => _strings.T("StatusProtected"),
         _ => Status.ToString()
     };
 

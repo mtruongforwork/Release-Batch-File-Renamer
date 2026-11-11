@@ -28,6 +28,7 @@
     <sys:String x:Key="StatusInvalidName">Nom invalide</sys:String>
     <sys:String x:Key="StatusPathTooLong">Chemin trop long</sys:String>
     <sys:String x:Key="StatusLocked">Fichier verrouillé</sys:String>
+    <sys:String x:Key="StatusProtected">Dossier système protégé</sys:String>
     <sys:String x:Key="StatusMissingData">Données manquantes</sys:String>
     <sys:String x:Key="NoRuleTrace">(aucune règle)</sys:String>
     <sys:String x:Key="ConfirmTitle">Confirmation</sys:String>
@@ -198,6 +199,12 @@
     <sys:String x:Key="SettingsLicenseTrial">Pro (essai) — {0} jours restants.</sys:String>
     <sys:String x:Key="SettingsPrivacy">CONFIDENTIALITÉ</sys:String>
     <sys:String x:Key="SettingsPrivacyHint">Traitement 100 % local. Consultez PRIVACY_POLICY.md dans la distribution.</sys:String>
+    <sys:String x:Key="SettingsRetention">Conserver l'historique et les données d'annulation pendant</sys:String>
+    <sys:String x:Key="SettingsRetentionDays">{0} jours</sys:String>
+    <sys:String x:Key="SettingsEraseActivity">Effacer l'historique et les données d'annulation maintenant</sys:String>
+    <sys:String x:Key="SettingsEraseConfirm">Supprimer tout l'historique, les journaux d'annulation, les journaux du dossier surveillé et les fichiers temporaires ? Les renommages précédents ne pourront plus être annulés. Les préréglages, les paramètres et votre licence sont conservés.</sys:String>
+    <sys:String x:Key="SettingsEraseDone">{0} fichiers supprimés.</sys:String>
+    <sys:String x:Key="SettingsEraseDoneFailed">{0} fichiers supprimés ; {1} n'ont pas pu être supprimés (en cours d'utilisation).</sys:String>
     <sys:String x:Key="SettingsAbout">À PROPOS</sys:String>
     <sys:String x:Key="SettingsVersion">Version {0}</sys:String>
     <sys:String x:Key="SettingsClose">Fermer</sys:String>    <sys:String x:Key="UpgradeHeader">Passer à Batch File Renamer Pro</sys:String>
@@ -488,6 +495,7 @@
     <sys:String x:Key="CoreDuplicateInBatch">Nom en double dans le lot : « {0} »</sys:String>
     <sys:String x:Key="CoreAutoResolved">Doublon corrigé automatiquement → {0}</sys:String>
     <sys:String x:Key="CoreRegexTimeout">Regex trop lente (délai dépassé)</sys:String>
+    <sys:String x:Key="CoreProtectedZone">Dans une zone système protégée</sys:String>
     <sys:String x:Key="CoreRegexInvalid">Motif regex invalide</sys:String>
     <sys:String x:Key="CoreListNoMatch">Liste (aucune correspondance)</sys:String>
     <sys:String x:Key="CoreDictEmpty">Dictionnaire (vide)</sys:String>

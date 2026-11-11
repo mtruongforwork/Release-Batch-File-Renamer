@@ -102,7 +102,7 @@ public sealed class QuickRenamer
 
         if (preview.HasBlockingError)
         {
-            var bad = preview.Items.First(i => i.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong);
+            var bad = preview.Items.First(i => i.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong or PreviewStatus.Protected);
             return new QuickRenameResult(QuickRenameStatus.Blocked, 0, files.Count, null,
                 $"{bad.OldName}: {bad.Detail ?? bad.Status.ToString()}", engine.AutoResolvedCount);
         }
@@ -129,7 +129,7 @@ public sealed class QuickRenamer
             Status = result.Failed > 0 ? "partial" : "completed",
             JournalPath = result.JournalPath
         });
-        _history?.PruneAndLimit(TimeSpan.FromDays(30), maxUndoEntries);
+        _history?.PruneAndLimit(maxUndoEntries);
 
         return new QuickRenameResult(
             result.Failed > 0 ? QuickRenameStatus.Failed : QuickRenameStatus.Done,

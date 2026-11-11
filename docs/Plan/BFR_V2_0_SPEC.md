@@ -346,9 +346,9 @@ Giữ quy tắc tối đa 16 mục con (giới hạn thực tế của Explorer)
 | C4 | Nhập preset và workflow | Giới hạn kích thước và độ sâu JSON, kiểm tra schema. Workflow nhập từ ngoài **không được** chứa bước ghi ra đường dẫn tuyệt đối mà không hỏi người dùng |
 | C5 | Cập nhật | Chỉ HTTPS và host cho phép, giới hạn phản hồi, User-Agent theo `AppVersion` |
 | C7 | Chuỗi cung ứng | CodeQL, Dependabot, kiểm tra gói có lỗ hổng, `TreatWarningsAsErrors`, ký số exe/MSIX, SBOM |
-| C8 | Dữ liệu cục bộ | Tự dọn lịch sử và khu cách ly; nút "Xoá toàn bộ dữ liệu BFR"; không ghi đường dẫn vào log |
+| C8 | Dữ liệu cục bộ | Thời hạn giữ lịch sử/journal chỉnh được (7/30/90/365 ngày, mặc định 30); xoá journal của mục lịch sử bị loại và journal mồ côi (journal dở dang luôn được giữ để khôi phục); cắt nhật ký Watch Folder theo thời hạn; nút "Xoá lịch sử và dữ liệu hoàn tác ngay" (giữ preset, cài đặt, giấy phép); `LogRedactor` che đường dẫn trong nhật ký lỗi và log shell. Khu cách ly (Giai đoạn 0, phần sau) có cơ chế dọn riêng vì chứa tệp của người dùng |
 | C9 | **Archive** | Chống Zip Slip, zip bomb, bỏ qua symlink và mục nhập có đường dẫn tuyệt đối |
-| C10 | **Vùng cấm** | Không cho thao tác ghi vào `C:\Windows`, `Program Files`, thư mục gốc ổ đĩa, `%APPDATA%` của app khác; không theo symlink/junction khi quét đệ quy (tránh vòng lặp và thoát ra ngoài) |
+| C10 | **Vùng cấm** | `ProtectedZones` chặn mọi thao tác ghi trong `C:\Windows`, `Program Files` (cả x86 và Common), `%LOCALAPPDATA%\Packages`, dữ liệu nội bộ của BFR, `$Recycle.Bin`, `System Volume Information`. Trạng thái xem trước `Protected` (chặn áp dụng) và lớp bảo vệ thứ hai trong executor. Quét đệ quy không đi vào symlink/junction và vùng cấm. *Ghi chú: tệp ở gốc ổ đĩa (ví dụ USB) vẫn được xử lý bình thường.* |
 | C11 | **Ảnh đầu vào độc** | Giải mã ảnh qua WIC trong khối try riêng có giới hạn kích thước (≤ 500 MP) để tệp hỏng không làm sập app |
 | C12 | **Hard link** | Chỉ trên cùng ổ NTFS, cảnh báo rằng sửa một bản sẽ đổi cả bản còn lại |
 

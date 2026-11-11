@@ -87,6 +87,7 @@ public sealed class FileScanner
         {
             if (ct.IsCancellationRequested) break;
             if (!ShouldInclude(sub, options)) continue;
+            if (ShouldSkipDirectory(sub)) continue;
             if (options.IncludeFolders)
             {
                 AddDirectory(sub, dirs, seen, ref loadOrder);
@@ -256,6 +257,24 @@ public sealed class FileScanner
     }
 
     private static bool GlobMatch(string name, string glob) => GlobMatcher.IsMatch(name, glob);
+
+    /// <summary>
+    /// Khi quét đệ quy (C10): không đi vào symlink/junction (tránh vòng lặp và thoát ra ngoài thư mục đã chọn)
+    /// và không đi vào vùng hệ thống được bảo vệ.
+    /// </summary>
+    internal static bool ShouldSkipDirectory(string directory)
+    {
+        try
+        {
+            if (new DirectoryInfo(directory).LinkTarget is not null) return true;
+        }
+        catch
+        {
+            return true; // không đọc được thì không đi vào
+        }
+
+        return ProtectedZones.Default.IsProtected(directory);
+    }
 
     private static int Depth(string path) => path.Count(c => c == '\\' || c == '/');
 }

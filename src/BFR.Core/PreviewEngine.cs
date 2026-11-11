@@ -104,11 +104,18 @@ public sealed class PreviewEngine
                 detail = conflict.Message ?? conflict.Type.ToString();
             }
 
+            // Vùng hệ thống được bảo vệ (C10): ghi đè mọi trạng thái cần thay đổi để không bao giờ áp dụng.
+            if (status != PreviewStatus.Unchanged && ProtectedZones.Default.TryGetReason(item.File.FullPath, out _))
+            {
+                status = PreviewStatus.Protected;
+                detail = CoreText.Get("CoreProtectedZone", "Nằm trong vùng hệ thống được bảo vệ");
+            }
+
             items.Add(item with { Status = status, Detail = detail });
         }
 
         var hasBlocking = items.Any(i =>
-            i.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong);
+            i.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong or PreviewStatus.Protected);
 
         return new PreviewResult(items, hasBlocking);
     }

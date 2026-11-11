@@ -216,7 +216,7 @@ public sealed class MainViewModel : ObservableObject
 
     public int UnchangedCount => Rows.Count(r => r.Status == PreviewStatus.Unchanged);
 
-    public int ErrorCount => Rows.Count(r => r.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong);
+    public int ErrorCount => Rows.Count(r => r.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong or PreviewStatus.Protected);
 
     public int SelectedCount => Rows.Count(r => r.IsSelected);
 
@@ -725,7 +725,7 @@ public sealed class MainViewModel : ObservableObject
         {
             PreviewFilter.WillChange => row.Status == PreviewStatus.Ok && !string.Equals(row.NewName, row.OldName, StringComparison.Ordinal),
             PreviewFilter.Unchanged => row.Status == PreviewStatus.Unchanged,
-            PreviewFilter.Problems => row.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong,
+            PreviewFilter.Problems => row.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong or PreviewStatus.Protected,
             _ => true
         };
 
@@ -830,7 +830,7 @@ public sealed class MainViewModel : ObservableObject
                 JournalPath = result.JournalPath
             });
 
-            _history.PruneAndLimit(TimeSpan.FromDays(30), _license.License.MaxUndoEntries);
+            _history.PruneAndLimit(_license.License.MaxUndoEntries);
 
             _lastReport = Rows
                 .Where(r => r.Status == PreviewStatus.Ok && r.IsSelected)

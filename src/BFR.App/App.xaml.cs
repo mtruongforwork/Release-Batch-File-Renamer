@@ -20,6 +20,9 @@ public partial class App : Application
     private TrayIcon? _tray;
     private int _toasts;
 
+    /// <summary>Tệp báo lỗi nghiêm trọng (đã che đường dẫn); xoá cùng dữ liệu hoạt động.</summary>
+    internal static string CrashFilePath => Path.Combine(Path.GetTempPath(), "bfr-crash.txt");
+
     /// <summary>True khi đang bật chạy nền (có biểu tượng khay).</summary>
     public bool BackgroundEnabled => _tray is not null;
 
@@ -77,12 +80,12 @@ public partial class App : Application
 
         AppDomain.CurrentDomain.UnhandledException += (s, ev) =>
         {
-            try { File.WriteAllText(Path.Combine(Path.GetTempPath(), "bfr-crash.txt"), ev.ExceptionObject?.ToString() ?? "null"); } catch { }
+            try { File.WriteAllText(CrashFilePath, LogRedactor.Redact(ev.ExceptionObject?.ToString() ?? "null")); } catch { }
         };
 
         DispatcherUnhandledException += (s, ev) =>
         {
-            try { File.WriteAllText(Path.Combine(Path.GetTempPath(), "bfr-crash.txt"), ev.Exception.ToString()); } catch { }
+            try { File.WriteAllText(CrashFilePath, LogRedactor.Redact(ev.Exception.ToString())); } catch { }
         };
 
         SessionEnding += (_, _) => IsExiting = true;   // không chặn đăng xuất/tắt máy khi đang ẩn trong khay
@@ -136,6 +139,10 @@ public partial class App : Application
             Dispatcher.Invoke(() => Shutdown(0));
             return;
         }
+
+        // C8: áp dụng thời hạn giữ dữ liệu hoạt động rồi dọn nền (chỉ phiên chính, tránh hai tiến trình cùng dọn).
+        HistoryStore.DefaultRetention = TimeSpan.FromDays(AppSettings.NormalizeRetentionDays(settings.HistoryRetentionDays));
+        _ = Task.Run(ActivityMaintenance.Run);
 
         // B1: đổi tên nhanh từ menu chuột phải — không mở cửa sổ chính, chỉ hiện thông báo kèm Hoàn tác.
         if (payload.QuickPreset is not null)

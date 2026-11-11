@@ -88,6 +88,12 @@ public sealed class RenameExecutor
 
             try
             {
+                // Lớp bảo vệ cuối (C10): dù phía trên đã chặn, executor không bao giờ chạm vùng hệ thống.
+                if (ProtectedZones.Default.IsProtected(step.From) || ProtectedZones.Default.IsProtected(step.To))
+                {
+                    throw new UnauthorizedAccessException(CoreText.Get("CoreProtectedZone", "Nằm trong vùng hệ thống được bảo vệ"));
+                }
+
                 switch (step.Kind)
                 {
                     case StepKind.Direct:

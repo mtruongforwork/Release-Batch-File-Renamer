@@ -166,8 +166,11 @@
           </li>
           <li>
             <strong>Nhật ký hoàn tác:</strong> được lưu tại <code>%LocalAppData%\BatchFileRenamer\journal</code>
-            để hỗ trợ Hoàn tác và khôi phục sau sự cố. Bạn có thể xóa thư mục này bất kỳ lúc nào;
-            việc xóa sẽ làm mất khả năng hoàn tác các lần đổi tên trước đó.
+            để hỗ trợ Hoàn tác và khôi phục sau sự cố. Lịch sử và nhật ký hoàn tác tự động bị xóa sau thời hạn bạn chọn
+            trong Cài đặt (7, 30, 90 hoặc 365 ngày; mặc định 30 ngày). Bạn cũng có thể bấm
+            <strong>Xoá lịch sử và dữ liệu hoàn tác ngay</strong> trong Cài đặt, hoặc xóa thư mục này bất kỳ lúc nào;
+            việc xóa sẽ làm mất khả năng hoàn tác các lần đổi tên trước đó. Nhật ký lỗi nghiêm trọng (nếu có)
+            được ghi cục bộ với đường dẫn tệp đã được che.
           </li>
           <li>
             <strong>Đổi tên nhanh từ menu Explorer (v1.4):</strong> các mục con của menu chuột phải chuyển danh sách tệp và
@@ -304,8 +307,11 @@
           </li>
           <li>
             <strong>Undo journal:</strong> stored at <code>%LocalAppData%\BatchFileRenamer\journal</code> to support
-            Undo and crash recovery. You may delete this folder at any time; doing so removes the ability to undo
-            previous rename operations.
+            Undo and crash recovery. History and undo journals are deleted automatically after the retention period you
+            choose in Settings (7, 30, 90 or 365 days; default 30). You can also press
+            <strong>Clear history and undo data now</strong> in Settings, or delete this folder at any time; doing so
+            removes the ability to undo previous rename operations. Crash reports (if any) are written locally with
+            file paths redacted.
           </li>
           <li>
             <strong>Quick rename from the Explorer menu (v1.4):</strong> the right-click submenu items pass the file list and a
@@ -390,8 +396,9 @@
         <h3>9. Retention and your choices</h3>
         <p>
           BFR has no cloud database and stores no data outside your machine. Undo journals and temporary files
-          remain local until deleted or cleaned up by the app. Uninstalling the app does not automatically delete
-          journals under <code>%LocalAppData%</code>; you may remove them manually.
+          remain local until the retention period you choose in Settings expires or you clear them with
+          <strong>Clear history and undo data now</strong>. Uninstalling the app does not automatically delete
+          journals under <code>%LocalAppData%</code>; use the clear button first, or remove them manually.
         </p>
 
         <h3>10. Children and sensitive data</h3>

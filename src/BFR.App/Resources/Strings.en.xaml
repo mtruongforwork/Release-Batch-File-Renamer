@@ -28,6 +28,7 @@
     <sys:String x:Key="StatusInvalidName">Invalid name</sys:String>
     <sys:String x:Key="StatusPathTooLong">Path too long</sys:String>
     <sys:String x:Key="StatusLocked">File locked</sys:String>
+    <sys:String x:Key="StatusProtected">Protected system folder</sys:String>
     <sys:String x:Key="StatusMissingData">Missing data</sys:String>
     <sys:String x:Key="NoRuleTrace">(no rules)</sys:String>
     <sys:String x:Key="ConfirmTitle">Confirm</sys:String>
@@ -198,6 +199,12 @@
     <sys:String x:Key="SettingsLicenseTrial">Pro (trial) — {0} days left.</sys:String>
     <sys:String x:Key="SettingsPrivacy">PRIVACY</sys:String>
     <sys:String x:Key="SettingsPrivacyHint">100% local processing. See PRIVACY_POLICY.md in the distribution.</sys:String>
+    <sys:String x:Key="SettingsRetention">Keep history and undo data for</sys:String>
+    <sys:String x:Key="SettingsRetentionDays">{0} days</sys:String>
+    <sys:String x:Key="SettingsEraseActivity">Clear history and undo data now</sys:String>
+    <sys:String x:Key="SettingsEraseConfirm">Delete all history, undo journals, watch-folder logs and temporary files? Earlier renames can no longer be undone. Presets, settings and your license are kept.</sys:String>
+    <sys:String x:Key="SettingsEraseDone">Deleted {0} files.</sys:String>
+    <sys:String x:Key="SettingsEraseDoneFailed">Deleted {0} files; {1} could not be deleted (in use).</sys:String>
     <sys:String x:Key="SettingsAbout">ABOUT</sys:String>
     <sys:String x:Key="SettingsVersion">Version {0}</sys:String>
     <sys:String x:Key="SettingsClose">Close</sys:String>    <sys:String x:Key="UpgradeHeader">Upgrade to Batch File Renamer Pro</sys:String>
@@ -488,6 +495,7 @@
     <sys:String x:Key="CoreDuplicateInBatch">Duplicate name in the batch: '{0}'</sys:String>
     <sys:String x:Key="CoreAutoResolved">Auto-fixed duplicate → {0}</sys:String>
     <sys:String x:Key="CoreRegexTimeout">Regex too slow (timeout)</sys:String>
+    <sys:String x:Key="CoreProtectedZone">Inside a protected system area</sys:String>
     <sys:String x:Key="CoreRegexInvalid">Invalid regex pattern</sys:String>
     <sys:String x:Key="CoreListNoMatch">List map (no match)</sys:String>
     <sys:String x:Key="CoreDictEmpty">Replace dictionary (empty)</sys:String>
