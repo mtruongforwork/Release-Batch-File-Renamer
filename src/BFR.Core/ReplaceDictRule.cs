@@ -44,7 +44,8 @@ public sealed class ReplaceDictRule : IRule
             ? null
             : new Regex(
                 string.Join("|", _map.Keys.OrderByDescending(k => k.Length).Select(Regex.Escape)),
-                IgnoreCase ? RegexOptions.IgnoreCase | RegexOptions.CultureInvariant : RegexOptions.CultureInvariant);
+                IgnoreCase ? RegexOptions.IgnoreCase | RegexOptions.CultureInvariant : RegexOptions.CultureInvariant,
+                RegexLimits.Timeout);
         _built = true;
     }
 
@@ -58,7 +59,17 @@ public sealed class ReplaceDictRule : IRule
             return state with { Trace = trace };
         }
 
-        var result = _regex.Replace(state.Name, m => _map.TryGetValue(m.Value, out var r) ? r : m.Value);
+        string result;
+        try
+        {
+            result = _regex.Replace(state.Name, m => _map.TryGetValue(m.Value, out var r) ? r : m.Value);
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            trace.Add($"{Id}: " + CoreText.Get("CoreRegexTimeout", "Regex quá chậm (timeout)"));
+            return state with { Trace = trace };
+        }
+
         trace.Add($"{Id}: ReplaceDict → {result}");
         return state with { Name = result, Trace = trace };
     }

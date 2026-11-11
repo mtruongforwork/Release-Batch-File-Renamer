@@ -55,7 +55,7 @@ public sealed class FindReplaceRule : IRule
             if (cached is not null && cached.Pattern == Pattern && cached.IgnoreCase == IgnoreCase) return cached.Regex;
 
             var options = IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
-            var created = new Regex(Pattern, options, TimeSpan.FromMilliseconds(250));
+            var created = new Regex(Pattern, options, RegexLimits.Timeout);
             _regexCache = new CachedRegex(Pattern, IgnoreCase, created);
             return created;
         }

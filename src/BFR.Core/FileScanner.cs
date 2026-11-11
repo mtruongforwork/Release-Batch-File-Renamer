@@ -255,11 +255,7 @@ public sealed class FileScanner
         return true;
     }
 
-    private static bool GlobMatch(string name, string glob)
-    {
-        var pattern = "^" + Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
-        return Regex.IsMatch(name, pattern, RegexOptions.IgnoreCase);
-    }
+    private static bool GlobMatch(string name, string glob) => GlobMatcher.IsMatch(name, glob);
 
     private static int Depth(string path) => path.Count(c => c == '\\' || c == '/');
 }

@@ -616,7 +616,17 @@ public partial class MainWindow : FluentWindow
         var dialog = new OpenFileDialog { Filter = "BFR Preset (*.bfrpreset)|*.bfrpreset", Multiselect = false };
         if (dialog.ShowDialog() != true) return;
 
-        var preset = new PresetStore(_fs).Import(dialog.FileName);
+        Preset preset;
+        try
+        {
+            preset = new PresetStore(_fs).Import(dialog.FileName);
+        }
+        catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(this, ex.Message, Loc.T("WindowTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         PresetCombo.SelectedItem = null;
         _vm.LoadPreset(preset);
         StatusText.Text = Loc.F("ImportedPreset", preset.Name);

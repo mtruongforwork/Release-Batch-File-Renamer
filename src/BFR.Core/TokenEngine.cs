@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 /// </summary>
 public sealed class TokenEngine
 {
-    private static readonly Regex TokenRegex = new(@"\{([^{}]+)\}", RegexOptions.Compiled);
+    private static readonly Regex TokenRegex = new(@"\{([^{}]+)\}", RegexOptions.Compiled, RegexLimits.Timeout);
 
     public string Expand(string template, FileItem file, RenameState state, RuleContext ctx, ICollection<string>? errors = null)
     {
