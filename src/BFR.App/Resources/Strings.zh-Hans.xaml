@@ -485,6 +485,11 @@
     <sys:String x:Key="HomeHistoryHint">撤销过去的更改。</sys:String>
     <sys:String x:Key="SettingsAccent">强调色</sys:String>
     <sys:String x:Key="SettingsMascot">显示吉祥物 Tem</sys:String>
+    <sys:String x:Key="StepFiles">选择文件</sys:String>
+    <sys:String x:Key="StepOptions">选项</sys:String>
+    <sys:String x:Key="StepReview">预览</sys:String>
+    <sys:String x:Key="StepApply">应用</sys:String>
+    <sys:String x:Key="StepsName">步骤</sys:String>
     <sys:String x:Key="TemName">Tem，BFR 吉祥物</sys:String>
     <sys:String x:Key="NavShelf">文件架</sys:String>
     <sys:String x:Key="NavHistory">历史</sys:String>

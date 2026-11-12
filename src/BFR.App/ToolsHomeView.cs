@@ -62,7 +62,7 @@ internal sealed class ToolsHomeView : UserControl
             var key = tool.Key;
             var card = new Border
             {
-                Style = (Style)Application.Current.FindResource("InteractiveCardStyle"),
+                Style = (Style)Application.Current.FindResource("BfrInteractiveCard"),
                 Width = 250,
                 Margin = new Thickness(0, 0, 12, 12),
                 Padding = new Thickness(14),
@@ -83,8 +83,8 @@ internal sealed class ToolsHomeView : UserControl
             head.Children.Add(new TextBlock
             {
                 Text = Loc.T(tool.TitleKey),
-                FontWeight = FontWeights.SemiBold,
-                Foreground = (Brush)Application.Current.FindResource("TextPrimary"),
+                FontFamily = (FontFamily)Application.Current.FindResource("BfrFontHeading"),
+                Foreground = (Brush)Application.Current.FindResource("BfrFg"),
                 TextTrimming = TextTrimming.CharacterEllipsis
             });
             panel.Children.Add(head);

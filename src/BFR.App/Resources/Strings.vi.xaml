@@ -485,6 +485,11 @@
     <sys:String x:Key="HomeHistoryHint">Hoàn tác các thay đổi cũ.</sys:String>
     <sys:String x:Key="SettingsAccent">Bảng màu nhấn</sys:String>
     <sys:String x:Key="SettingsMascot">Hiện linh vật Tem</sys:String>
+    <sys:String x:Key="StepFiles">Chọn tệp</sys:String>
+    <sys:String x:Key="StepOptions">Tuỳ chọn</sys:String>
+    <sys:String x:Key="StepReview">Xem trước</sys:String>
+    <sys:String x:Key="StepApply">Áp dụng</sys:String>
+    <sys:String x:Key="StepsName">Các bước</sys:String>
     <sys:String x:Key="TemName">Tem, linh vật của BFR</sys:String>
     <sys:String x:Key="NavShelf">Khay tệp</sys:String>
     <sys:String x:Key="NavHistory">Lịch sử</sys:String>

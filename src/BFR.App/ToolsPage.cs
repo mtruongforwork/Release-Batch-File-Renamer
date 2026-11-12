@@ -61,6 +61,7 @@ public sealed class ToolsPage : PageBase
         _list.ItemsSource = entries;
         _list.Style = (Style)Application.Current.FindResource("AppListBoxStyle");
         _list.ItemTemplate = BuildItemTemplate();
+        _list.ItemContainerStyle = BuildItemStyle();
         _list.SelectionChanged += (_, _) =>
         {
             if (_list.SelectedItem is Entry entry) Show(entry);
@@ -85,6 +86,39 @@ public sealed class ToolsPage : PageBase
 
         Content = grid;
         _list.SelectedIndex = 0;
+    }
+
+    /// <summary>Mục danh sách công cụ: chọn thì nền gradient và chữ trắng (đạt tương phản ở mọi bảng màu), rê chuột nền kính.</summary>
+    private static Style BuildItemStyle()
+    {
+        return (Style)System.Windows.Markup.XamlReader.Parse("""
+            <Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" TargetType="ListBoxItem">
+              <Setter Property="Foreground" Value="{DynamicResource BfrFg2}" />
+              <Setter Property="Padding" Value="10,6" />
+              <Setter Property="Margin" Value="0,2" />
+              <Setter Property="Cursor" Value="Hand" />
+              <Setter Property="FocusVisualStyle" Value="{x:Null}" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" />
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Bd" CornerRadius="12" Background="Transparent" Padding="{TemplateBinding Padding}" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                      <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BfrGlass}" />
+                        <Setter Property="Foreground" Value="{DynamicResource BfrFg}" />
+                      </Trigger>
+                      <Trigger Property="IsSelected" Value="True">
+                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BfrAccGradient}" />
+                        <Setter Property="Foreground" Value="{DynamicResource BfrOnAccent}" />
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+            """);
     }
 
     private static DataTemplate BuildItemTemplate()

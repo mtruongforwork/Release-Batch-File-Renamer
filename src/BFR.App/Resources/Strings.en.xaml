@@ -485,6 +485,11 @@
     <sys:String x:Key="HomeHistoryHint">Undo past changes.</sys:String>
     <sys:String x:Key="SettingsAccent">Accent palette</sys:String>
     <sys:String x:Key="SettingsMascot">Show the mascot (Tem)</sys:String>
+    <sys:String x:Key="StepFiles">Choose files</sys:String>
+    <sys:String x:Key="StepOptions">Options</sys:String>
+    <sys:String x:Key="StepReview">Review</sys:String>
+    <sys:String x:Key="StepApply">Apply</sys:String>
+    <sys:String x:Key="StepsName">Steps</sys:String>
     <sys:String x:Key="TemName">Tem, the BFR mascot</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">History</sys:String>

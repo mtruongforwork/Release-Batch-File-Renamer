@@ -82,6 +82,8 @@ internal sealed class ToolView : UserControl
     private readonly Ui.Button _exportButton = new();
     private readonly Ui.Button _upgradeButton = new();
     private readonly Ui.Button _undoButton = new();
+    private readonly List<ContentControl> _stepDots = new();
+    private readonly List<Border> _stepLines = new();
 
     private ToolPlan? _plan;
     private CancellationTokenSource? _cts;
@@ -142,6 +144,11 @@ internal sealed class ToolView : UserControl
         });
         DockPanel.SetDock(header, Dock.Top);
         root.Children.Add(header);
+
+        // Thanh bước: Chọn tệp → Tuỳ chọn → Xem trước → Áp dụng (công cụ chỉ đọc không có bước cuối).
+        var stepper = BuildStepper();
+        DockPanel.SetDock(stepper, Dock.Top);
+        root.Children.Add(stepper);
 
         // Thanh hành động (dưới cùng)
         var actions = BuildActions();
@@ -676,6 +683,50 @@ internal sealed class ToolView : UserControl
         }
     }
 
+    private FrameworkElement BuildStepper()
+    {
+        var keys = _tool.ReadOnly ? new[] { "StepFiles", "StepOptions", "StepReview" } : new[] { "StepFiles", "StepOptions", "StepReview", "StepApply" };
+        var strip = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 12) };
+        for (var i = 0; i < keys.Length; i++)
+        {
+            if (i > 0)
+            {
+                var line = new Border { Style = AppStyle("BfrStepLine"), Width = 28 };
+                _stepLines.Add(line);
+                strip.Children.Add(line);
+            }
+
+            var dot = new ContentControl { Style = AppStyle("BfrStepDot"), Content = (i + 1).ToString() };
+            _stepDots.Add(dot);
+            strip.Children.Add(dot);
+            strip.Children.Add(new TextBlock
+            {
+                Text = Loc.T(keys[i]),
+                Style = AppStyle("BfrCaptionText"),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(6, 0, 0, 0)
+            });
+        }
+
+        System.Windows.Automation.AutomationProperties.SetName(strip, Loc.T("StepsName"));
+        return strip;
+    }
+
+    /// <summary>Bước hiện tại suy ra từ trạng thái: chưa có tệp → 1; chưa xem trước → 2; đã có kế hoạch → 3; đã áp dụng → 4 (xong).</summary>
+    private void UpdateStepper()
+    {
+        if (_stepDots.Count == 0) return;
+
+        var hasInput = _paths.Count > 0 || NeedsNoInput();
+        var current = !hasInput ? 0 : _plan is null ? 1 : _lastJournal is not null && !_tool.ReadOnly ? _stepDots.Count : 2;
+
+        for (var i = 0; i < _stepDots.Count; i++)
+        {
+            _stepDots[i].Tag = i < current ? "done" : i == current ? "current" : null;
+            if (i > 0) _stepLines[i - 1].Tag = i <= current ? "done" : null;
+        }
+    }
+
     // ----------------------------------------------------------------- Trạng thái nút
 
     private void SetBusy(bool busy)
@@ -695,6 +746,7 @@ internal sealed class ToolView : UserControl
         _exportButton.Visibility = _plan?.Export is not null ? Visibility.Visible : Visibility.Collapsed;
         _upgradeButton.Visibility = _plan?.UpgradeFeature is not null ? Visibility.Visible : Visibility.Collapsed;
         _undoButton.Visibility = _lastJournal is not null && !_busy ? Visibility.Visible : Visibility.Collapsed;
+        UpdateStepper();
     }
 
     /// <summary>Kiểm tra tệp checksum không cần danh sách đầu vào: chỉ cần chọn tệp .sha256.</summary>
