@@ -37,4 +37,7 @@ public interface IFileSystem
 
     /// <summary>Mở tệp để đọc tuần tự (băm, đọc magic bytes). Người gọi đóng luồng.</summary>
     Stream OpenRead(string path);
+
+    /// <summary>Ghi tệp nhị phân (tạo thư mục cha nếu cần). Dùng cho tệp tạm do công cụ dựng.</summary>
+    void WriteAllBytes(string path, byte[] content);
 }

@@ -65,6 +65,13 @@ public sealed class RealFileSystem : IFileSystem
     public bool IsDirectoryEmpty(string path) =>
         Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
 
+    public void WriteAllBytes(string path, byte[] content)
+    {
+        var parent = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(parent)) Directory.CreateDirectory(parent);
+        File.WriteAllBytes(path, content);
+    }
+
     public Stream OpenRead(string path) =>
         new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, 81920, FileOptions.SequentialScan);
 
