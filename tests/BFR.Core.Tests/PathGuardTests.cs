@@ -163,3 +163,36 @@ public class SingleInstanceHardeningTests
         Assert.True(await Task.WhenAny(tcs.Task, Task.Delay(3000)) == tcs.Task);
     }
 }
+
+public class ToolPayloadTests
+{
+    [Theory]
+    [InlineData("organize")]
+    [InlineData("duplicates")]
+    [InlineData("checksum")]
+    public void KnownToolKeys_SurviveSanitizing(string key)
+    {
+        var args = StartupArgs.Parse(new[] { "--tool", key, @"C:\data\a.txt" });
+
+        var clean = PathGuard.SanitizeIpcPayload(args.Payload);
+
+        Assert.Equal(key, clean.Tool);
+        Assert.Single(clean.Paths);
+    }
+
+    [Theory]
+    [InlineData("rm -rf")]
+    [InlineData("ORGANIZE")]
+    [InlineData("..\\evil")]
+    [InlineData("")]
+    public void UnknownToolKeys_AreDropped(string key)
+    {
+        var payload = new IpcPayload { Tool = key };
+
+        Assert.Null(PathGuard.SanitizeIpcPayload(payload).Tool);
+    }
+
+    [Fact]
+    public void ToolKeysMatchTheCatalogue() =>
+        Assert.Equal(KnownTools.Keys.OrderBy(k => k), new[] { "analyze", "archive", "checksum", "duplicates", "folders", "images", "metadata", "organize", "workflow" });
+}

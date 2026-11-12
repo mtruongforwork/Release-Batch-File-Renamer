@@ -28,6 +28,10 @@ public sealed record StartupArgs(IpcPayload Payload, bool Background)
             {
                 if (i + 1 < args.Length) payload.QuickPreset = args[++i];
             }
+            else if (string.Equals(a, "--tool", StringComparison.OrdinalIgnoreCase))
+            {
+                if (i + 1 < args.Length) payload.Tool = args[++i];
+            }
             else if (string.Equals(a, "--background", StringComparison.OrdinalIgnoreCase))
             {
                 background = true;

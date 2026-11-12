@@ -154,7 +154,8 @@ public partial class App : Application
             return;
         }
 
-        _mainWindow = new MainWindow(payload, _license);
+        // --tool: mở trang Công cụ với các tệp đã chọn; danh sách Đổi tên không nhận các tệp này.
+        _mainWindow = new MainWindow(payload.Tool is null ? payload : new IpcPayload(), _license);
         MainWindow = _mainWindow;
 
         // Bắt đầu lắng nghe trước khi Show để không bỏ lỡ lần mở tệp thứ hai
@@ -177,8 +178,22 @@ public partial class App : Application
             _mainWindow.Show();
         }
 
+        if (payload.Tool is not null) OpenToolFromPayload(payload);
+
         // Đồng bộ giấy phép Store (chạy nền, không chặn khởi động).
         _ = RefreshLicenseAsync();
+    }
+
+    /// <summary>Mở công cụ tệp theo <c>--tool</c> với các tệp trong payload.</summary>
+    private void OpenToolFromPayload(IpcPayload payload)
+    {
+        if (_mainWindow is null || payload.Tool is null) return;
+
+        var paths = new List<string>(payload.Paths);
+        if (!string.IsNullOrWhiteSpace(payload.FileListPath)) paths.AddRange(FileListReader.ReadAndDelete(payload.FileListPath));
+
+        _mainWindow.OpenTool(payload.Tool, paths);
+        _mainWindow.ActivateAndForeground();
     }
 
     /// <summary>
@@ -314,6 +329,12 @@ public partial class App : Application
         Dispatcher.BeginInvoke(() =>
         {
             if (payload.QuickPreset is not null) { _ = RunQuickAsync(payload); return; }
+            if (payload.Tool is not null)
+            {
+                if (_mainWindow == null) EnsureMainWindow(new IpcPayload());
+                OpenToolFromPayload(payload);
+                return;
+            }
             if (_mainWindow == null) { EnsureMainWindow(payload); return; }
 
             var paths = new List<string>(payload.Paths);

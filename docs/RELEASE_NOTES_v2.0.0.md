@@ -20,6 +20,7 @@ Tài liệu ghi chú phát hành cho **Microsoft Partner Center**, bản **v2.0.
   - **Checksum**: MD5 / SHA-1 / SHA-256, export `.sha256`, verify downloads.
   - **Analyze**: space by type and folder, largest files, old files and files whose extension does not match their content.
   - **Workflow (Pro)**: chain several steps and undo the whole chain with one click.
+- **Send files to a tool from anywhere.** A *Tools home* with a card per tool and a drop zone, a *Send to Tools* button on the rename list, and new Explorer right-click entries (Organize, Find duplicates, Dates / remove GPS, Compress to ZIP, Checksum) that open the tool with the selected files, ready to preview.
 - **Safer by design.** "Delete" never erases anything: files move to a **quarantine** and are kept for at least 30 days. Every change is journaled, so everything can be undone from History. System folders (Windows, Program Files…) are never touched.
 - **Watch Folder for several folders (Pro).** Each rule watches one folder and runs a preset or a whole workflow on new files.
 - **Command line.** `bfr organize`, `dupes`, `flatten`, `zip`, `unzip`, `hash`, `verify`, `analyze`, `image`, `touch`, `strip-gps`, `workflow run`… all with `--dry-run`, `--yes` and `--format json`.
@@ -42,6 +43,7 @@ Tài liệu ghi chú phát hành cho **Microsoft Partner Center**, bản **v2.0.
   - **Checksum**: MD5 / SHA-1 / SHA-256, xuất `.sha256`, kiểm tra tệp tải về.
   - **Phân tích**: dung lượng theo loại và thư mục, tệp lớn nhất, tệp cũ và tệp có đuôi không khớp nội dung.
   - **Workflow (Pro)**: nối nhiều bước và hoàn tác cả chuỗi chỉ một lần bấm.
+- **Gửi tệp tới công cụ từ mọi nơi.** Có *Trang chủ công cụ* với thẻ cho từng công cụ và vùng thả tệp, nút *Gửi tới Công cụ* trên danh sách đổi tên, và các mục mới trong menu chuột phải Explorer (Sắp xếp, Tìm tệp trùng, Ngày giờ / xoá GPS, Nén ZIP, Checksum) mở công cụ với các tệp đã chọn, sẵn sàng xem trước.
 - **An toàn từ thiết kế.** “Xoá” không bao giờ xoá vĩnh viễn: tệp chuyển vào **khu cách ly** và được giữ ít nhất 30 ngày. Mọi thay đổi đều ghi journal nên hoàn tác được trong Lịch sử. Thư mục hệ thống (Windows, Program Files…) không bao giờ bị đụng tới.
 - **Theo dõi nhiều thư mục (Pro).** Mỗi quy tắc theo dõi một thư mục và chạy preset hoặc cả workflow cho tệp mới.
 - **Dòng lệnh.** `bfr organize`, `dupes`, `flatten`, `zip`, `unzip`, `hash`, `verify`, `analyze`, `image`, `touch`, `strip-gps`, `workflow run`… đều có `--dry-run`, `--yes`, `--format json`.

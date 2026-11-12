@@ -146,6 +146,13 @@ public sealed class ToolsPage : PageBase
         _list.SelectedIndex = 0;
     }
 
+    /// <summary>Mở công cụ theo khoá và đưa tệp vào đó (khoá lạ: về Trang chủ và giữ tệp lại).</summary>
+    public void OpenTool(string key, IEnumerable<string> paths)
+    {
+        AddPending(paths);
+        OpenTool(KnownTools.IsKnown(key) ? key : "home");
+    }
+
     private void AddPending(IEnumerable<string> paths)
     {
         foreach (var p in paths)
@@ -160,6 +167,13 @@ public sealed class ToolsPage : PageBase
     {
         var entry = _entries.FirstOrDefault(e => e.Key == key);
         if (entry is null) return;
+
+        if (key == "home")
+        {
+            _list.SelectedItem = entry;
+            _home?.SetPending(_pending.Count);
+            return;
+        }
 
         var carry = _pending.ToList();
         _pending.Clear();

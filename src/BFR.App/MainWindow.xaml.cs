@@ -194,6 +194,13 @@ public partial class MainWindow : FluentWindow
     /// <summary>Gửi các tệp đang có trong danh sách sang trang Công cụ (Trang chủ của Công cụ để chọn công cụ).</summary>
     private void SendToTools_Click(object sender, RoutedEventArgs e) => SendToTools(_vm.Rows.Select(r => r.File.FullPath).ToList());
 
+    /// <summary>Mở một công cụ theo khoá (từ menu Explorer hoặc dòng lệnh) và đưa các tệp vào đó.</summary>
+    public void OpenTool(string toolKey, IReadOnlyList<string> paths)
+    {
+        NavigateTo("Tools");
+        if (GetPage("Tools") is ToolsPage tools) tools.OpenTool(toolKey, paths);
+    }
+
     public void SendToTools(IReadOnlyList<string> paths)
     {
         NavigateTo("Tools");

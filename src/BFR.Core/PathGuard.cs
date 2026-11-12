@@ -84,6 +84,7 @@ public static class PathGuard
 
         result.PresetName = Limit(input.PresetName, MaxPresetNameLength);
         result.QuickPreset = Limit(input.QuickPreset, MaxQuickKeyLength);
+        result.Tool = KnownTools.IsKnown(input.Tool) ? input.Tool : null; // danh sách trắng: khoá lạ bị bỏ
         return result;
     }
 

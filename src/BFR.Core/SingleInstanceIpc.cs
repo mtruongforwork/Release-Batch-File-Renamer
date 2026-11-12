@@ -19,6 +19,21 @@ public sealed class IpcPayload
 
     /// <summary>Khoá preset đổi tên nhanh (--quick): áp dụng ngay, không mở cửa sổ chính.</summary>
     public string? QuickPreset { get; set; }
+
+    /// <summary>Khoá công cụ tệp (--tool): mở trang Công cụ với các tệp đã chọn. Chỉ nhận khoá trong <see cref="KnownTools"/>.</summary>
+    public string? Tool { get; set; }
+}
+
+/// <summary>Danh sách trắng khoá công cụ mà dòng lệnh khởi động, IPC và menu Explorer được phép mở (C2).</summary>
+public static class KnownTools
+{
+    public static readonly IReadOnlyList<string> Keys = new[]
+    {
+        "organize", "duplicates", "folders", "metadata", "images", "archive", "checksum", "analyze", "workflow"
+    };
+
+    public static bool IsKnown(string? key) =>
+        !string.IsNullOrEmpty(key) && Keys.Contains(key, StringComparer.Ordinal);
 }
 
 /// <summary>

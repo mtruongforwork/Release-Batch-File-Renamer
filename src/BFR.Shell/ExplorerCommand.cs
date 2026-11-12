@@ -184,15 +184,17 @@ public static class ExplorerCommandLauncher
     }
 
     public const string QuickArgument = "--quick";
+    public const string ToolArgument = "--tool";
 
     /// <param name="quickKey">Khoá preset đổi tên nhanh; null = mở BFR bình thường.</param>
-    public static int Launch(IReadOnlyCollection<string> paths, string? quickKey = null)
+    /// <param name="toolKey">Khoá công cụ tệp (organize, duplicates...); mở trang Công cụ với các tệp đã chọn.</param>
+    public static int Launch(IReadOnlyCollection<string> paths, string? quickKey = null, string? toolKey = null)
     {
         var app = FindAppExecutable();
         if (app is null) return HResult.E_FILE_NOT_FOUND;
 
         // Đổi tên nhanh mà không có tệp nào được chọn (ví dụ bấm vào nền thư mục): không làm gì.
-        if (quickKey is not null && paths.Count == 0) return HResult.S_OK;
+        if ((quickKey is not null || toolKey is not null) && paths.Count == 0) return HResult.S_OK;
 
         string? listPath = null;
         try
@@ -215,6 +217,12 @@ public static class ExplorerCommandLauncher
             {
                 startInfo.ArgumentList.Add(QuickArgument);
                 startInfo.ArgumentList.Add(quickKey);
+            }
+
+            if (toolKey is not null)
+            {
+                startInfo.ArgumentList.Add(ToolArgument);
+                startInfo.ArgumentList.Add(toolKey);
             }
 
             Process.Start(startInfo);
