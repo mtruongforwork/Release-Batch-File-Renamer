@@ -178,6 +178,90 @@
                 </StackPanel>
             </Border>
 
+            <!-- Bộ thành phần 2 -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Bộ thành phần 2" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Thanh bước (đã xong, đang ở, chưa tới)" Margin="0,0,0,8" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <ContentControl Style="{StaticResource BfrStepDot}" Tag="done" Content="1" AutomationProperties.Name="Bước 1, đã xong" />
+                        <Border Style="{StaticResource BfrStepLine}" Tag="done" Width="60" />
+                        <ContentControl Style="{StaticResource BfrStepDot}" Tag="current" Content="2" AutomationProperties.Name="Bước 2, đang ở" />
+                        <Border Style="{StaticResource BfrStepLine}" Width="60" />
+                        <ContentControl Style="{StaticResource BfrStepDot}" Content="3" AutomationProperties.Name="Bước 3, chưa tới" />
+                        <Border Style="{StaticResource BfrStepLine}" Width="60" />
+                        <ContentControl Style="{StaticResource BfrStepDot}" Content="4" AutomationProperties.Name="Bước 4, chưa tới" />
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Vùng thả tệp (thường, đang kéo tệp qua)" Margin="0,0,0,8" />
+                    <UniformGrid Columns="2" Margin="0,0,0,20">
+                        <ContentControl Style="{StaticResource BfrDropZone}" Margin="0,0,8,0" AutomationProperties.Name="Vùng thả tệp">
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="Thả tệp vào đây hoặc bấm để chọn" />
+                        </ContentControl>
+                        <ContentControl Style="{StaticResource BfrDropZone}" Tag="drag" Margin="8,0,0,0" AutomationProperties.Name="Vùng thả tệp đang kéo qua">
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="Thả để thêm 12 tệp" />
+                        </ContentControl>
+                    </UniformGrid>
+
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Dòng xem trước (đổi, xung đột, không đổi)" Margin="0,0,0,8" />
+                    <StackPanel Margin="0,0,0,20">
+                        <Border Style="{StaticResource BfrPreviewRow}">
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="IMG_0412.jpg  →  Chuyen-di-Da-Lat-001.jpg" />
+                        </Border>
+                        <Border Style="{StaticResource BfrPreviewRow}" Tag="conflict">
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="IMG_0413.jpg  →  Chuyen-di-Da-Lat-001.jpg  (trùng tên)" />
+                        </Border>
+                        <Border Style="{StaticResource BfrPreviewRow}" Tag="unchanged">
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="notes.txt  (giữ nguyên)" />
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Thanh thông báo có hoàn tác" Margin="0,0,0,8" />
+                    <Border Style="{StaticResource BfrToast}" HorizontalAlignment="Left" Margin="0,0,0,20">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="Đã đổi tên 48 tệp." VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <Button Style="{StaticResource BfrGhostButton}" Content="Hoàn tác" />
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Khung chờ" Margin="0,0,0,8" />
+                    <StackPanel Margin="0,0,0,20" MaxWidth="420" HorizontalAlignment="Left">
+                        <Border Style="{StaticResource BfrSkeleton}" Margin="0,0,0,8" />
+                        <Border Style="{StaticResource BfrSkeleton}" Width="300" HorizontalAlignment="Left" Margin="0,0,0,8" />
+                        <Border Style="{StaticResource BfrSkeleton}" Width="180" HorizontalAlignment="Left" />
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Trạng thái rỗng" Margin="0,0,0,8" />
+                    <Border Style="{StaticResource BfrCard}" Background="{DynamicResource BfrSurface1}" Margin="0,0,0,20">
+                        <HeaderedContentControl Style="{StaticResource BfrEmptyState}" Header="Chưa có tệp nào">
+                            <TextBlock Style="{StaticResource BfrBodyText}" TextWrapping="Wrap" TextAlignment="Center" Text="Kéo thư mục vào đây, Tem sẽ lo phần còn lại." />
+                        </HeaderedContentControl>
+                    </Border>
+
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Thanh rail và hộp thoại" Margin="0,0,0,8" />
+                    <StackPanel Orientation="Horizontal">
+                        <Border Style="{StaticResource BfrRail}" Height="260" BorderThickness="1" CornerRadius="16" Margin="0,0,24,0">
+                            <StackPanel>
+                                <RadioButton GroupName="rail" Style="{StaticResource BfrRailItem}" Tag="⌂" Content="Home" IsChecked="True" />
+                                <RadioButton GroupName="rail" Style="{StaticResource BfrRailItem}" Tag="✎" Content="Rename" />
+                                <RadioButton GroupName="rail" Style="{StaticResource BfrRailItem}" Tag="⚙" Content="Tools" />
+                                <RadioButton GroupName="rail" Style="{StaticResource BfrRailItem}" Tag="↺" Content="History" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource BfrDialog}" Width="340" VerticalAlignment="Top">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource BfrHeadingText}" Text="Xoá 3 tệp?" />
+                                <TextBlock Style="{StaticResource BfrBodyText}" TextWrapping="Wrap" Margin="0,6,0,16" Text="Tệp được chuyển vào thùng cách ly 30 ngày, có thể khôi phục." />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Style="{StaticResource BfrGhostButton}" Content="Huỷ" Margin="0,0,8,0" />
+                                    <Button Style="{StaticResource BfrDangerButton}" Content="Xoá" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!-- Linh vật Tem -->
             <TextBlock Style="{StaticResource BfrTitleText}" Text="Linh vật Tem (5 trạng thái)" Margin="0,8,0,10" />
             <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
