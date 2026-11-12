@@ -302,7 +302,9 @@ internal sealed class ToolView : UserControl
                 Foreground = Res("TextSecondary"),
                 TextWrapping = TextWrapping.Wrap
             });
-            line.Children.Add(BuildEditor(option));
+            var editor = BuildEditor(option);
+            NameForNarrator(editor, Loc.T(option.LabelKey));
+            line.Children.Add(editor);
         }
 
         row.Children.Add(line);
@@ -320,6 +322,20 @@ internal sealed class ToolView : UserControl
         }
 
         return row;
+    }
+
+    /// <summary>Gán tên cho điều khiển để Narrator đọc đúng nhãn (ô văn bản, danh sách chọn, ô thư mục/tệp).</summary>
+    private static void NameForNarrator(FrameworkElement editor, string label)
+    {
+        if (editor is Panel panel)
+        {
+            foreach (var child in panel.Children.OfType<TextBox>()) AutomationHelper(child, label);
+            foreach (var child in panel.Children.OfType<Ui.Button>()) AutomationHelper(child, label + " …");
+        }
+        else
+        {
+            AutomationHelper(editor, label);
+        }
     }
 
     private FrameworkElement BuildEditor(ToolOption option)
