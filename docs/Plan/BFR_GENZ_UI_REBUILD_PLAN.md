@@ -178,7 +178,7 @@ Gộp một trang **"Lịch sử"** dạng dòng thời gian theo ngày: mỗi l
 - Bộ **microcopy** có hai tầng: *Chuẩn* (mặc định, rõ ràng) và *Vui* (tuỳ chọn trong Cài đặt) cho riêng trạng thái trống/thành công. Ví dụ *Vui* tiếng Việt: "Kéo thả tệp vào đây nè", "Xong rồi! 128 tệp đã vào nếp". Hộp xác nhận, lỗi, xoá **không** có bản *Vui*.
 - Phản hồi: nút lún, thẻ nổi, danh sách đổ vào, dấu tích vẽ nét, pháo giấy nhẹ (chỉ khi xong ≥ 10 tệp, tắt được).
 - **Phím tắt hiển thị** trên tooltip; thanh lệnh Ctrl+K giữ nguyên nhưng đổi sang giao diện kính.
-- Không có âm thanh, không có mascot ở bản này (xem mục 11).
+- Không có âm thanh. Mascot **Tem** có mặt ở trạng thái trống và màn thành công (xem mục 11, 6.1).
 
 ---
 
@@ -196,12 +196,12 @@ Gộp một trang **"Lịch sử"** dạng dòng thời gian theo ngày: mỗi l
 
 ---
 
-## 8. Lộ trình (khoảng 8–9 tuần, một người)
+## 8. Lộ trình (khoảng 9–10 tuần, một người, gồm mascot)
 
 | Giai đoạn | Nội dung | Tuần | Cổng chấp nhận |
 |---|---|---|---|
 | **0. Chốt hướng** | Bạn chọn hướng A/B/C, bảng màu, phông, mức "vui". Dựng **prototype HTML tương tác 3 màn** (Trang chủ, Đổi tên, bước Xem trước Sắp xếp) để duyệt trước khi viết XAML | 1 | Bạn duyệt prototype |
-| **1. Nền tảng** | Tokens màu/chữ/hình khối, bảng màu Aurora/Mint/Sunset, nhúng phông, backdrop, bộ component 1 (Button, Card, Chip, Segmented, Toggle, TextField) + trang mẫu "Gallery" để xem mọi trạng thái | 2 | Gallery đủ trạng thái ở dark/light/High Contrast |
+| **1. Nền tảng** | Tokens màu/chữ/hình khối, bảng màu Aurora/Mint/Sunset, nhúng phông, backdrop, bộ component 1 (Button, Card, Chip, Segmented, Toggle, TextField) + trang mẫu "Gallery" để xem mọi trạng thái; **song song: mascot Tem (5 trạng thái)** | 2 | Gallery đủ trạng thái ở dark/light/High Contrast |
 | **2. Khung ứng dụng** | Thanh bên mới, chuyển cảnh, thanh hoàn tác, menu avatar, hộp thoại kính, **Trang chủ** | 1,5 | Chụp tự động qua UIA, không cắt chữ ở 4 ngôn ngữ |
 | **3. Không gian Đổi tên** | Hai cột, thẻ quy tắc nội tuyến, `BfrPreviewRow`, màn thành công | 2 | Giữ nguyên toàn bộ test INV và hành vi áp dụng/hoàn tác |
 | **4. Công cụ** | `BfrStepper` + thẻ lựa chọn có minh hoạ + xem trước riêng cho 9 công cụ + treemap + trước/sau ảnh; làm lại Theo dõi, Lịch sử/Khu cách ly | 2,5 | Mỗi công cụ chạy đủ 4 bước trên giao diện, có ảnh chụp |
@@ -235,18 +235,33 @@ Gộp một trang **"Lịch sử"** dạng dòng thời gian theo ngày: mỗi l
 
 ---
 
-## 11. Câu hỏi cần bạn chốt trước khi bắt đầu
+## 11. Quyết định đã chốt
 
-| # | Câu hỏi | Đề xuất |
-|---|---|---|
-| D1 | Hướng thẩm mỹ A / B / C? | **A + bố cục Bento** |
-| D2 | Màu nhấn mặc định? | **Aurora (tím-hồng)**, cho chọn thêm Mint, Sunset |
-| D3 | Tối hay sáng là mặc định? | **Theo hệ thống**, thiết kế tối trước |
-| D4 | Có microcopy giọng "Vui" không? | **Có, mặc định tắt**, chỉ ở trạng thái trống/thành công |
-| D5 | Có mascot/nhân vật không? | **Chưa** (tốn công minh hoạ; cân nhắc sau v2.1) |
-| D6 | Bao nhiêu người dùng thử ở Giai đoạn 6? | **5–8 người** |
-| D7 | Giữ tên mục "Công cụ" hay đổi tên theo gu mới ("Studio"…)? | **Giữ "Công cụ"** cho rõ nghĩa; thương hiệu chỉ đổi ở màn chào |
-| D8 | Phát hành cùng v2.0 hay thành v2.1? | **v2.1** (v2.0 đã rộng về tính năng; UI rebuild cần kiểm riêng) |
+| # | Câu hỏi | Quyết định | Hệ quả cho plan |
+|---|---|---|---|
+| D1 | Hướng thẩm mỹ | **A (neo-glass, tối là chính) kết hợp bố cục Bento của C** | Như mục 2–5 |
+| D2 | Màu nhấn mặc định | **Aurora** (tím-hồng); có thêm Mint, Sunset | Như mục 3.1 |
+| D3 | Tối hay sáng | Theo hệ thống, thiết kế tối trước | Như mục 3.1 |
+| D4 | Microcopy giọng "Vui" | **Có, mặc định tắt** | Như mục 6 |
+| D5 | Mascot | **Có** (đổi so với đề xuất ban đầu) | Thêm mục 6.1 và 1 tuần công sức |
+| D6 | Người dùng thử | 5–8 người | Giai đoạn 6 |
+| D7 | Tên mục "Công cụ" | Giữ nguyên | |
+| D8 | Phát hành | **Cùng v2.0** (đổi so với đề xuất ban đầu) | Thêm mục 8.1: lịch phát hành |
+
+### 6.1 Mascot "Tem"
+
+- **Ý tưởng:** một chiếc thẻ nhãn (tag) tròn trịa có lỗ xỏ dây ở trên, hai mắt to, má hồng, miệng nhỏ. Hợp với app vì "tem/nhãn" chính là thứ app gắn lên tệp. Thân tô gradient của bảng màu đang chọn nên đổi màu theo Aurora/Mint/Sunset.
+- **Trạng thái (vẽ bằng vector XAML, không dùng ảnh):** *nghỉ* (chớp mắt chậm), *đang làm* (mắt liếc theo thanh tiến trình), *vui* (mắt cong, pháo giấy nhỏ), *ái ngại* (lông mày xệ, khi lỗi hoặc xung đột), *ngủ* (khi app rảnh lâu).
+- **Chỗ xuất hiện:** trạng thái trống, màn thành công, màn chào lần đầu, lỗi nhẹ. Một Tem nhỏ ở góc trang chủ có thể bấm để xem mẹo.
+- **Quy tắc:** Tem không xuất hiện trong hộp xác nhận hành động nguy hiểm, không chặn thao tác, không có âm thanh; tắt được hoàn toàn trong Cài đặt. Giọng nói của Tem theo công tắc microcopy (tắt = chỉ biểu cảm, không lời đùa).
+- **Công sức:** khoảng 1 tuần cho thiết kế + dựng vector + hoạt hình 5 trạng thái, làm song song Giai đoạn 1.
+
+### 8.1 Lịch phát hành khi gộp vào v2.0
+
+Gộp UI rebuild vào v2.0 nghĩa là **v2.0 không phát hành sớm hơn cuối Giai đoạn 6**, tức khoảng **9–10 tuần** kể từ hôm bắt đầu (8–9 tuần UI + 1 tuần mascot, một phần song song). Điều này đã được chấp nhận. Để giảm rủi ro:
+1. Toàn bộ code v2.0 hiện tại (công cụ, CLI, workflow, Watch, menu tròn) đã commit trên nhánh `feat/v2.0` và qua test; UI mới làm trên nhánh con `feat/v2.0-ui`, gộp lại khi từng giai đoạn qua cổng.
+2. Nếu đến tuần 7 chưa kịp: phát hành **v2.0 với UI mới ở Trang chủ, Đổi tên, Công cụ**, các màn còn lại (Theo dõi, Lịch sử, Cài đặt) dùng token mới nhưng bố cục cũ (đã tính trong thứ tự cắt giảm).
+3. Giữ một ngày cố định mỗi tuần để dựng bản kiểm thử (beta nội bộ) từ nhánh UI, tránh dồn việc kiểm cuối.
 
 ---
 
