@@ -65,6 +65,9 @@ public sealed class RealFileSystem : IFileSystem
     public bool IsDirectoryEmpty(string path) =>
         Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
 
+    public Stream OpenRead(string path) =>
+        new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, 81920, FileOptions.SequentialScan);
+
     public bool IsLink(string path)
     {
         try

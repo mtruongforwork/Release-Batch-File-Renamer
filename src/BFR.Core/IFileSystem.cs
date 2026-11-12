@@ -34,4 +34,7 @@ public interface IFileSystem
 
     /// <summary>True nếu đường dẫn là symlink/junction (không đi theo khi duyệt cây).</summary>
     bool IsLink(string path) => false;
+
+    /// <summary>Mở tệp để đọc tuần tự (băm, đọc magic bytes). Người gọi đóng luồng.</summary>
+    Stream OpenRead(string path);
 }

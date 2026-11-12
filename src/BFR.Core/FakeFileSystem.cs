@@ -167,6 +167,19 @@ public sealed class FakeFileSystem : IFileSystem
 
     public bool IsLink(string path) => _links.Contains(Normalize(path));
 
+    public Stream OpenRead(string path) =>
+        _files.TryGetValue(Normalize(path), out var bytes)
+            ? new MemoryStream(bytes, writable: false)
+            : throw new FileNotFoundException("Tệp không tồn tại", path);
+
+    /// <summary>Ghi nội dung nhị phân (cho test).</summary>
+    public void WriteAllBytes(string path, byte[] content)
+    {
+        var p = Normalize(path);
+        EnsureDirectory(ParentDirectory(p));
+        _files[p] = (byte[])content.Clone();
+    }
+
     public bool IsDirectoryEmpty(string path)
     {
         var p = Normalize(path);
