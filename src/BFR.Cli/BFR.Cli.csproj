@@ -13,8 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="BFR.Cli.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BFR.Core\BFR.Core.csproj" />
     <ProjectReference Include="..\BFR.Store\BFR.Store.csproj" />
+    <ProjectReference Include="..\BFR.Media\BFR.Media.csproj" />
   </ItemGroup>
 
 </Project>

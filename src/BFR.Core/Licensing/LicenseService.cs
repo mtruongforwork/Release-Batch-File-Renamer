@@ -197,6 +197,15 @@ public sealed class LicenseService
             ProFeature.UnlimitedShelf => limits.MaxShelfItems == int.MaxValue,
             ProFeature.UnlimitedListRows => limits.MaxListRows == int.MaxValue,
             ProFeature.ListCsvImport => limits.AllowListCsvImport,
+            ProFeature.OrganizeDeepTemplate => limits.MaxOrganizeDepth == int.MaxValue,
+            ProFeature.DuplicatesUnlimited => limits.MaxDuplicateFiles == int.MaxValue,
+            ProFeature.SimilarImages or ProFeature.HardLinkDedupe => limits.AllowSimilarImages,
+            ProFeature.ImageUnlimited => limits.MaxImagesPerBatch == int.MaxValue,
+            ProFeature.ExifWrite => limits.AllowExifWrite,
+            ProFeature.ArchiveAdvanced => limits.AllowArchiveAdvanced,
+            ProFeature.AnalyzeExport => limits.AllowAnalyzeExport,
+            ProFeature.Workflow => limits.AllowWorkflow,
+            ProFeature.QuarantineRetention => limits.MaxQuarantineDays > QuarantineStore.DefaultRetentionDays,
             _ => true
         };
 
@@ -206,6 +215,15 @@ public sealed class LicenseService
     }
 
     public bool Allows(ProFeature feature) => Check(feature).Allowed;
+
+    /// <summary>Số cấp thư mục tối đa của mẫu Organize.</summary>
+    public int MaxOrganizeDepth => Limits.MaxOrganizeDepth;
+
+    /// <summary>Số tệp tối đa mỗi lần quét trùng lặp.</summary>
+    public int MaxDuplicateFiles => Limits.MaxDuplicateFiles;
+
+    /// <summary>Số ảnh tối đa mỗi lô Image Tools.</summary>
+    public int MaxImagesPerBatch => Limits.MaxImagesPerBatch;
 
     /// <summary>Số quy tắc tối đa được phép dùng.</summary>
     public int MaxRules => Limits.MaxRules;
@@ -317,6 +335,16 @@ public static class FeatureMessages
         ProFeature.UnlimitedShelf => "Bản Free giữ tối đa 50 tệp trong Shelf. Nâng cấp Pro để không giới hạn.",
         ProFeature.UnlimitedListRows => "Bản Free dùng tối đa 50 dòng trong danh sách đổi tên. Nâng cấp Pro để không giới hạn.",
         ProFeature.ListCsvImport => "Nhập danh sách từ tệp CSV là tính năng Pro.",
+        ProFeature.OrganizeDeepTemplate => "Bản Free sắp xếp tối đa 2 cấp thư mục. Nâng cấp Pro để không giới hạn.",
+        ProFeature.DuplicatesUnlimited => "Bản Free quét tối đa 1.000 tệp mỗi lần tìm trùng. Nâng cấp Pro để không giới hạn.",
+        ProFeature.SimilarImages => "Tìm ảnh gần giống là tính năng Pro.",
+        ProFeature.HardLinkDedupe => "Thay bản trùng bằng hard link là tính năng Pro.",
+        ProFeature.ImageUnlimited => "Bản Free xử lý tối đa 20 ảnh mỗi lô. Nâng cấp Pro để không giới hạn.",
+        ProFeature.ExifWrite => "Ghi và xoá toàn bộ EXIF là tính năng Pro. Xoá GPS luôn miễn phí.",
+        ProFeature.ArchiveAdvanced => "Nén chia nhóm và đặt tên theo mẫu là tính năng Pro.",
+        ProFeature.AnalyzeExport => "Xuất báo cáo phân tích là tính năng Pro.",
+        ProFeature.Workflow => "Workflow nhiều bước là tính năng Pro.",
+        ProFeature.QuarantineRetention => "Chỉnh thời gian giữ khu cách ly là tính năng Pro. Bản Free giữ 30 ngày.",
         _ => "Tính năng này cần bản Pro."
     };
 }

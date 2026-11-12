@@ -1,7 +1,9 @@
 using BFR.Core;
 using BFR.Core.Licensing;
 using BFR.Core.Reports;
+using BFR.Cli;
 using BFR.Core.WatchFolder;
+using BFR.Media;
 using BFR.Store;
 using System.Text;
 using System.Text.Json;
@@ -48,6 +50,7 @@ try
         "watch" => WatchCommand(args[1..]),
         "license" => await LicenseCommand(args[1..]),
         "context-menu" or "shell" => ContextMenuCommand(args[1..]),
+        var tool when ToolCommands.Names.Contains(tool) => RunTool(args),
         "help" or "--help" or "-h" => Help(),
         _ => Unknown(args[0])
     };
@@ -479,6 +482,8 @@ int WatchCommand(string[] rest)
 {
     if (!RequirePro(ProFeature.CommandLine)) return 1;
 
+    if (rest.Length >= 2 && rest[0] == "--rules") return WatchRules(rest[1]);
+
     string? folder = null, presetName = null, include = null, exclude = null;
     bool dryRun = false, recursive = true;
     int settle = 1500;
@@ -558,6 +563,54 @@ int WatchCommand(string[] rest)
     finally
     {
         service.Stop();
+    }
+
+    return 0;
+}
+
+int WatchRules(string rulesFile)
+{
+    if (!licenseService.Allows(ProFeature.Workflow))
+    {
+        Console.Error.WriteLine(FeatureMessages.For(ProFeature.Workflow));
+        return 1;
+    }
+
+    var rules = new WatchRuleStore(fs, rulesFile).Load();
+    if (rules.Count == 0)
+    {
+        Console.Error.WriteLine("Không có quy tắc hợp lệ trong tệp.");
+        return 1;
+    }
+
+    var errors = WatchFolderManager.Validate(rules);
+    if (errors.Count > 0)
+    {
+        foreach (var e in errors) Console.Error.WriteLine(e);
+        return 1;
+    }
+
+    var processor = new WorkflowWatchProcessor(fs, journalDir, new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader(), new AudioTagReader()));
+    using var manager = new WatchFolderManager(fs, processor);
+    manager.Logged += (_, e) => Console.WriteLine($"[{(string.IsNullOrWhiteSpace(e.Rule.Name) ? e.Rule.Folder : e.Rule.Name)}] {e.Entry.Format()}");
+
+    using var stop = new ManualResetEventSlim(false);
+    Console.CancelKeyPress += (_, e) => { e.Cancel = true; stop.Set(); };
+
+    try
+    {
+        manager.Start(rules);
+        Console.WriteLine($"Đang theo dõi {manager.RunningCount} thư mục. Nhấn Ctrl+C để dừng.");
+        stop.Wait();
+    }
+    catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+    {
+        Console.Error.WriteLine($"Không theo dõi được: {ex.Message}");
+        return 4;
+    }
+    finally
+    {
+        manager.Stop();
     }
 
     return 0;
@@ -728,6 +781,24 @@ int ContextMenuCommand(string[] rest)
     }
 }
 
+int RunTool(string[] toolArgs)
+{
+    // Thư mục tạm riêng của lần chạy này (nằm trong vùng tạm của BFR), dọn khi xong.
+    var tempRoot = Path.Combine(PathGuard.BfrTempRoot, "cli-" + Guid.NewGuid().ToString("N"));
+    try
+    {
+        var tools = new ToolCommands(fs, licenseService, Console.Out, Console.Error, Console.In, journalDir, tempRoot,
+            historyStore, appVersion,
+            new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader(), new AudioTagReader()),
+            new WicImageProcessor());
+        return tools.Run(toolArgs);
+    }
+    finally
+    {
+        try { if (Directory.Exists(tempRoot)) Directory.Delete(tempRoot, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+    }
+}
+
 int Help() { PrintHelp(); return 0; }
 int Unknown(string cmd) { Console.Error.WriteLine($"Lệnh không hỗ trợ: {cmd}"); PrintHelp(); return 1; }
 
@@ -758,6 +829,26 @@ Batch File Renamer CLI
   bfr report export [--last|--id <id>] [--format csv|json] [--out <tệp>]
   bfr watch <thư mục> --preset <tên> [--include <glob>] [--exclude <glob>]
                [--settle <ms>] [--no-recursive] [--dry-run]
+  bfr watch --rules <rules.json>               Theo dõi nhiều thư mục, mỗi thư mục một workflow
+  bfr organize <paths...> --template "{exif.year}\{exif.month:00}" [--to <thư mục gốc>] [--copy] [--skip-existing]
+  bfr flatten <thư mục> [--prefix-path] [--keep-empty]
+  bfr empty-dirs <thư mục> [--no-junk]
+  bfr wrap <paths...> [--per-file]
+  bfr touch <paths...> --source fixed|shift|exif|filename|copy [--set created,modified,accessed]
+               [--value <ngày giờ>] [--offset +2h] [--pattern "IMG_{yyyyMMdd_HHmmss}"] [--from <tệp>]
+  bfr attrib <paths...> [--set readonly,hidden,archive] [--clear ...]
+  bfr strip-gps <paths...>                      Xoá GPS khỏi ảnh JPEG (không mã hoá lại ảnh)
+  bfr dupes <paths...> [--similar] [--keep newest|oldest|shortest|clean] [--prefer <thư mục>]
+               [--apply] [--action quarantine|move --to <thư mục>]
+  bfr hash <paths...> [--algo md5|sha1|sha256] [--out <tệp>]    bfr verify <tệp.sha256>
+  bfr analyze <thư mục> [--top N] [--older-than <năm>] [--format json]
+  bfr zip <paths...> [--group all|folder|files:N|mb:N] [--out <thư mục>] [--name <mẫu>] [--level fast|normal|small]
+  bfr unzip <tệp.zip...> [--to <thư mục>] [--single]
+  bfr image <paths...> [--format-out jpg|png|bmp|tif] [--long-edge N | --percent N | --fit WxH]
+               [--quality 60-95] [--suffix _edit] [--out <thư mục>] [--overwrite] [--no-orient]
+  bfr workflow run <tệp.json> <paths...>
+  bfr quarantine status|purge [--days N]
+    (mọi lệnh ghi đều có --dry-run, --yes, --format json, --recursive và hoàn tác được bằng bfr undo)
   bfr license status|trial|buy
   bfr context-menu register [--path <exe>] [--comserver <BFR.Shell.exe>] [--name <label>]
   bfr context-menu unregister|status
