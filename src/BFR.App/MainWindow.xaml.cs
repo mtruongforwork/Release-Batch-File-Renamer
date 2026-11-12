@@ -80,7 +80,17 @@ public partial class MainWindow : FluentWindow
             PresetCombo.SelectedIndex = 0;
         }
         SortCombo.SelectedIndex = 0;
-        Loaded += (_, _) => { ApplyShakeSetting(); ApplyHotkeySetting(); };
+        Loaded += (_, _) =>
+        {
+            ApplyShakeSetting();
+            ApplyHotkeySetting();
+            // Dev: BFR_GALLERY=2 mở thẳng Gallery khi khởi động (dùng cho chụp ảnh tự động).
+            if (Environment.GetEnvironmentVariable("BFR_GALLERY") == "2")
+            {
+                try { new BfrGalleryWindow { Owner = this }.Show(); }
+                catch (Exception ex) { System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "bfr-gallery-error.txt"), ex.ToString()); }
+            }
+        };
         Closed += (_, _) =>
         {
             _shakeHook?.Dispose();
@@ -803,6 +813,10 @@ public partial class MainWindow : FluentWindow
         registry.Register(Loc.T("CommandClearList"), files, () => ClearList_Click(this, new RoutedEventArgs()));
         registry.Register(Loc.T("CommandSendToTools"), files, () => SendToTools_Click(this, new RoutedEventArgs()));
         registry.Register(Loc.T("CommandRadial"), tools, () => ShowRadialAtCursor());
+
+        // Gallery của giao diện mới: chỉ có khi dev đặt BFR_GALLERY=1 (không hiện với người dùng).
+        if (Environment.GetEnvironmentVariable("BFR_GALLERY") == "1")
+            registry.Register("Gallery (dev)", tools, () => new BfrGalleryWindow { Owner = this }.Show());
         registry.Register(Loc.T("CommandApply"), files, () => Apply_Click(this, new RoutedEventArgs()), "Ctrl+Enter");
         registry.Register(Loc.T("CommandUndo"), files, () => Undo_Click(this, new RoutedEventArgs()), "Ctrl+Z");
         registry.Register(Loc.T("CommandSavePreset"), rules, () => SavePreset_Click(this, new RoutedEventArgs()), "Ctrl+S");

@@ -59,6 +59,9 @@ public static class ThemeManager
             Wpf.Ui.Controls.WindowBackdropType.Mica,
             updateAccent: true);
 
+        // Bộ token mới (Themes/Bfr) đi cùng theme cũ trong lúc chuyển đổi từng màn hình sang giao diện mới.
+        BfrTheme.Apply(IsDark, BfrTheme.ParseAccent(SettingsStore.Load().AccentPalette));
+
         var uri = new Uri($"Themes/Theme.{(IsDark ? "Dark" : "Light")}.xaml", UriKind.Relative);
         var dictionary = new ResourceDictionary { Source = uri };
 

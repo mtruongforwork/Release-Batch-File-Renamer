@@ -1,0 +1,407 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:infra="clr-namespace:BFR.App.Infrastructure;assembly=BatchFileRenamer">
+    <!--
+        Bộ thành phần BFR (component set 1): chữ, nút, thẻ, chip, công tắc, phân đoạn, ô nhập.
+        Mọi màu/phông/hình khối lấy từ token (DynamicResource) nên đổi theme hoặc bảng màu nhấn là cập nhật tức thì.
+        Mỗi thành phần có đủ trạng thái: mặc định, rê chuột, bấm, focus bàn phím, vô hiệu, (lỗi với ô nhập).
+        Chế độ tương phản cao nạp HighContrast.xaml ghi đè token nên cùng template vẫn đúng.
+    -->
+
+    <!-- Storyboard trong Style không dùng được DynamicResource (WPF không đóng băng được), nên thời lượng lấy qua
+         {infra:Dur ...} lúc nạp từ điển và easing khai báo tại chỗ. Đổi chế độ giảm chuyển động thì BfrTheme nạp lại từ điển này. -->
+    <CubicEase x:Key="BfrEaseOutLocal" EasingMode="EaseOut" />
+
+    <!-- ===================== Chữ ===================== -->
+    <Style x:Key="BfrDisplayText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontDisplay}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeDisplay}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="BfrTitleText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontHeadingBold}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeTitle}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="BfrHeadingText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontHeading}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeHeading}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="BfrBodyText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontBody}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeBody}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="BfrCaptionText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontBody}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeCaption}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg2}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="BfrMonoText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontMono}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeCaption}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg2}" />
+    </Style>
+
+    <!-- ===================== Nút ===================== -->
+    <!-- Một template cho cả 4 biến thể; biến thể chỉ khác Background/Foreground/Border/hiệu ứng nổi. -->
+    <ControlTemplate x:Key="BfrButtonTemplate" TargetType="Button">
+        <Grid>
+            <!-- Vòng focus bàn phím, nằm ngoài nút 2 px -->
+            <Border x:Name="FocusRing" Margin="-3" CornerRadius="15" BorderThickness="2"
+                    BorderBrush="{DynamicResource BfrAccFg}" Visibility="Collapsed" />
+            <Border x:Name="Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{DynamicResource BfrRadiusControl}"
+                    Padding="{TemplateBinding Padding}" RenderTransformOrigin="0.5,0.5" SnapsToDevicePixels="True">
+                <Border.RenderTransform>
+                    <ScaleTransform x:Name="Scale" ScaleX="1" ScaleY="1" />
+                </Border.RenderTransform>
+                <Grid>
+                    <!-- Lớp sáng khi rê chuột: không đổi màu nền nên đúng cho cả gradient lẫn nền trong -->
+                    <Border x:Name="Hover" CornerRadius="{DynamicResource BfrRadiusControl}" Background="#22FFFFFF" Opacity="0" Margin="-1" />
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"
+                                      TextElement.Foreground="{TemplateBinding Foreground}" />
+                </Grid>
+            </Border>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Hover" Property="Opacity" Value="1" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="0.97" Duration="{infra:Dur Fast}" />
+                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="0.97" Duration="{infra:Dur Fast}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1" Duration="{infra:Dur Fast}" />
+                            <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1" Duration="{infra:Dur Fast}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="BfrButtonBase" TargetType="Button">
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontBodySemi}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeBody}" />
+        <Setter Property="Padding" Value="{DynamicResource BfrPadControl}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template" Value="{StaticResource BfrButtonTemplate}" />
+    </Style>
+
+    <!-- Chính: mỗi màn chỉ nên có một nút này -->
+    <Style x:Key="BfrPrimaryButton" TargetType="Button" BasedOn="{StaticResource BfrButtonBase}">
+        <Setter Property="Background" Value="{DynamicResource BfrAccGradient}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrOnAccent}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="20,12" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Color="{DynamicResource BfrAcc1Color}" Opacity="{DynamicResource BfrShadowOpacity}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="BfrSecondaryButton" TargetType="Button" BasedOn="{StaticResource BfrButtonBase}">
+        <Setter Property="Background" Value="{DynamicResource BfrGlass}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrLine}" />
+    </Style>
+    <Style x:Key="BfrGhostButton" TargetType="Button" BasedOn="{StaticResource BfrButtonBase}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrAccFg}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <!-- Nguy hiểm: luôn đi kèm bước xác nhận ở nơi dùng -->
+    <Style x:Key="BfrDangerButton" TargetType="Button" BasedOn="{StaticResource BfrButtonBase}">
+        <Setter Property="Background" Value="{DynamicResource BfrGlass}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrBad}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrBad}" />
+    </Style>
+
+    <!-- ===================== Thẻ (Bento) ===================== -->
+    <Style x:Key="BfrCard" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource BfrSurface2}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrLine}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource BfrRadiusCard}" />
+        <Setter Property="Padding" Value="{DynamicResource BfrPadCard}" />
+    </Style>
+    <!-- Thẻ nổi bật: nền gradient nhạt theo bảng màu nhấn -->
+    <Style x:Key="BfrHeroCard" TargetType="Border" BasedOn="{StaticResource BfrCard}">
+        <Setter Property="Background" Value="{DynamicResource BfrAccGradientSoft}" />
+    </Style>
+    <!-- Thẻ bấm được: nổi lên 2 px khi rê chuột, viền chuyển sang màu nhấn -->
+    <Style x:Key="BfrInteractiveCard" TargetType="Border" BasedOn="{StaticResource BfrCard}">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform Y="0" />
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource BfrAccFg}" />
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="-2" Duration="{infra:Dur Fast}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="{infra:Dur Fast}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource BfrAccFg}" />
+                <Setter Property="BorderThickness" Value="2" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ===================== Chip ===================== -->
+    <ControlTemplate x:Key="BfrChipTemplate" TargetType="ContentControl">
+        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                CornerRadius="{DynamicResource BfrRadiusPill}" Padding="{TemplateBinding Padding}">
+            <ContentPresenter VerticalAlignment="Center" TextElement.Foreground="{TemplateBinding Foreground}" />
+        </Border>
+    </ControlTemplate>
+    <Style x:Key="BfrChip" TargetType="ContentControl">
+        <Setter Property="Background" Value="{DynamicResource BfrGlass}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrLine}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg2}" />
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontBodySemi}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeCaption}" />
+        <Setter Property="Padding" Value="{DynamicResource BfrPadChip}" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template" Value="{StaticResource BfrChipTemplate}" />
+    </Style>
+    <!-- Trạng thái luôn kèm chữ (không chỉ màu), nên chip có nền nhạt + chữ đậm cùng sắc -->
+    <Style x:Key="BfrChipOk" TargetType="ContentControl" BasedOn="{StaticResource BfrChip}">
+        <Setter Property="Background" Value="{DynamicResource BfrOkSoft}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrOk}" />
+    </Style>
+    <Style x:Key="BfrChipWarn" TargetType="ContentControl" BasedOn="{StaticResource BfrChip}">
+        <Setter Property="Background" Value="{DynamicResource BfrWarnSoft}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrWarn}" />
+    </Style>
+    <Style x:Key="BfrChipBad" TargetType="ContentControl" BasedOn="{StaticResource BfrChip}">
+        <Setter Property="Background" Value="{DynamicResource BfrBadSoft}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrBad}" />
+    </Style>
+    <Style x:Key="BfrChipPro" TargetType="ContentControl" BasedOn="{StaticResource BfrChip}">
+        <Setter Property="Background" Value="{DynamicResource BfrAccGradient}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrOnAccent}" />
+    </Style>
+
+    <!-- Chip bật/tắt (bộ lọc): được chọn thì tô gradient -->
+    <ControlTemplate x:Key="BfrChipToggleTemplate" TargetType="ToggleButton">
+        <Grid>
+            <Border x:Name="FocusRing" Margin="-3" CornerRadius="999" BorderThickness="2" BorderBrush="{DynamicResource BfrAccFg}" Visibility="Collapsed" />
+            <Border x:Name="Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                    CornerRadius="{DynamicResource BfrRadiusPill}" Padding="{TemplateBinding Padding}">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{TemplateBinding Foreground}" />
+            </Border>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource BfrAccFg}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource BfrAccGradient}" />
+                <Setter TargetName="Root" Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource BfrOnAccent}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style x:Key="BfrChipToggle" TargetType="ToggleButton">
+        <Setter Property="Background" Value="{DynamicResource BfrGlass}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrLine}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg2}" />
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontBodySemi}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeCaption}" />
+        <Setter Property="Padding" Value="{DynamicResource BfrPadChip}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template" Value="{StaticResource BfrChipToggleTemplate}" />
+    </Style>
+
+    <!-- ===================== Công tắc ===================== -->
+    <ControlTemplate x:Key="BfrToggleTemplate" TargetType="ToggleButton">
+        <Grid Width="44" Height="26" Background="Transparent">
+            <Border x:Name="FocusRing" Margin="-3" CornerRadius="16" BorderThickness="2" BorderBrush="{DynamicResource BfrAccFg}" Visibility="Collapsed" />
+            <Border x:Name="Track" Background="{DynamicResource BfrSurface1}" BorderBrush="{DynamicResource BfrLine}" BorderThickness="1" CornerRadius="13" />
+            <Ellipse x:Name="Thumb" Width="18" Height="18" HorizontalAlignment="Left" Margin="4,0,0,0" Fill="{DynamicResource BfrFg2}">
+                <Ellipse.RenderTransform>
+                    <TranslateTransform x:Name="ThumbMove" X="0" />
+                </Ellipse.RenderTransform>
+            </Ellipse>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Track" Property="Background" Value="{DynamicResource BfrAccGradient}" />
+                <Setter TargetName="Track" Property="BorderBrush" Value="Transparent" />
+                <Setter TargetName="Thumb" Property="Fill" Value="{DynamicResource BfrOnAccent}" />
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="ThumbMove" Storyboard.TargetProperty="X" To="18" Duration="{infra:Dur Fast}" EasingFunction="{StaticResource BfrEaseOutLocal}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="ThumbMove" Storyboard.TargetProperty="X" To="0" Duration="{infra:Dur Fast}" EasingFunction="{StaticResource BfrEaseOutLocal}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource BfrAccFg}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style x:Key="BfrToggle" TargetType="ToggleButton">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template" Value="{StaticResource BfrToggleTemplate}" />
+    </Style>
+
+    <!-- ===================== Phân đoạn (thay ComboBox khi ≤ 4 lựa chọn) ===================== -->
+    <Style x:Key="BfrSegmentedTrack" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource BfrSurface1}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrLine}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource BfrRadiusPill}" />
+        <Setter Property="Padding" Value="3" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <ControlTemplate x:Key="BfrSegmentedItemTemplate" TargetType="RadioButton">
+        <Grid>
+            <Border x:Name="FocusRing" Margin="-2" CornerRadius="999" BorderThickness="2" BorderBrush="{DynamicResource BfrAccFg}" Visibility="Collapsed" />
+            <Border x:Name="Root" Background="Transparent" CornerRadius="{DynamicResource BfrRadiusPill}" Padding="{TemplateBinding Padding}">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{TemplateBinding Foreground}" />
+            </Border>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource BfrGlass}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Root" Property="Background" Value="{DynamicResource BfrAccGradient}" />
+                <Setter Property="Foreground" Value="{DynamicResource BfrOnAccent}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style x:Key="BfrSegmentedItem" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg2}" />
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontBodySemi}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeCaption}" />
+        <Setter Property="Padding" Value="14,6" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template" Value="{StaticResource BfrSegmentedItemTemplate}" />
+    </Style>
+
+    <!-- ===================== Ô nhập ===================== -->
+    <ControlTemplate x:Key="BfrTextFieldTemplate" TargetType="TextBox">
+        <Grid>
+            <!-- Vầng sáng khi focus -->
+            <Border x:Name="Glow" Margin="-3" CornerRadius="15" BorderThickness="3" BorderBrush="{DynamicResource BfrAccFg}" Opacity="0" />
+            <Border x:Name="Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                    CornerRadius="{DynamicResource BfrRadiusControl}">
+                <Grid>
+                    <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" Focusable="False"
+                                  HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                    <!-- Gợi ý (placeholder) lấy từ thuộc tính Tag, chỉ hiện khi ô trống -->
+                    <TextBlock x:Name="Hint" Text="{TemplateBinding Tag}" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                               Foreground="{DynamicResource BfrFg3}" IsHitTestVisible="False" Visibility="Collapsed" />
+                </Grid>
+            </Border>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Text" Value="">
+                <Setter TargetName="Hint" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource BfrFg3}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource BfrAccFg}" />
+                <Setter TargetName="Glow" Property="Opacity" Value="0.3" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style x:Key="BfrTextField" TargetType="TextBox">
+        <Setter Property="Background" Value="{DynamicResource BfrSurface1}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrLine}" />
+        <Setter Property="Foreground" Value="{DynamicResource BfrFg}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource BfrAccFg}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource BfrAcc1}" />
+        <Setter Property="FontFamily" Value="{DynamicResource BfrFontBody}" />
+        <Setter Property="FontSize" Value="{DynamicResource BfrSizeBody}" />
+        <Setter Property="Padding" Value="{DynamicResource BfrPadField}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template" Value="{StaticResource BfrTextFieldTemplate}" />
+    </Style>
+    <!-- Biến thể lỗi: viền đỏ cố định, kèm chữ giải thích ở nơi dùng -->
+    <Style x:Key="BfrTextFieldError" TargetType="TextBox" BasedOn="{StaticResource BfrTextField}">
+        <Setter Property="BorderBrush" Value="{DynamicResource BfrBad}" />
+    </Style>
+</ResourceDictionary>

@@ -26,6 +26,14 @@
   <ItemGroup>
     <Page Remove="Themes\*.xaml" />
     <Resource Include="Themes\*.xaml" />
+    <Page Remove="Themes\Bfr\*.xaml" />
+    <Resource Include="Themes\Bfr\*.xaml" />
+  </ItemGroup>
+
+  <!-- Phông nhúng (giấy phép OFL, xem Resources/Fonts/OFL-*.txt): Inter cho thân chữ, Plus Jakarta Sans cho tiêu đề. -->
+  <ItemGroup>
+    <Resource Include="Resources\Fonts\*.ttf" />
+    <None Include="Resources\Fonts\OFL-*.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WPF-UI" Version="4.3.0" />

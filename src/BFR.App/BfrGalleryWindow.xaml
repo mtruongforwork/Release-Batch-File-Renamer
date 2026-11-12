@@ -1,0 +1,191 @@
+<Window x:Class="BFR.App.BfrGalleryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BFR Gallery (dev)" Width="1100" Height="860" MinWidth="560" MinHeight="480"
+        Background="{DynamicResource BfrBgBase}" FontFamily="{DynamicResource BfrFontBody}" FontSize="{DynamicResource BfrSizeBody}"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Ideal"
+        AutomationProperties.Name="BFR Gallery">
+    <!--
+        Trang Gallery (chỉ dành cho dev, mở bằng bảng lệnh khi đặt BFR_GALLERY=1): liệt kê mọi token và thành phần của bộ giao diện mới
+        ở mọi trạng thái, đổi sáng/tối và bảng màu tại chỗ. Mỗi thay đổi theme phải xem qua trang này trước khi áp dụng vào màn hình thật.
+    -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,28,32,40" MaxWidth="1000" HorizontalAlignment="Left">
+
+            <TextBlock Style="{StaticResource BfrDisplayText}" Text="Gallery" />
+            <TextBlock Style="{StaticResource BfrBodyText}" Foreground="{DynamicResource BfrFg2}" Margin="0,4,0,18"
+                       Text="Rê chuột, bấm và nhấn Tab để xem các trạng thái rê, bấm, focus. Trạng thái vô hiệu và lỗi được hiện sẵn." />
+
+            <!-- Bộ điều khiển theme -->
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <WrapPanel>
+                    <StackPanel Margin="0,0,28,8">
+                        <TextBlock Style="{StaticResource BfrCaptionText}" Text="Chế độ" Margin="0,0,0,6" />
+                        <Border Style="{StaticResource BfrSegmentedTrack}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="ThemeDark" GroupName="theme" Content="Tối" IsChecked="True" Style="{StaticResource BfrSegmentedItem}" Checked="Theme_Checked" />
+                                <RadioButton x:Name="ThemeLight" GroupName="theme" Content="Sáng" Style="{StaticResource BfrSegmentedItem}" Checked="Theme_Checked" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,28,8">
+                        <TextBlock Style="{StaticResource BfrCaptionText}" Text="Bảng màu nhấn" Margin="0,0,0,6" />
+                        <Border Style="{StaticResource BfrSegmentedTrack}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="AccentAurora" GroupName="accent" Content="Aurora" IsChecked="True" Style="{StaticResource BfrSegmentedItem}" Checked="Accent_Checked" />
+                                <RadioButton x:Name="AccentMint" GroupName="accent" Content="Mint" Style="{StaticResource BfrSegmentedItem}" Checked="Accent_Checked" />
+                                <RadioButton x:Name="AccentSunset" GroupName="accent" Content="Sunset" Style="{StaticResource BfrSegmentedItem}" Checked="Accent_Checked" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,8">
+                        <TextBlock Style="{StaticResource BfrCaptionText}" Text="Xem thử tương phản cao" Margin="0,0,0,6" />
+                        <ToggleButton x:Name="HighContrastToggle" Style="{StaticResource BfrToggle}" HorizontalAlignment="Left"
+                                      AutomationProperties.Name="Xem thử tương phản cao" Click="HighContrast_Click" />
+                    </StackPanel>
+                </WrapPanel>
+            </Border>
+
+            <!-- Màu -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Màu" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <StackPanel>
+                    <WrapPanel x:Name="Swatches" />
+                    <Rectangle Height="56" RadiusX="14" RadiusY="14" Margin="0,16,0,6" Fill="{DynamicResource BfrAccGradient}" />
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Gradient nhấn (nút chính, ô đang chọn, tiến trình). Chữ trên gradient luôn là trắng." />
+                </StackPanel>
+            </Border>
+
+            <!-- Chữ -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Chữ" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BfrDisplayText}" Text="Display 32 · Làm việc với tệp" />
+                    <TextBlock Style="{StaticResource BfrTitleText}" Text="Title 22 · Đổi tên 128 tệp trong một lần" Margin="0,10,0,0" />
+                    <TextBlock Style="{StaticResource BfrHeadingText}" Text="Heading 16 · Quy tắc đánh số" Margin="0,10,0,0" />
+                    <TextBlock Style="{StaticResource BfrBodyText}" Text="Body 14 · Tiếng Việt có dấu: ạ ắ ằ ẳ ẵ ặ ế ề ể ễ ệ ố ồ ổ ỗ ộ ớ ờ ở ỡ ợ ứ ừ ử ữ ự đ Đ" Margin="0,10,0,0" />
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Caption 12 · Pháp: é è ê ç à ù · Trung: 文件批量重命名" Margin="0,6,0,0" />
+                    <TextBlock Style="{StaticResource BfrMonoText}" Text="Mono 12 · {exif.year}\{exif.month:00}\IMG_0042.jpg" Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Nút -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Nút" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <StackPanel>
+                    <WrapPanel>
+                        <Button Style="{StaticResource BfrPrimaryButton}" Content="Áp dụng 128 tệp" Margin="0,0,12,12" />
+                        <Button Style="{StaticResource BfrSecondaryButton}" Content="Xem trước" Margin="0,0,12,12" />
+                        <Button Style="{StaticResource BfrGhostButton}" Content="Để sau" Margin="0,0,12,12" />
+                        <Button Style="{StaticResource BfrDangerButton}" Content="Dọn khu cách ly" Margin="0,0,12,12" />
+                    </WrapPanel>
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Vô hiệu" Margin="0,4,0,6" />
+                    <WrapPanel>
+                        <Button Style="{StaticResource BfrPrimaryButton}" Content="Áp dụng" IsEnabled="False" Margin="0,0,12,0" />
+                        <Button Style="{StaticResource BfrSecondaryButton}" Content="Xem trước" IsEnabled="False" Margin="0,0,12,0" />
+                        <Button Style="{StaticResource BfrGhostButton}" Content="Để sau" IsEnabled="False" Margin="0,0,12,0" />
+                        <Button Style="{StaticResource BfrDangerButton}" Content="Xoá" IsEnabled="False" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Thẻ -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Thẻ" Margin="0,8,0,10" />
+            <WrapPanel Margin="0,0,0,16">
+                <Border Style="{StaticResource BfrCard}" Width="280" Margin="0,0,16,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource BfrHeadingText}" Text="Thẻ thường" />
+                        <TextBlock Style="{StaticResource BfrCaptionText}" Text="Bề mặt 2, viền 1 px, bo góc 20." Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource BfrHeroCard}" Width="280" Margin="0,0,16,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource BfrHeadingText}" Text="Thẻ nổi bật" />
+                        <TextBlock Style="{StaticResource BfrCaptionText}" Text="Nền gradient nhạt theo bảng màu nhấn." Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource BfrInteractiveCard}" Width="280" Margin="0,0,16,16" AutomationProperties.Name="Thẻ bấm được" Focusable="True">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource BfrHeadingText}" Text="Thẻ bấm được" />
+                        <TextBlock Style="{StaticResource BfrCaptionText}" Text="Rê chuột để nổi lên 2 px, Tab để thấy viền focus." Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!-- Chip -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Chip" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <StackPanel>
+                    <WrapPanel>
+                        <ContentControl Style="{StaticResource BfrChip}" Content="Giữ nguyên" Margin="0,0,10,10" />
+                        <ContentControl Style="{StaticResource BfrChipOk}" Content="Sẽ đổi" Margin="0,0,10,10" />
+                        <ContentControl Style="{StaticResource BfrChipWarn}" Content="Cần xem lại" Margin="0,0,10,10" />
+                        <ContentControl Style="{StaticResource BfrChipBad}" Content="Trùng tên" Margin="0,0,10,10" />
+                        <ContentControl Style="{StaticResource BfrChipPro}" Content="Pro" Margin="0,0,10,10" />
+                    </WrapPanel>
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Chip lọc (bấm để chọn)" Margin="0,2,0,6" />
+                    <WrapPanel>
+                        <ToggleButton Style="{StaticResource BfrChipToggle}" Content="Tất cả 12" IsChecked="True" Margin="0,0,8,0" />
+                        <ToggleButton Style="{StaticResource BfrChipToggle}" Content="Sẽ đổi 10" Margin="0,0,8,0" />
+                        <ToggleButton Style="{StaticResource BfrChipToggle}" Content="Trùng tên 2" Margin="0,0,8,0" />
+                        <ToggleButton Style="{StaticResource BfrChipToggle}" Content="Vô hiệu" IsEnabled="False" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Công tắc và phân đoạn -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Công tắc và phân đoạn" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <StackPanel>
+                    <WrapPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,28,12">
+                            <ToggleButton Style="{StaticResource BfrToggle}" IsChecked="False" AutomationProperties.Name="Công tắc tắt" />
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="Tắt" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,28,12">
+                            <ToggleButton Style="{StaticResource BfrToggle}" IsChecked="True" AutomationProperties.Name="Công tắc bật" />
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="Bật" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <ToggleButton Style="{StaticResource BfrToggle}" IsChecked="True" IsEnabled="False" AutomationProperties.Name="Công tắc vô hiệu" />
+                            <TextBlock Style="{StaticResource BfrBodyText}" Text="Vô hiệu" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </WrapPanel>
+                    <Border Style="{StaticResource BfrSegmentedTrack}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton GroupName="seg" Content="Di chuyển" IsChecked="True" Style="{StaticResource BfrSegmentedItem}" />
+                            <RadioButton GroupName="seg" Content="Sao chép" Style="{StaticResource BfrSegmentedItem}" />
+                            <RadioButton GroupName="seg" Content="Bỏ qua" Style="{StaticResource BfrSegmentedItem}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Ô nhập -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Ô nhập" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <StackPanel MaxWidth="420" HorizontalAlignment="Left">
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Thường (có gợi ý)" Margin="0,0,0,4" />
+                    <TextBox Style="{StaticResource BfrTextField}" Tag="Tìm trong tên tệp…" AutomationProperties.Name="Ô nhập thường" />
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Có nội dung" Margin="0,12,0,4" />
+                    <TextBox Style="{StaticResource BfrTextField}" Text="Chuyen-di-Da-Lat" AutomationProperties.Name="Ô nhập có nội dung" />
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Lỗi" Margin="0,12,0,4" />
+                    <TextBox Style="{StaticResource BfrTextFieldError}" Text="IMG_&lt;001&gt;" AutomationProperties.Name="Ô nhập lỗi" />
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Foreground="{DynamicResource BfrBad}" Text="Tên không được chứa ký tự &lt; &gt;. Hãy bỏ chúng đi." Margin="0,6,0,0" />
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Text="Vô hiệu" Margin="0,12,0,4" />
+                    <TextBox Style="{StaticResource BfrTextField}" Text="Chỉ đọc" IsEnabled="False" AutomationProperties.Name="Ô nhập vô hiệu" />
+                </StackPanel>
+            </Border>
+
+            <!-- Tương phản -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Tương phản (WCAG)" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BfrCaptionText}" Margin="0,0,0,10"
+                               Text="Đo trực tiếp từ giá trị màu đang áp dụng. Chữ thường cần 4.5, thành phần giao diện và chữ mờ cần 3." />
+                    <ItemsControl x:Name="ContrastRows" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
