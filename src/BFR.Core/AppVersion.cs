@@ -8,5 +8,5 @@ namespace BFR.Core;
 public static class AppVersion
 {
     /// <summary>Phiên bản hiển thị / so sánh cập nhật (ngữ nghĩa, 3 số).</summary>
-    public const string Current = "1.4.0";
+    public const string Current = "2.0.0";
 }

@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $artifactsPath = Join-Path $repoRoot $OutputDir
 $layoutDir = Join-Path $artifactsPath "msix-layout"
-$version = "1.4.0"
+$version = "2.0.0"
 $msixOutput = Join-Path $artifactsPath "BatchFileRenamer-$version.msix"
 $zipOutput = Join-Path $artifactsPath "BatchFileRenamer-$version-portable-win-x64.zip"
 

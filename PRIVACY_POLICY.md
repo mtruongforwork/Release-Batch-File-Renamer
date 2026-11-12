@@ -1,6 +1,6 @@
 # CHÍNH SÁCH QUYỀN RIÊNG TƯ / PRIVACY POLICY
 
-**Ngày có hiệu lực / Effective Date:** 05/11/2026  
+**Ngày có hiệu lực / Effective Date:** 12/11/2026  
 **Ứng dụng / Application:** Batch File Renamer (BFR)  
 **Nhà phát triển / Developer:** Batch File Renamer Team  
 
