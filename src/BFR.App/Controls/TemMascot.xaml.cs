@@ -42,6 +42,7 @@ public partial class TemMascot : UserControl
     {
         InitializeComponent();
         System.Windows.Automation.AutomationProperties.SetName(this, Loc.T("TemName"));
+        if (!SettingsStore.Load().ShowMascot) Visibility = Visibility.Collapsed;
         Loaded += (_, _) => { ApplyState(); StartAmbientMotion(); };
         Unloaded += (_, _) => StopAmbientMotion();
     }

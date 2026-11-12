@@ -491,6 +491,9 @@
     <sys:String x:Key="StepApply">应用</sys:String>
     <sys:String x:Key="StepsName">步骤</sys:String>
     <sys:String x:Key="TreemapName">按文件类型的空间占用</sys:String>
+    <sys:String x:Key="HistoryEmptyTitle">暂无可撤销的内容</sys:String>
+    <sys:String x:Key="WatchRulesEmptyTitle">还没有监视规则</sys:String>
+    <sys:String x:Key="WatchRulesEmptyHint">选择一个文件夹和一个预设，新文件将被自动重命名。</sys:String>
     <sys:String x:Key="TemName">Tem，BFR 吉祥物</sys:String>
     <sys:String x:Key="NavShelf">文件架</sys:String>
     <sys:String x:Key="NavHistory">历史</sys:String>

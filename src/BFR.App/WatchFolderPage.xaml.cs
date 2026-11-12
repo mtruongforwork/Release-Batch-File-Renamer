@@ -54,6 +54,8 @@ public class WatchFolderPage : PageBase
     private readonly ListBox _logList = new();
     private readonly TextBlock _status = new() { Margin = new Thickness(0, 6, 0, 0), TextWrapping = TextWrapping.Wrap };
     private readonly TextBlock _logEmpty = new();
+    private readonly HeaderedContentControl _ruleEmpty = new();
+    private StackPanel _editorPanel = null!;
     private readonly Ui.Button _startButton = new();
     private readonly Ui.Button _stopButton = new();
     private readonly Ui.Button _addButton = new();
@@ -118,6 +120,7 @@ public class WatchFolderPage : PageBase
         AutomationProperties.SetName(_ruleList, "Watch rules");
 
         var editor = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
+        _editorPanel = editor;
         editor.Children.Add(Header(Loc.T("WatchOptionsTitle")));
         editor.Children.Add(Row(Loc.T("WatchRuleName"), _nameBox));
         editor.Children.Add(Row(Loc.Plain("WatchFolder"), _folderBox, BrowseButton()));
@@ -165,6 +168,18 @@ public class WatchFolderPage : PageBase
         top.Children.Add(rulesHeader);
         top.Children.Add(_ruleList);
         top.Children.Add(editor);
+
+        // Chưa có quy tắc nào: thay vùng chỉnh sửa bằng trạng thái rỗng có nút thêm.
+        var addFirst = new Button { Content = Loc.T("WatchAddRule"), Style = (Style)Application.Current.FindResource("BfrPrimaryButton"), HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 14, 0, 0) };
+        addFirst.Click += (_, _) => AddRule();
+        var emptyBody = new StackPanel();
+        emptyBody.Children.Add(new TextBlock { Text = Loc.T("WatchRulesEmptyHint"), TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center });
+        emptyBody.Children.Add(addFirst);
+        _ruleEmpty.Style = (Style)Application.Current.FindResource("BfrEmptyState");
+        _ruleEmpty.Header = Loc.T("WatchRulesEmptyTitle");
+        _ruleEmpty.Content = emptyBody;
+        _ruleEmpty.Margin = new Thickness(0, 24, 0, 24);
+        top.Children.Add(_ruleEmpty);
         var scroll = new ScrollViewer { Content = top, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         Grid.SetRow(scroll, 0);
         root.Children.Add(scroll);
@@ -365,6 +380,10 @@ public class WatchFolderPage : PageBase
     private void UpdateEditorState()
     {
         var has = Selected is not null;
+        var noRules = _rules.Count == 0;
+        _ruleEmpty.Visibility = noRules ? Visibility.Visible : Visibility.Collapsed;
+        _editorPanel.Visibility = noRules ? Visibility.Collapsed : Visibility.Visible;
+        _ruleList.Visibility = noRules ? Visibility.Collapsed : Visibility.Visible;
         foreach (var c in new UIElement[] { _nameBox, _folderBox, _kindCombo, _presetCombo, _workflowFileBox, _enabled, _recursive, _dryRun, _settleBox, _includeBox, _excludeBox })
             c.IsEnabled = has;
         _removeButton.IsEnabled = has && _manager is null;

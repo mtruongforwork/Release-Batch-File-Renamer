@@ -43,10 +43,11 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <TextBlock x:Name="EmptyText" Text="{DynamicResource HistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420"
-                       Foreground="{DynamicResource TextSecondary}"
-                       AutomationProperties.Name="History Empty" />
+            <HeaderedContentControl x:Name="EmptyText" Style="{StaticResource BfrEmptyState}" Header="{DynamicResource HistoryEmptyTitle}"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    AutomationProperties.Name="History Empty">
+                <TextBlock Text="{DynamicResource HistoryEmpty}" TextWrapping="Wrap" TextAlignment="Center" />
+            </HeaderedContentControl>
         </Grid>
 
         <!-- Thanh hành động -->
