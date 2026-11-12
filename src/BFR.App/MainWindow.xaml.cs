@@ -67,6 +67,11 @@ public partial class MainWindow : FluentWindow
         {
             ThemeManager.RefreshBackdrop(this);
             UpdateLicenseState();
+
+            // Trang chủ là điểm vào mặc định; mở từ Explorer/IPC kèm tệp thì vào thẳng Đổi tên.
+            bool hasStartupFiles;
+            lock (_collectorBuffer) hasStartupFiles = _collectorBuffer.Count > 0;
+            if (!hasStartupFiles && _vm.Rows.Count == 0) NavigateTo("Home");
         };
 
         PresetCombo.ItemsSource = _vm.Presets;
@@ -903,6 +908,7 @@ public partial class MainWindow : FluentWindow
 
     private RadioButton NavButton(string key) => key switch
     {
+        "Home" => NavHome,
         "Tools" => NavTools,
         "Shelf" => NavShelf,
         "History" => NavHistory,
@@ -945,11 +951,27 @@ public partial class MainWindow : FluentWindow
         }
 
         RenamePage.Visibility = key == "Rename" ? Visibility.Visible : Visibility.Collapsed;
-        if (key == "Rename") return;
+        if (key == "Rename")
+        {
+            FadeIn(RenamePage);
+            return;
+        }
 
         var page = GetPage(key);
         page.Visibility = Visibility.Visible;
+        FadeIn(page);
         page.OnShown();
+    }
+
+    /// <summary>Chuyển trang: hiện dần trong 220 ms; tắt khi giảm chuyển động.</summary>
+    private static void FadeIn(UIElement element)
+    {
+        element.BeginAnimation(OpacityProperty, null);
+        if (BfrTheme.ReduceMotion) return;
+        element.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220))
+        {
+            EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+        });
     }
 
     private PageBase GetPage(string key)
@@ -964,6 +986,12 @@ public partial class MainWindow : FluentWindow
         PageBase page;
         switch (key)
         {
+            case "Home":
+                page = new HomePage(
+                    NavigateTo,
+                    dropped => { NavigateTo("Rename"); EnqueuePaths(dropped); },
+                    toolKey => OpenTool(toolKey, Array.Empty<string>()));
+                break;
             case "Shelf":
                 page = new ShelfPage(_shelfModel, batch => { NavigateTo("Rename"); EnqueuePaths(batch); }, feature => ShowUpgradeDialog(feature));
                 break;

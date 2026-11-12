@@ -528,7 +528,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
                     <Grid>
-                        <Border x:Name="Bd" CornerRadius="8" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="Bd" CornerRadius="14" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <Border x:Name="Indicator" Width="3" Height="18" CornerRadius="2" HorizontalAlignment="Left"
@@ -540,9 +540,8 @@
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SurfaceSelected}" />
-                            <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
-                            <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BfrAccGradient}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BfrOnAccent}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent}" />

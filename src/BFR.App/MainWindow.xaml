@@ -280,7 +280,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Rail điều hướng bên trái: mỗi chức năng là một trang -->
-            <Border x:Name="NavRail" Grid.Column="0" Width="80" Background="{DynamicResource PanelBackground}"
+            <Border x:Name="NavRail" Grid.Column="0" Width="72" Background="{DynamicResource PanelBackground}"
                     BorderBrush="{DynamicResource Divider}" BorderThickness="0,0,1,0">
                 <DockPanel Margin="0,8">
                     <StackPanel DockPanel.Dock="Bottom">
@@ -293,6 +293,13 @@
                         </RadioButton>
                     </StackPanel>
                     <StackPanel>
+                        <RadioButton x:Name="NavHome" Style="{StaticResource NavRailItemStyle}" GroupName="Nav" Tag="Home"
+                                     Checked="Nav_Checked" ToolTip="{DynamicResource NavHome}" AutomationProperties.Name="Nav home">
+                            <StackPanel>
+                                <TextBlock Text="&#xE80F;" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource NavHome}" FontSize="10.5" Margin="0,5,0,0" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </RadioButton>
                         <RadioButton x:Name="NavRename" Style="{StaticResource NavRailItemStyle}" GroupName="Nav" Tag="Rename" IsChecked="True"
                                      Checked="Nav_Checked" ToolTip="{DynamicResource NavRename}" AutomationProperties.Name="Nav rename">
                             <StackPanel>

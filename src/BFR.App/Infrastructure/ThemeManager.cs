@@ -83,6 +83,16 @@ public static class ThemeManager
             app.Resources.MergedDictionaries.Add(dictionary);
         }
 
+        // Nút Primary, mục chọn của WPF-UI theo bảng màu nhấn của BFR thay vì màu nhấn của Windows.
+        if (Application.Current.TryFindResource("BfrAcc1Color") is Color brand && !BfrTheme.IsHighContrast)
+        {
+            Wpf.Ui.Appearance.ApplicationAccentColorManager.Apply(
+                brand, IsDark ? Wpf.Ui.Appearance.ApplicationTheme.Dark : Wpf.Ui.Appearance.ApplicationTheme.Light);
+        }
+
+        // Sau khi từ điển Theme.* đã hoán đổi: ghi đè khoá cũ bằng màu của token mới.
+        LegacyBridge.Apply();
+
         foreach (Window window in Application.Current.Windows)
         {
             RefreshBackdrop(window);

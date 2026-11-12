@@ -51,6 +51,7 @@ public partial class BfrGalleryWindow : Window
             : BfrTheme.Accent.Aurora;
 
         BfrTheme.Apply(ThemeDark.IsChecked == true, accent);
+        LegacyBridge.Apply();
         Rebuild();
     }
 
