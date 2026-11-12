@@ -824,4 +824,14 @@
     <sys:String x:Key="CoreToolCrossVolume">不同磁盘:将先复制再删除(较慢)</sys:String>
     <sys:String x:Key="CoreToolOrganizeFallback">{0} 个文件缺少该模式所需的数据,将放入“未知”文件夹。</sys:String>
     <sys:String x:Key="CoreToolOrganizeSummary">{0} 个文件将被整理到 {1} 个文件夹。</sys:String>
+    <sys:String x:Key="WatchRulesTitle">监视规则</sys:String>
+    <sys:String x:Key="WatchRuleName">规则名称</sys:String>
+    <sys:String x:Key="WatchKind">流程</sys:String>
+    <sys:String x:Key="WatchKindPreset">按预设重命名</sys:String>
+    <sys:String x:Key="WatchWorkflowFile">工作流文件</sys:String>
+    <sys:String x:Key="WatchRuleEnabled">启用此规则</sys:String>
+    <sys:String x:Key="WatchAddRule">添加规则</sys:String>
+    <sys:String x:Key="WatchRemoveRule">删除规则</sys:String>
+    <sys:String x:Key="WatchRuleDefaultName">规则 {0}</sys:String>
+    <sys:String x:Key="WatchRunning">正在监视 {0} 个文件夹。</sys:String>
 </ResourceDictionary>

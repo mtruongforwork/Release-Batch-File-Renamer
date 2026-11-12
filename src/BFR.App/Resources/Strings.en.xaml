@@ -824,4 +824,14 @@
     <sys:String x:Key="CoreToolCrossVolume">Different drive: it will be copied then deleted (slower)</sys:String>
     <sys:String x:Key="CoreToolOrganizeFallback">{0} files have no data for the pattern and will go to the unknown folder.</sys:String>
     <sys:String x:Key="CoreToolOrganizeSummary">{0} files will be organized into {1} folders.</sys:String>
+    <sys:String x:Key="WatchRulesTitle">Watch rules</sys:String>
+    <sys:String x:Key="WatchRuleName">Rule name</sys:String>
+    <sys:String x:Key="WatchKind">Workflow</sys:String>
+    <sys:String x:Key="WatchKindPreset">Rename with a preset</sys:String>
+    <sys:String x:Key="WatchWorkflowFile">Workflow file</sys:String>
+    <sys:String x:Key="WatchRuleEnabled">This rule is on</sys:String>
+    <sys:String x:Key="WatchAddRule">Add rule</sys:String>
+    <sys:String x:Key="WatchRemoveRule">Remove rule</sys:String>
+    <sys:String x:Key="WatchRuleDefaultName">Rule {0}</sys:String>
+    <sys:String x:Key="WatchRunning">Watching {0} folders.</sys:String>
 </ResourceDictionary>

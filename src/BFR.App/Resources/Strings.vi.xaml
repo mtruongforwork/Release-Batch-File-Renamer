@@ -824,4 +824,14 @@
     <sys:String x:Key="CoreToolCrossVolume">Khác ổ đĩa: sẽ sao chép rồi xoá (chậm hơn)</sys:String>
     <sys:String x:Key="CoreToolOrganizeFallback">{0} tệp không có dữ liệu cho mẫu, sẽ vào thư mục không xác định.</sys:String>
     <sys:String x:Key="CoreToolOrganizeSummary">{0} tệp sẽ được sắp xếp vào {1} thư mục.</sys:String>
+    <sys:String x:Key="WatchRulesTitle">Quy tắc theo dõi</sys:String>
+    <sys:String x:Key="WatchRuleName">Tên quy tắc</sys:String>
+    <sys:String x:Key="WatchKind">Quy trình</sys:String>
+    <sys:String x:Key="WatchKindPreset">Đổi tên theo preset</sys:String>
+    <sys:String x:Key="WatchWorkflowFile">Tệp workflow</sys:String>
+    <sys:String x:Key="WatchRuleEnabled">Bật quy tắc này</sys:String>
+    <sys:String x:Key="WatchAddRule">Thêm quy tắc</sys:String>
+    <sys:String x:Key="WatchRemoveRule">Xoá quy tắc</sys:String>
+    <sys:String x:Key="WatchRuleDefaultName">Quy tắc {0}</sys:String>
+    <sys:String x:Key="WatchRunning">Đang theo dõi {0} thư mục.</sys:String>
 </ResourceDictionary>

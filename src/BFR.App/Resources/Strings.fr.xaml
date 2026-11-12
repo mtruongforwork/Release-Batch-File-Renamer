@@ -824,4 +824,14 @@
     <sys:String x:Key="CoreToolCrossVolume">Autre lecteur : copie puis suppression (plus lent)</sys:String>
     <sys:String x:Key="CoreToolOrganizeFallback">{0} fichiers n'ont pas de données pour le modèle et iront dans le dossier inconnu.</sys:String>
     <sys:String x:Key="CoreToolOrganizeSummary">{0} fichiers seront classés dans {1} dossiers.</sys:String>
+    <sys:String x:Key="WatchRulesTitle">Règles de surveillance</sys:String>
+    <sys:String x:Key="WatchRuleName">Nom de la règle</sys:String>
+    <sys:String x:Key="WatchKind">Workflow</sys:String>
+    <sys:String x:Key="WatchKindPreset">Renommer avec un préréglage</sys:String>
+    <sys:String x:Key="WatchWorkflowFile">Fichier workflow</sys:String>
+    <sys:String x:Key="WatchRuleEnabled">Cette règle est activée</sys:String>
+    <sys:String x:Key="WatchAddRule">Ajouter une règle</sys:String>
+    <sys:String x:Key="WatchRemoveRule">Supprimer la règle</sys:String>
+    <sys:String x:Key="WatchRuleDefaultName">Règle {0}</sys:String>
+    <sys:String x:Key="WatchRunning">Surveillance de {0} dossiers.</sys:String>
 </ResourceDictionary>
