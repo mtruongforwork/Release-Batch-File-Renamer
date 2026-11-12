@@ -36,7 +36,8 @@ public sealed class FakeFileSystem : IFileSystem
         var t = Normalize(to);
         // Kiểm tra trước khi gỡ nguồn: một lần Move thất bại không được làm mất tệp (giống hệ thống tệp thật).
         if (!_files.ContainsKey(f)) throw new FileNotFoundException("Tệp không tồn tại", from);
-        if (_files.ContainsKey(t) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
+        // Đổi chữ hoa/thường của chính tệp đó không phải xung đột (hệ thống tệp thật cho phép).
+        if (!string.Equals(f, t, StringComparison.OrdinalIgnoreCase) && _files.ContainsKey(t) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
         _files.TryRemove(f, out var content);
         _files[t] = content!;
         // Di chuyển giữ nguyên ngày giờ và thuộc tính (như hệ thống tệp thật); đích cũ bị ghi đè mất giá trị của nó.

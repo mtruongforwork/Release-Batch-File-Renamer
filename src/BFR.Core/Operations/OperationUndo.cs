@@ -50,7 +50,9 @@ internal static class OperationUndo
                 case OperationKind.Move:
                 case OperationKind.Quarantine:
                     if (!fs.FileExists(to)) return CoreText.Get("CoreUndoMissing", "Tệp tại vị trí mới không còn tồn tại");
-                    if (fs.FileExists(from)) return CoreText.Get("CoreUndoOldTaken", "Tên cũ đã bị chiếm");
+                    // Đổi chữ hoa/thường: tên cũ "tồn tại" chỉ vì chính tệp này (hệ thống tệp không phân biệt hoa thường).
+                    if (fs.FileExists(from) && !string.Equals(from.Replace('\\', '/'), to.Replace('\\', '/'), StringComparison.OrdinalIgnoreCase))
+                        return CoreText.Get("CoreUndoOldTaken", "Tên cũ đã bị chiếm");
                     EnsureParent(fs, from);
                     fs.Move(to, from, overwrite: false);
                     return null;

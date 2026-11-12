@@ -188,7 +188,8 @@ public sealed class OverlayFileSystem : IFileSystem
     public void Move(string from, string to, bool overwrite)
     {
         var source = GetOrThrow(from);
-        if (FileExists(to) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
+        // Đổi chữ hoa/thường của chính tệp đó không phải xung đột (hệ thống tệp thật cho phép).
+        if (!string.Equals(Canon(from), Canon(to), StringComparison.OrdinalIgnoreCase) && FileExists(to) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
 
         _files[Canon(from)] = null;
         _files[Canon(to)] = source with { Path = to };

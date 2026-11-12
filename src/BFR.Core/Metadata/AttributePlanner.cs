@@ -35,6 +35,9 @@ public static class AttributePlanner
             {
                 var current = fs.GetAttributes(file.FullPath);
                 var next = (current | set) & ~clear;
+                // "Normal" chỉ hợp lệ khi đứng một mình.
+                next &= ~FileAttributes.Normal;
+                if (next == 0) next = FileAttributes.Normal;
                 if (next != current) ops.Add(Operation.SetAttributes(file.FullPath, next));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
