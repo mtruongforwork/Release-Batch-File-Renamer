@@ -483,6 +483,8 @@
     <sys:String x:Key="HomeWatchHint">Rename new files automatically.</sys:String>
     <sys:String x:Key="HomeHistoryTitle">History</sys:String>
     <sys:String x:Key="HomeHistoryHint">Undo past changes.</sys:String>
+    <sys:String x:Key="SettingsAccent">Accent palette</sys:String>
+    <sys:String x:Key="SettingsMascot">Show the mascot (Tem)</sys:String>
     <sys:String x:Key="TemName">Tem, the BFR mascot</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">History</sys:String>

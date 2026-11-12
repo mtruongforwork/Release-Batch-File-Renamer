@@ -95,6 +95,42 @@ public class SettingsPage : PageBase
         look.Children.Add(themeCaption);
         look.Children.Add(theme);
 
+        // Bảng màu nhấn: áp dụng ngay, giữ theme sáng/tối hiện tại.
+        var accentCaption = Caption(Loc.T("SettingsAccent"));
+        accentCaption.Margin = new Thickness(0, 12, 0, 4);
+        look.Children.Add(accentCaption);
+        var accentTrack = new Border { Style = (Style)Application.Current.FindResource("BfrSegmentedTrack"), HorizontalAlignment = HorizontalAlignment.Left };
+        var accentRow = new StackPanel { Orientation = Orientation.Horizontal };
+        foreach (var name in new[] { "Aurora", "Mint", "Sunset" })
+        {
+            var option = new RadioButton
+            {
+                Content = name,
+                GroupName = "accent",
+                Style = (Style)Application.Current.FindResource("BfrSegmentedItem"),
+                IsChecked = string.Equals(_settings.AccentPalette, name, StringComparison.OrdinalIgnoreCase)
+            };
+            var chosen = name;
+            option.Checked += (_, _) =>
+            {
+                if (string.Equals(_settings.AccentPalette, chosen, StringComparison.OrdinalIgnoreCase)) return;
+                _settings.AccentPalette = chosen;
+                SettingsStore.Save(_settings);
+                ThemeManager.Apply(ThemeManager.Current);
+            };
+            accentRow.Children.Add(option);
+        }
+        accentTrack.Child = accentRow;
+        look.Children.Add(accentTrack);
+
+        var mascot = Toggle(Loc.T("SettingsMascot"), _settings.ShowMascot, on =>
+        {
+            _settings.ShowMascot = on;
+            SettingsStore.Save(_settings);
+        });
+        mascot.Margin = new Thickness(0, 14, 0, 0);
+        look.Children.Add(mascot);
+
         // ---- Shelf & chạy nền ----
         var shelf = Card(content, Loc.T("SettingsShelf"));
         shelf.Children.Add(Toggle(

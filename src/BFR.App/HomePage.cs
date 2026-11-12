@@ -34,7 +34,7 @@ internal sealed class HomePage : PageBase
         var root = new StackPanel { Margin = new Thickness(32, 24, 32, 24), MaxWidth = 1040, HorizontalAlignment = HorizontalAlignment.Left };
 
         var header = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 20) };
-        header.Children.Add(new TemMascot { Width = 64, Height = 67, Margin = new Thickness(0, 0, 16, 0) });
+        if (SettingsStore.Load().ShowMascot) header.Children.Add(new TemMascot { Width = 64, Height = 67, Margin = new Thickness(0, 0, 16, 0) });
         var titles = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         titles.Children.Add(new TextBlock { Text = Loc.T("HomeTitle"), Style = S("BfrTitleText") });
         titles.Children.Add(new TextBlock { Text = Loc.T("HomeSubtitle"), Style = S("BfrBodyText"), Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("BfrFg2"), Margin = new Thickness(0, 2, 0, 0), TextWrapping = TextWrapping.Wrap });

@@ -483,6 +483,8 @@
     <sys:String x:Key="HomeWatchHint">自动重命名新文件。</sys:String>
     <sys:String x:Key="HomeHistoryTitle">历史记录</sys:String>
     <sys:String x:Key="HomeHistoryHint">撤销过去的更改。</sys:String>
+    <sys:String x:Key="SettingsAccent">强调色</sys:String>
+    <sys:String x:Key="SettingsMascot">显示吉祥物 Tem</sys:String>
     <sys:String x:Key="TemName">Tem，BFR 吉祥物</sys:String>
     <sys:String x:Key="NavShelf">文件架</sys:String>
     <sys:String x:Key="NavHistory">历史</sys:String>

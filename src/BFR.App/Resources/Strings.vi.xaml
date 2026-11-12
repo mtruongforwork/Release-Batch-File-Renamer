@@ -483,6 +483,8 @@
     <sys:String x:Key="HomeWatchHint">Tự đổi tên tệp mới.</sys:String>
     <sys:String x:Key="HomeHistoryTitle">Lịch sử</sys:String>
     <sys:String x:Key="HomeHistoryHint">Hoàn tác các thay đổi cũ.</sys:String>
+    <sys:String x:Key="SettingsAccent">Bảng màu nhấn</sys:String>
+    <sys:String x:Key="SettingsMascot">Hiện linh vật Tem</sys:String>
     <sys:String x:Key="TemName">Tem, linh vật của BFR</sys:String>
     <sys:String x:Key="NavShelf">Khay tệp</sys:String>
     <sys:String x:Key="NavHistory">Lịch sử</sys:String>

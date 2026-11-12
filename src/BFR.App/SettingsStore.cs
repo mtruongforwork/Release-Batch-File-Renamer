@@ -53,6 +53,9 @@ public sealed class AppSettings
     /// <summary>Bảng màu nhấn: "Aurora" (mặc định), "Mint" hoặc "Sunset".</summary>
     public string AccentPalette { get; set; } = "Aurora";
 
+    /// <summary>Hiện linh vật Tem (trang chủ, trạng thái rỗng). Mặc định bật.</summary>
+    public bool ShowMascot { get; set; } = true;
+
     /// <summary>Số lần đổi tên thành công (dùng để gợi ý đánh giá Store sau 2 lần).</summary>
     public int SuccessfulRenameCount { get; set; } = 0;
 
