@@ -31,4 +31,7 @@ public interface IFileSystem
 
     /// <summary>True nếu thư mục tồn tại và không chứa tệp hay thư mục con nào.</summary>
     bool IsDirectoryEmpty(string path);
+
+    /// <summary>True nếu đường dẫn là symlink/junction (không đi theo khi duyệt cây).</summary>
+    bool IsLink(string path) => false;
 }

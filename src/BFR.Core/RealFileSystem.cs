@@ -64,4 +64,17 @@ public sealed class RealFileSystem : IFileSystem
 
     public bool IsDirectoryEmpty(string path) =>
         Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
+
+    public bool IsLink(string path)
+    {
+        try
+        {
+            var attrs = File.GetAttributes(path);
+            return (attrs & FileAttributes.ReparsePoint) != 0;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return true; // không đọc được thì coi như không an toàn để đi vào
+        }
+    }
 }

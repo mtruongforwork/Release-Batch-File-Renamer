@@ -48,6 +48,7 @@ public sealed class FakeFileSystem : IFileSystem
         if (prefix.Length > 0 && !prefix.EndsWith('/')) prefix += "/";
         return _files.Keys
             .Where(k => k.StartsWith(prefix))
+            .Where(k => recursive || !k[prefix.Length..].Contains('/'))
             .Where(k => MatchesPattern(System.IO.Path.GetFileName(k), pattern))
             .ToArray();
     }
@@ -158,6 +159,13 @@ public sealed class FakeFileSystem : IFileSystem
         if (!_files.ContainsKey(p) && !DirectoryExists(path)) throw new FileNotFoundException("Tệp không tồn tại", path);
         _attributes[p] = attributes;
     }
+
+    private readonly HashSet<string> _links = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Đánh dấu một đường dẫn là symlink/junction (cho test).</summary>
+    public void MarkLink(string path) => _links.Add(Normalize(path));
+
+    public bool IsLink(string path) => _links.Contains(Normalize(path));
 
     public bool IsDirectoryEmpty(string path)
     {
