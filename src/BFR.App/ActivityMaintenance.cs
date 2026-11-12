@@ -21,6 +21,11 @@ internal static class ActivityMaintenance
             history.Prune(retention);            // xoá cả journal của các mục bị bỏ
             history.SweepOrphanJournals();       // journal không còn mục lịch sử nào trỏ tới
             ActivityData.TrimLog(Path.Combine(AppDataDir, "watch", "watch.log"), retention);
+
+            // Khu cách ly chứa tệp của người dùng: chỉ xoá thật khi quá hạn (không bao giờ sớm hơn lịch sử hoàn tác).
+            new QuarantineStore(new RealFileSystem()).Purge(retention < TimeSpan.FromDays(QuarantineStore.DefaultRetentionDays)
+                ? TimeSpan.FromDays(QuarantineStore.DefaultRetentionDays)
+                : retention);
         }
         catch
         {
