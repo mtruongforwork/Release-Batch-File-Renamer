@@ -161,7 +161,7 @@ Notes:
 | :--- | :--- |
 | Product ID | `BFR_PRO_LIFETIME` |
 | Loại | Durable add-on (mua đứt trọn đời) |
-| Giá đề xuất | 3,99–4,99 USD (Partner Center tự tính theo sức mua khu vực) |
+| Giá đề xuất | 7,99 USD cho người mua mới từ v2.0 (người đã mua giữ nguyên quyền; Partner Center tự tính theo sức mua khu vực). Đổi giá add-on `BFR_PRO_LIFETIME` cùng ngày phát hành |
 | Dùng thử | 30 ngày, một lần cho mỗi cài đặt (ghi cục bộ) |
 | Nâng cấp trong app | Hộp thoại *"Nâng cấp lên Batch File Renamer Pro"* (so sánh Free/Pro, nút Mua Pro, nhập mã kích hoạt) |
 | Bản portable (ZIP) | Có thể dùng thử và nhập **mã kích hoạt**; không mua được trong Store |

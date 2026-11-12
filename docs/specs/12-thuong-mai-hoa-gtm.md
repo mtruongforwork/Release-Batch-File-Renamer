@@ -6,7 +6,7 @@ Nguồn: `docs/batch_file_renamer_spec_v1.0.md` — Phần 13.
 
 ## 12.1 Định giá
 
-- Pro mua đứt trọn đời: đề xuất **3,99 USD** (giá theo sức mua khu vực), Durable Add-on qua `Windows.Services.Store` (Product ID ví dụ `BFR_PRO_LIFETIME`). Tỷ lệ chia sẻ doanh thu cần kiểm tra theo chính sách Store hiện hành; bảng dưới dùng giả định 85%.
+- Pro mua đứt trọn đời: đề xuất **7,99 USD từ v2.0 (trước đó 3,99 USD)** (giá theo sức mua khu vực), Durable Add-on qua `Windows.Services.Store` (Product ID ví dụ `BFR_PRO_LIFETIME`). Tỷ lệ chia sẻ doanh thu cần kiểm tra theo chính sách Store hiện hành; bảng dưới dùng giả định 85%.
 - Có thể dùng thử Pro 14 ngày một lần để người dùng trải nghiệm EXIF, Undo đa bước và CLI.
 
 ---
