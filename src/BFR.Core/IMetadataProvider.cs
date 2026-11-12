@@ -38,7 +38,17 @@ public static class MetadataRequirement
 
     /// <summary>True nếu văn bản chứa token cần đọc metadata ({taken} hoặc {media}).</summary>
     public static bool HasMetadataToken(string? text) =>
-        HasTakenToken(text) || HasMediaToken(text);
+        HasTakenToken(text) || HasMediaToken(text) || HasAudioTagToken(text);
+
+    /// <summary>True nếu chứa token tag nhạc ({artist}, {album}, {title}, {track}).</summary>
+    public static bool HasAudioTagToken(string? text)
+    {
+        if (string.IsNullOrEmpty(text)) return false;
+        return text.Contains("{artist", System.StringComparison.OrdinalIgnoreCase)
+            || text.Contains("{album", System.StringComparison.OrdinalIgnoreCase)
+            || text.Contains("{title", System.StringComparison.OrdinalIgnoreCase)
+            || text.Contains("{track", System.StringComparison.OrdinalIgnoreCase);
+    }
 
     public static bool HasTakenToken(string? text) =>
         !string.IsNullOrEmpty(text) && text.Contains("{taken", System.StringComparison.OrdinalIgnoreCase);

@@ -65,7 +65,7 @@ public sealed class MainViewModel : ObservableObject
 
         _metadataTier = license.Status.Tier;
         _metadataProvider = license.Status.Tier == LicenseTier.Pro
-            ? new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader())
+            ? new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader(), new AudioTagReader())
             : null;
 
         Presets = new ObservableCollection<Preset>(BuiltInPresets.All);

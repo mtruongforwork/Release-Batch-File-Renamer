@@ -197,7 +197,7 @@ int Rename(string[] rest)
 
     var ctx = new RuleContext(DateTime.Now, Guid.NewGuid().ToString("N"));
     var outside = OutsideBatchIndex.Build(files, fs);
-    var engine = new PreviewEngine(pipeline, metadataProvider: new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader()));
+    var engine = new PreviewEngine(pipeline, metadataProvider: new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader(), new AudioTagReader()));
     var preview = engine.Run(files, ctx, null, default, outside);
 
     if (format.Equals("json", StringComparison.OrdinalIgnoreCase))

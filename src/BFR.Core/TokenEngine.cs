@@ -76,6 +76,21 @@ public sealed class TokenEngine
                 missing = CoreText.Get("CoreMissingData", "Thiếu dữ liệu: {0}", "{media}");
                 return null;
             }
+            case "artist" or "album" or "title" or "track":
+            {
+                var metadata = ctx.MetadataFor(file);
+                if (metadata is not null && metadata.TryGetValue(name, out var tag))
+                {
+                    var clean = OrganizeTemplate.SanitizeSegment(tag);
+                    if (clean.Length > 0)
+                    {
+                        var width = name == "track" ? ParseInt(arg, 0) : 0;
+                        return width > 0 && clean.All(char.IsDigit) ? clean.PadLeft(width, '0') : clean;
+                    }
+                }
+                missing = CoreText.Get("CoreMissingData", "Thiếu dữ liệu: {0}", "{" + name + "}");
+                return null;
+            }
             case "size":
                 return FormatSize(file.Size, arg);
             case "rand":
