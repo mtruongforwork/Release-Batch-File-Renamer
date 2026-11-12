@@ -20,7 +20,7 @@ public static class LegacyBridge
         "Border", "BorderStrong", "Divider",
         "Success", "SuccessSoft", "Warning", "WarningSoft", "Error", "ErrorSoft", "Info", "InfoSoft",
         "ChipBackground", "ChipBorder", "ChipSelectedBackground", "ChipSelectedBorder",
-        "AccentFillColorDefaultBrush", "AccentFillColorSecondaryBrush", "AccentFillColorTertiaryBrush",
+        "BfrAccFg", "AccentFillColorDefaultBrush", "AccentFillColorSecondaryBrush", "AccentFillColorTertiaryBrush",
         "TextOnAccentFillColorPrimaryBrush", "TextOnAccentFillColorSecondaryBrush"
     };
 
@@ -56,6 +56,8 @@ public static class LegacyBridge
         Set("TextOnAccent", dark ? Color.FromRgb(0x10, 0x10, 0x10) : Colors.White);
 
         Set("Accent", accent);
+        // Chữ nhấn của bộ mới: cọ đặc cụ thể, vì cọ trong Palette (Color là DynamicResource) có lúc không giải quyết được sau khi đổi palette.
+        Set("BfrAccFg", accent);
         Set("AccentHover", Mix(accent, Colors.White, 0.12));
         Set("AccentPressed", Mix(accent, Colors.Black, 0.14));
         Set("AccentSoft", Over(C("BfrAcc1Soft"), surface1));

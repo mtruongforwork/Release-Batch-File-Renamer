@@ -366,12 +366,12 @@
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Nhóm nạp tệp nguồn -->
-                    <ui:Button Appearance="Primary" Click="AddFiles_Click" Padding="14,6">
+                    <Button Style="{StaticResource BfrPrimaryButton}" Click="AddFiles_Click" Padding="14,6">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
                             <TextBlock Text="{DynamicResource AddFilesButton}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
-                    </ui:Button>
+                    </Button>
 
                     <ui:Button Appearance="Secondary" Click="AddFolder_Click" Margin="6,0,0,0" Padding="12,6">
                         <StackPanel Orientation="Horizontal">
@@ -499,13 +499,13 @@
                                 <TextBlock Text="{DynamicResource SaveAsPresetButton}" Margin="6,0,0,0" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </ui:Button>
-                        <ui:Button Grid.Column="1" Appearance="Primary" Click="AddRule_Click"
+                        <Button Grid.Column="1" Style="{StaticResource BfrPrimaryButton}" Click="AddRule_Click"
                                 AutomationProperties.Name="Add rule button">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
                                 <TextBlock Text="{DynamicResource AddRuleButton}" Margin="6,0,0,0" />
                             </StackPanel>
-                        </ui:Button>
+                        </Button>
                     </Grid>
 
                     <!-- Danh sách rỗng -->
@@ -763,7 +763,7 @@
                                Margin="0,8,0,0" />
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                        <ui:Button Appearance="Primary" Click="AddFiles_Click" Content="{DynamicResource AddFilesButton}" Padding="16,8" />
+                        <Button Style="{StaticResource BfrPrimaryButton}" Click="AddFiles_Click" Content="{DynamicResource AddFilesButton}" Padding="16,8" />
                         <ui:Button Appearance="Secondary" Click="AddFolder_Click" Margin="10,0,0,0"
                                 Content="{DynamicResource AddFolderButton}" Padding="14,8" />
                     </StackPanel>
@@ -813,7 +813,7 @@
                                Foreground="{DynamicResource TextSecondary}" Margin="4,0,0,0" />
 
                     <!-- Báo thành công kèm Hoàn tác / Lịch sử / Xuất báo cáo -->
-                    <Border Margin="6,0,0,0" Padding="10,4" CornerRadius="8" BorderThickness="1"
+                    <Border Margin="6,0,0,0" Style="{StaticResource BfrToast}" Padding="12,4" MaxWidth="900"
                             Background="{DynamicResource SuccessSoft}" BorderBrush="{DynamicResource Success}"
                             Visibility="{Binding HasSuccessMessage, Converter={StaticResource BoolToVis}}"
                             AutomationProperties.Name="Success banner">
@@ -822,12 +822,9 @@
                                        Foreground="{DynamicResource Success}" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding SuccessMessage}" Foreground="{DynamicResource TextPrimary}"
                                        VerticalAlignment="Center" Margin="8,0,10,0" />
-                            <ui:Button Appearance="Transparent" Content="{DynamicResource Undo}"
-                                    Click="Undo_Click" Padding="8,3" />
-                            <ui:Button Appearance="Transparent" Content="{DynamicResource MenuHistory}"
-                                    Click="History_Click" Padding="8,3" />
-                            <ui:Button Appearance="Transparent" Content="{DynamicResource MenuExportReport}"
-                                    Click="ExportReport_Click" Padding="8,3" />
+                            <Button Style="{StaticResource BfrGhostButton}" Content="{DynamicResource Undo}" Click="Undo_Click" Padding="10,4" />
+                            <Button Style="{StaticResource BfrGhostButton}" Content="{DynamicResource MenuHistory}" Click="History_Click" Padding="10,4" />
+                            <Button Style="{StaticResource BfrGhostButton}" Content="{DynamicResource MenuExportReport}" Click="ExportReport_Click" Padding="10,4" />
                         </StackPanel>
                     </Border>
 
@@ -848,7 +845,7 @@
                             IsEnabled="{Binding CanUndo}" Margin="0,0,8,0" Padding="14,7"
                             AutomationProperties.Name="Undo last rename" />
 
-                    <ui:Button x:Name="ApplyButton" Appearance="Primary" Click="Apply_Click"
+                    <Button x:Name="ApplyButton" Style="{StaticResource BfrPrimaryButton}" Click="Apply_Click"
                             IsEnabled="{Binding CanApply}" MinWidth="200" Height="36"
                             AutomationProperties.Name="Apply renaming">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -857,7 +854,7 @@
                             <TextBlock Text="{Binding ApplyButtonText}" FontWeight="SemiBold" FontSize="13"
                                        VerticalAlignment="Center" />
                         </StackPanel>
-                    </ui:Button>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
