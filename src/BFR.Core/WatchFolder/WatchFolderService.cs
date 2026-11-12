@@ -33,8 +33,8 @@ public sealed record WatchFolderLogEntry(
 public sealed class WatchFolderService : IDisposable
 {
     private readonly WatchFolderOptions _options;
-    private readonly Preset _preset;
-    private readonly WatchFolderProcessor _processor;
+    private readonly string _label;
+    private readonly Func<IReadOnlyList<string>, WatchFolderResult> _process;
     private readonly IFileSystem _fs;
     private readonly Action<WatchFolderLogEntry>? _logger;
     private readonly WatchFolderPlanner _planner = new();
@@ -54,8 +54,26 @@ public sealed class WatchFolderService : IDisposable
         Action<WatchFolderLogEntry>? logger = null)
     {
         _options = options;
-        _preset = preset;
-        _processor = processor;
+        _label = preset.Name;
+        _process = batch => processor.Process(batch, preset, options);
+        _fs = fs;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Theo dõi với một bộ xử lý lô tuỳ ý (ví dụ chạy cả workflow cho mỗi lô tệp mới).
+    /// <paramref name="label"/> chỉ dùng để ghi nhật ký.
+    /// </summary>
+    public WatchFolderService(
+        WatchFolderOptions options,
+        string label,
+        Func<IReadOnlyList<string>, WatchFolderResult> process,
+        IFileSystem fs,
+        Action<WatchFolderLogEntry>? logger = null)
+    {
+        _options = options;
+        _label = label;
+        _process = process;
         _fs = fs;
         _logger = logger;
     }
@@ -106,7 +124,7 @@ public sealed class WatchFolderService : IDisposable
 
         _watcher.EnableRaisingEvents = true;
         IsRunning = true;
-        Log("info", CoreText.Get("CoreWatchStart", "Đang theo dõi: {0} (preset: {1})", _options.Folder, _preset.Name));
+        Log("info", CoreText.Get("CoreWatchStart", "Đang theo dõi: {0} (preset: {1})", _options.Folder, _label));
     }
 
     /// <summary>Dừng theo dõi.</summary>
@@ -167,7 +185,8 @@ public sealed class WatchFolderService : IDisposable
             lock (_gate)
             {
                 batch = ready
-                    .Where(p => !_seen.Contains(p) && !_produced.Contains(p))
+                    // Sự kiện của thư mục (ví dụ thư mục do Organize vừa tạo) và tệp đã biến mất không tạo lô rỗng.
+                    .Where(p => !_seen.Contains(p) && !_produced.Contains(p) && _fs.FileExists(p))
                     .ToList();
 
                 foreach (var path in batch) _seen.Add(path);
@@ -182,7 +201,7 @@ public sealed class WatchFolderService : IDisposable
 
             Log("info", CoreText.Get("CoreWatchDetected", "Phát hiện {0} tệp mới, đang áp dụng preset…", batch.Count));
 
-            var result = _processor.Process(batch, _preset, _options);
+            var result = _process(batch);
             ProcessedBatches++;
             RenamedFiles += result.Renamed;
 

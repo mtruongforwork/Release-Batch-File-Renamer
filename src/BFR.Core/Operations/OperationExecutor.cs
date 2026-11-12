@@ -187,6 +187,7 @@ public sealed class OperationExecutor
         switch (ParseKind(e))
         {
             case OperationKind.Move:
+                EnsureParent(fs, to); // Organize/Wrap/Flatten chuyển vào thư mục có thể chưa tồn tại
                 fs.Move(from, to, overwrite: false);
                 break;
 

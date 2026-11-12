@@ -26,7 +26,13 @@ public sealed class RealFileSystem : IFileSystem
     public void Delete(string path, bool recursive)
     {
         if (Directory.Exists(path)) Directory.Delete(path, recursive);
-        else if (File.Exists(path)) File.Delete(path);
+        else if (File.Exists(path))
+        {
+            // Tệp chỉ-đọc không xoá được ngay (ví dụ bản sao của tệp chỉ-đọc khi hoàn tác): bỏ thuộc tính rồi xoá.
+            var attributes = File.GetAttributes(path);
+            if ((attributes & FileAttributes.ReadOnly) != 0) File.SetAttributes(path, attributes & ~FileAttributes.ReadOnly);
+            File.Delete(path);
+        }
         else throw new FileNotFoundException("Tệp không tồn tại", path);
     }
     public long GetLength(string path) => new FileInfo(path).Length;
