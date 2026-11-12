@@ -490,6 +490,7 @@
     <sys:String x:Key="StepReview">Review</sys:String>
     <sys:String x:Key="StepApply">Apply</sys:String>
     <sys:String x:Key="StepsName">Steps</sys:String>
+    <sys:String x:Key="TreemapName">Space by file type</sys:String>
     <sys:String x:Key="TemName">Tem, the BFR mascot</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">History</sys:String>

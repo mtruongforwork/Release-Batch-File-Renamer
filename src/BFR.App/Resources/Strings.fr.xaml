@@ -490,6 +490,7 @@
     <sys:String x:Key="StepReview">Aperçu</sys:String>
     <sys:String x:Key="StepApply">Appliquer</sys:String>
     <sys:String x:Key="StepsName">Étapes</sys:String>
+    <sys:String x:Key="TreemapName">Espace par type de fichier</sys:String>
     <sys:String x:Key="TemName">Tem, la mascotte de BFR</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">Historique</sys:String>

@@ -85,6 +85,9 @@ public sealed class ToolPlan
 
     public ToolExport? Export { get; init; }
 
+    /// <summary>Dữ liệu vẽ treemap (công cụ phân tích dung lượng); null nếu không có.</summary>
+    public IReadOnlyList<BFR.Presentation.Design.TreemapItem>? Treemap { get; init; }
+
     /// <summary>Dọn tệp tạm khi kế hoạch bị bỏ (huỷ, lập lại) hoặc sau khi áp dụng.</summary>
     public Action? Cleanup { get; init; }
 

@@ -490,6 +490,7 @@
     <sys:String x:Key="StepReview">预览</sys:String>
     <sys:String x:Key="StepApply">应用</sys:String>
     <sys:String x:Key="StepsName">步骤</sys:String>
+    <sys:String x:Key="TreemapName">按文件类型的空间占用</sys:String>
     <sys:String x:Key="TemName">Tem，BFR 吉祥物</sys:String>
     <sys:String x:Key="NavShelf">文件架</sys:String>
     <sys:String x:Key="NavHistory">历史</sys:String>

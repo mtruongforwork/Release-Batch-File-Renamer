@@ -74,6 +74,7 @@ internal sealed class ToolView : UserControl
     private readonly TextBlock _summary = new() { TextWrapping = TextWrapping.Wrap, FontWeight = FontWeights.SemiBold };
     private readonly ItemsControl _messages = new();
     private readonly ListBox _results = new();
+    private readonly BFR.App.Controls.TreemapView _treemap = new() { Visibility = Visibility.Collapsed, Margin = new Thickness(0, 0, 0, 10) };
     private readonly TextBlock _empty = new();
     private readonly ProgressBar _progress = new() { IsIndeterminate = true, Height = 3, Visibility = Visibility.Collapsed, Margin = new Thickness(0, 6, 0, 0) };
     private readonly Ui.Button _previewButton = new();
@@ -163,7 +164,7 @@ internal sealed class ToolView : UserControl
         {
             Content = top,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            MaxHeight = 330
+            MaxHeight = _tool.ReadOnly ? 250 : 330
         };
         DockPanel.SetDock(topScroll, Dock.Top);
         root.Children.Add(topScroll);
@@ -180,6 +181,9 @@ internal sealed class ToolView : UserControl
         info.Children.Add(_messages);
         DockPanel.SetDock(info, Dock.Top);
         root.Children.Add(info);
+
+        DockPanel.SetDock(_treemap, Dock.Top);
+        root.Children.Add(_treemap);
 
         // Danh sách kết quả
         _results.Style = AppStyle("AppListBoxStyle");
@@ -547,6 +551,7 @@ internal sealed class ToolView : UserControl
         DisposePlan();
         _plan = null;
         _results.ItemsSource = null;
+        _treemap.Visibility = Visibility.Collapsed;
         _messages.ItemsSource = null;
         _summary.Text = string.Empty;
         _empty.Visibility = Visibility.Visible;
@@ -599,6 +604,8 @@ internal sealed class ToolView : UserControl
     {
         _plan = plan;
         _results.ItemsSource = plan.Rows;
+        _treemap.SetItems(plan.Treemap ?? Array.Empty<BFR.Presentation.Design.TreemapItem>());
+        _treemap.Visibility = plan.Treemap is { Count: > 0 } ? Visibility.Visible : Visibility.Collapsed;
         _messages.ItemsSource = plan.Messages.Take(20).ToList();
         _summary.Text = plan.Summary;
         _empty.Visibility = plan.Rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;

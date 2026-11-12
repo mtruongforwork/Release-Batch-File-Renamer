@@ -175,7 +175,8 @@ public sealed class AnalyzeTool : ITool
         {
             Rows = rows,
             Summary = ToolText.T("CoreToolAnalyzeSummary", "{0:N0} tệp, {1:N0} thư mục, {2}.", report.TotalFiles, report.TotalFolders, ToolText.Size(report.TotalBytes)),
-            Export = new ToolExport("analysis.json", "JSON|*.json", json, ProFeature.AnalyzeExport)
+            Export = new ToolExport("analysis.json", "JSON|*.json", json, ProFeature.AnalyzeExport),
+            Treemap = report.ByType.Select(t => new BFR.Presentation.Design.TreemapItem($"{t.Category} · {ToolText.Size(t.Bytes)}", t.Bytes)).ToList()
         };
     }
 }
