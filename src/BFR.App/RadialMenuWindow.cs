@@ -19,7 +19,7 @@ using BFR.Presentation.Tools;
 /// </summary>
 internal sealed class RadialMenuWindow : Window
 {
-    private const double Outer = 150, Inner = 52, Pad = 16, FlyoutWidth = 280, Hover = 9;
+    private const double Outer = 96, Inner = 33, Pad = 12, FlyoutWidth = 230, Hover = 6;
 
     private readonly IReadOnlyList<RadialItem> _items;
     private readonly Action<RadialItem, RadialAction?> _activate;
@@ -41,7 +41,7 @@ internal sealed class RadialMenuWindow : Window
         _activate = activate;
 
         Width = 2 * (Outer + Pad + FlyoutWidth);
-        Height = 2 * (Outer + Pad) + 70;
+        Height = 2 * (Outer + Pad) + 44;
         _cx = Width / 2;
         _cy = Pad + Outer;
 
@@ -92,7 +92,7 @@ internal sealed class RadialMenuWindow : Window
             {
                 Text = _items[i].Icon,
                 FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                FontSize = 24,
+                FontSize = 16,
                 Foreground = Res("Accent"),
                 IsHitTestVisible = false,
                 RenderTransform = new TranslateTransform()
@@ -102,63 +102,56 @@ internal sealed class RadialMenuWindow : Window
             Canvas.SetTop(icon, iy - icon.DesiredSize.Height / 2);
             _icons.Add(icon);
             _canvas.Children.Add(icon);
-
-            // Phím số mở nhanh: hiện số nhỏ ở góc ô.
-            var (nx, ny) = RadialLayout.Point(_cx, _cy, Outer - 14, RadialLayout.CenterAngle(i, count));
-            var number = new TextBlock { Text = (i + 1).ToString(), FontSize = 10, Foreground = Res("TextSecondary"), IsHitTestVisible = false };
-            Canvas.SetLeft(number, nx - 3);
-            Canvas.SetTop(number, ny - 7);
-            _canvas.Children.Add(number);
         }
 
         // Lỗ giữa: tên công cụ đang rê chuột.
         var hub = new Ellipse
         {
-            Width = 2 * (Inner - 5),
-            Height = 2 * (Inner - 5),
+            Width = 2 * (Inner - 3),
+            Height = 2 * (Inner - 3),
             Fill = Res("PanelBackground"),
             Stroke = Res("BorderStrong"),
             StrokeThickness = 1,
             IsHitTestVisible = false
         };
-        Canvas.SetLeft(hub, _cx - (Inner - 5));
-        Canvas.SetTop(hub, _cy - (Inner - 5));
+        Canvas.SetLeft(hub, _cx - (Inner - 3));
+        Canvas.SetTop(hub, _cy - (Inner - 3));
         _canvas.Children.Add(hub);
 
         _hubIcon.FontFamily = new FontFamily("Segoe MDL2 Assets");
-        _hubIcon.FontSize = 20;
+        _hubIcon.FontSize = 13;
         _hubIcon.Foreground = Res("Accent");
         _hubIcon.TextAlignment = TextAlignment.Center;
-        _hubIcon.Width = 2 * (Inner - 9);
+        _hubIcon.Width = 2 * (Inner - 5);
         _hubIcon.IsHitTestVisible = false;
-        Canvas.SetLeft(_hubIcon, _cx - (Inner - 9));
-        Canvas.SetTop(_hubIcon, _cy - 28);
+        Canvas.SetLeft(_hubIcon, _cx - (Inner - 5));
+        Canvas.SetTop(_hubIcon, _cy - 17);
         _canvas.Children.Add(_hubIcon);
 
-        _hubTitle.FontSize = 11;
+        _hubTitle.FontSize = 8.5;
         _hubTitle.FontWeight = FontWeights.SemiBold;
         _hubTitle.Foreground = Res("TextPrimary");
         _hubTitle.TextAlignment = TextAlignment.Center;
         _hubTitle.TextWrapping = TextWrapping.Wrap;
         _hubTitle.TextTrimming = TextTrimming.CharacterEllipsis;
-        _hubTitle.MaxHeight = 30;
-        _hubTitle.Width = 2 * (Inner - 12);
+        _hubTitle.MaxHeight = 22;
+        _hubTitle.Width = 2 * (Inner - 4);
         _hubTitle.IsHitTestVisible = false;
-        Canvas.SetLeft(_hubTitle, _cx - (Inner - 12));
+        Canvas.SetLeft(_hubTitle, _cx - (Inner - 4));
         Canvas.SetTop(_hubTitle, _cy + 1);
         _canvas.Children.Add(_hubTitle);
 
         _hint.Text = Loc.T("RadialHint");
-        _hint.FontSize = 11;
+        _hint.FontSize = 10;
         _hint.Foreground = Res("TextSecondary");
         _hint.TextAlignment = TextAlignment.Center;
-        _hint.Width = 2 * Outer;
+        _hint.Width = 2 * Outer + 90;
         _hint.IsHitTestVisible = false;
-        Canvas.SetLeft(_hint, _cx - Outer);
-        Canvas.SetTop(_hint, _cy + Outer + 12);
+        Canvas.SetLeft(_hint, _cx - Outer - 45);
+        Canvas.SetTop(_hint, _cy + Outer + 8);
         _canvas.Children.Add(_hint);
 
-        _canvas.Effect = new DropShadowEffect { BlurRadius = 18, ShadowDepth = 2, Opacity = 0.45, Color = Colors.Black };
+        _canvas.Effect = new DropShadowEffect { BlurRadius = 12, ShadowDepth = 1.5, Opacity = 0.45, Color = Colors.Black };
         SetHover(-1);
     }
 
@@ -418,7 +411,7 @@ internal sealed class RadialMenuWindow : Window
         var area = SystemParameters.WorkArea;
         // Chỉ vòng tròn cần nằm trọn trong màn hình; vùng trong suốt hai bên được phép tràn ra ngoài.
         x = Math.Clamp(x, area.Left - (_cx - Outer - Pad), area.Right - (_cx + Outer + Pad));
-        y = Math.Clamp(y, area.Top - Pad, area.Bottom - (_cy + Outer + 70));
+        y = Math.Clamp(y, area.Top - Pad, area.Bottom - (_cy + Outer + 44));
 
         Left = x;
         Top = y;
