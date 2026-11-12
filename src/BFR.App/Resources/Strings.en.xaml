@@ -840,4 +840,16 @@
     <sys:String x:Key="SendToToolsButton">Send to Tools</sys:String>
     <sys:String x:Key="SendToToolsTip">Send the files in the list to the Tools page (organize, find duplicates, zip…)</sys:String>
     <sys:String x:Key="CommandSendToTools">Send list to Tools</sys:String>
+    <sys:String x:Key="FeatureOrganizeDeep">Organize into deeper folders</sys:String>
+    <sys:String x:Key="FeatureLimitOrganizeDepth">Up to {0} levels</sys:String>
+    <sys:String x:Key="FeatureDuplicatesUnlimited">Unlimited duplicate scans</sys:String>
+    <sys:String x:Key="FeatureLimitDuplicates">{0} files per scan</sys:String>
+    <sys:String x:Key="FeatureSimilarImages">Similar images and hard links</sys:String>
+    <sys:String x:Key="FeatureImageUnlimited">Unlimited image tools</sys:String>
+    <sys:String x:Key="FeatureLimitImages">{0} images per batch</sys:String>
+    <sys:String x:Key="FeatureExifWrite">Write and strip all EXIF</sys:String>
+    <sys:String x:Key="FeatureArchiveAdvanced">ZIP grouping and name patterns</sys:String>
+    <sys:String x:Key="FeatureAnalyzeExport">Export analysis reports</sys:String>
+    <sys:String x:Key="FeatureWorkflow">Multi-step workflows</sys:String>
+    <sys:String x:Key="FeatureQuarantineRetention">Adjustable quarantine retention</sys:String>
 </ResourceDictionary>

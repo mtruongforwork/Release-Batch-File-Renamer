@@ -263,6 +263,15 @@ public sealed class UpgradeViewModel : ObservableObject
         ProFeature.UnlimitedShelf => "FeatureUnlimitedShelf",
         ProFeature.UnlimitedListRows => "FeatureUnlimitedListRows",
         ProFeature.ListCsvImport => "FeatureListCsvImport",
+        ProFeature.OrganizeDeepTemplate => "FeatureOrganizeDeep",
+        ProFeature.DuplicatesUnlimited => "FeatureDuplicatesUnlimited",
+        ProFeature.SimilarImages or ProFeature.HardLinkDedupe => "FeatureSimilarImages",
+        ProFeature.ImageUnlimited => "FeatureImageUnlimited",
+        ProFeature.ExifWrite => "FeatureExifWrite",
+        ProFeature.ArchiveAdvanced => "FeatureArchiveAdvanced",
+        ProFeature.AnalyzeExport => "FeatureAnalyzeExport",
+        ProFeature.Workflow => "FeatureWorkflow",
+        ProFeature.QuarantineRetention => "FeatureQuarantineRetention",
         _ => "FeatureUnlimitedRules"
     };
 
@@ -332,6 +341,48 @@ public sealed class UpgradeViewModel : ObservableObject
                 s.T("FeatureNotIncluded"),
                 s.T("FeatureIncluded"),
                 free.AllowListCsvImport,
+                true),
+            new(
+                s.T("FeatureOrganizeDeep"),
+                s.F("FeatureLimitOrganizeDepth", free.MaxOrganizeDepth),
+                s.T("FeatureUnlimited"),
+                free.MaxOrganizeDepth == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureDuplicatesUnlimited"),
+                s.F("FeatureLimitDuplicates", free.MaxDuplicateFiles),
+                s.T("FeatureUnlimited"),
+                free.MaxDuplicateFiles == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureSimilarImages"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowSimilarImages,
+                true),
+            new(
+                s.T("FeatureImageUnlimited"),
+                s.F("FeatureLimitImages", free.MaxImagesPerBatch),
+                s.T("FeatureUnlimited"),
+                free.MaxImagesPerBatch == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureArchiveAdvanced"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowArchiveAdvanced,
+                true),
+            new(
+                s.T("FeatureAnalyzeExport"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowAnalyzeExport,
+                true),
+            new(
+                s.T("FeatureWorkflow"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowWorkflow,
                 true)
         };
     }

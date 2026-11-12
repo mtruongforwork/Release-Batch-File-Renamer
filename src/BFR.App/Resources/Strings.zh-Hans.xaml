@@ -840,4 +840,16 @@
     <sys:String x:Key="SendToToolsButton">发送到工具</sys:String>
     <sys:String x:Key="SendToToolsTip">将列表中的文件发送到“工具”页面(整理、查重、压缩等)</sys:String>
     <sys:String x:Key="CommandSendToTools">将列表发送到工具</sys:String>
+    <sys:String x:Key="FeatureOrganizeDeep">更深层级的文件夹整理</sys:String>
+    <sys:String x:Key="FeatureLimitOrganizeDepth">最多 {0} 级</sys:String>
+    <sys:String x:Key="FeatureDuplicatesUnlimited">不限数量的重复文件查找</sys:String>
+    <sys:String x:Key="FeatureLimitDuplicates">每次扫描 {0} 个文件</sys:String>
+    <sys:String x:Key="FeatureSimilarImages">相似图片与硬链接</sys:String>
+    <sys:String x:Key="FeatureImageUnlimited">不限数量的图片工具</sys:String>
+    <sys:String x:Key="FeatureLimitImages">每批 {0} 张图片</sys:String>
+    <sys:String x:Key="FeatureExifWrite">写入和清除全部 EXIF</sys:String>
+    <sys:String x:Key="FeatureArchiveAdvanced">ZIP 分组与名称模式</sys:String>
+    <sys:String x:Key="FeatureAnalyzeExport">导出分析报告</sys:String>
+    <sys:String x:Key="FeatureWorkflow">多步骤工作流</sys:String>
+    <sys:String x:Key="FeatureQuarantineRetention">可调整隔离区保留时间</sys:String>
 </ResourceDictionary>

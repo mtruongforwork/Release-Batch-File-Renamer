@@ -840,4 +840,16 @@
     <sys:String x:Key="SendToToolsButton">Gửi tới Công cụ</sys:String>
     <sys:String x:Key="SendToToolsTip">Gửi các tệp trong danh sách sang trang Công cụ (sắp xếp, tìm trùng, nén…)</sys:String>
     <sys:String x:Key="CommandSendToTools">Gửi danh sách tới Công cụ</sys:String>
+    <sys:String x:Key="FeatureOrganizeDeep">Sắp xếp vào thư mục nhiều cấp</sys:String>
+    <sys:String x:Key="FeatureLimitOrganizeDepth">Tối đa {0} cấp</sys:String>
+    <sys:String x:Key="FeatureDuplicatesUnlimited">Tìm tệp trùng không giới hạn</sys:String>
+    <sys:String x:Key="FeatureLimitDuplicates">{0} tệp mỗi lần quét</sys:String>
+    <sys:String x:Key="FeatureSimilarImages">Ảnh gần giống và hard link</sys:String>
+    <sys:String x:Key="FeatureImageUnlimited">Công cụ ảnh không giới hạn</sys:String>
+    <sys:String x:Key="FeatureLimitImages">{0} ảnh mỗi lô</sys:String>
+    <sys:String x:Key="FeatureExifWrite">Ghi và xoá toàn bộ EXIF</sys:String>
+    <sys:String x:Key="FeatureArchiveAdvanced">Nén ZIP chia nhóm và đặt tên theo mẫu</sys:String>
+    <sys:String x:Key="FeatureAnalyzeExport">Xuất báo cáo phân tích</sys:String>
+    <sys:String x:Key="FeatureWorkflow">Workflow nhiều bước</sys:String>
+    <sys:String x:Key="FeatureQuarantineRetention">Chỉnh thời gian giữ khu cách ly</sys:String>
 </ResourceDictionary>

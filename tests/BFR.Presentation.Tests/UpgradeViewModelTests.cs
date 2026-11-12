@@ -110,7 +110,7 @@ public class UpgradeViewModelTests : IDisposable
     {
         var (_, vm) = Create();
 
-        Assert.Equal(10, vm.Features.Count);
+        Assert.Equal(17, vm.Features.Count);
         Assert.All(vm.Features, row => Assert.False(row.FreeHasIt));
         Assert.All(vm.Features, row => Assert.True(row.ProHasIt));
     }

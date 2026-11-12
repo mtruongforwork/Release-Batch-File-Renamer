@@ -840,4 +840,16 @@
     <sys:String x:Key="SendToToolsButton">Envoyer aux Outils</sys:String>
     <sys:String x:Key="SendToToolsTip">Envoyer les fichiers de la liste à la page Outils (classer, doublons, zip…)</sys:String>
     <sys:String x:Key="CommandSendToTools">Envoyer la liste aux Outils</sys:String>
+    <sys:String x:Key="FeatureOrganizeDeep">Classer dans des dossiers plus profonds</sys:String>
+    <sys:String x:Key="FeatureLimitOrganizeDepth">Jusqu'à {0} niveaux</sys:String>
+    <sys:String x:Key="FeatureDuplicatesUnlimited">Recherche de doublons illimitée</sys:String>
+    <sys:String x:Key="FeatureLimitDuplicates">{0} fichiers par analyse</sys:String>
+    <sys:String x:Key="FeatureSimilarImages">Images similaires et liens physiques</sys:String>
+    <sys:String x:Key="FeatureImageUnlimited">Outils d'image illimités</sys:String>
+    <sys:String x:Key="FeatureLimitImages">{0} images par lot</sys:String>
+    <sys:String x:Key="FeatureExifWrite">Écrire et supprimer tout l'EXIF</sys:String>
+    <sys:String x:Key="FeatureArchiveAdvanced">Regroupement ZIP et modèles de nom</sys:String>
+    <sys:String x:Key="FeatureAnalyzeExport">Exporter les rapports d'analyse</sys:String>
+    <sys:String x:Key="FeatureWorkflow">Workflows multi-étapes</sys:String>
+    <sys:String x:Key="FeatureQuarantineRetention">Durée de quarantaine réglable</sys:String>
 </ResourceDictionary>
