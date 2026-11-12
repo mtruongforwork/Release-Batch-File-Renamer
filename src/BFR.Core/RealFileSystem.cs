@@ -72,6 +72,13 @@ public sealed class RealFileSystem : IFileSystem
         File.WriteAllBytes(path, content);
     }
 
+    public Stream OpenWrite(string path)
+    {
+        var parent = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(parent)) Directory.CreateDirectory(parent);
+        return new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 81920);
+    }
+
     public Stream OpenRead(string path) =>
         new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, 81920, FileOptions.SequentialScan);
 

@@ -172,6 +172,29 @@ public sealed class FakeFileSystem : IFileSystem
             ? new MemoryStream(bytes, writable: false)
             : throw new FileNotFoundException("Tệp không tồn tại", path);
 
+    public Stream OpenWrite(string path)
+    {
+        var p = Normalize(path);
+        EnsureDirectory(ParentDirectory(p));
+        _files[p] = Array.Empty<byte>();
+        return new CommitStream(bytes => _files[p] = bytes);
+    }
+
+    /// <summary>Luồng ghi trong bộ nhớ, ghi kết quả vào hệ thống tệp giả khi đóng.</summary>
+    private sealed class CommitStream : MemoryStream
+    {
+        private readonly Action<byte[]> _commit;
+        private bool _done;
+
+        public CommitStream(Action<byte[]> commit) { _commit = commit; }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_done) { _done = true; _commit(ToArray()); }
+            base.Dispose(disposing);
+        }
+    }
+
     /// <summary>Ghi nội dung nhị phân (cho test).</summary>
     public void WriteAllBytes(string path, byte[] content)
     {
