@@ -178,6 +178,12 @@ public interface ITool
 
     /// <summary>Người dùng bấm vào một dòng (ví dụ chọn bản giữ lại). Trả về kế hoạch mới hoặc null nếu không có gì đổi.</summary>
     ToolPlan? OnRowActivated(ToolRow row) => null;
+
+    /// <summary>
+    /// Khoá của tuỳ chọn dạng Choice mà menu tròn dùng làm danh sách "chức năng" khi bấm chuột phải vào công cụ.
+    /// null = công cụ chỉ có mục mở.
+    /// </summary>
+    string? QuickOptionKey => null;
 }
 
 public sealed record ToolRunResult(string JournalId, string JournalPath, int Total, int Succeeded, int Failed, bool Cancelled, IReadOnlyList<(string Step, string Error)> Errors);

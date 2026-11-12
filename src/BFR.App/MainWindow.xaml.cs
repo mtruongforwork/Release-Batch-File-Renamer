@@ -1,5 +1,6 @@
 namespace BFR.App;
 
+using BFR.Presentation.Tools;
 using BFR.Core;
 using BFR.App.Infrastructure;
 using BFR.Core.Licensing;
@@ -195,10 +196,78 @@ public partial class MainWindow : FluentWindow
     private void SendToTools_Click(object sender, RoutedEventArgs e) => SendToTools(_vm.Rows.Select(r => r.File.FullPath).ToList());
 
     /// <summary>Mở một công cụ theo khoá (từ menu Explorer hoặc dòng lệnh) và đưa các tệp vào đó.</summary>
-    public void OpenTool(string toolKey, IReadOnlyList<string> paths)
+    public void OpenTool(string toolKey, IReadOnlyList<string> paths, IReadOnlyDictionary<string, string>? values = null)
     {
         NavigateTo("Tools");
-        if (GetPage("Tools") is ToolsPage tools) tools.OpenTool(toolKey, paths);
+        if (GetPage("Tools") is ToolsPage tools) tools.OpenTool(toolKey, paths, values);
+    }
+
+    // ----------------------------------------------------------------- Menu tròn
+
+    private GlobalHotkey? _radialHotkey;
+    private RadialMenuWindow? _radial;
+
+    /// <summary>Mở menu tròn tại toạ độ màn hình (vật lý). Đang mở thì đóng lại.</summary>
+    public void ShowRadial(int x, int y)
+    {
+        if (_radial is not null)
+        {
+            _radial.Close();
+            return;
+        }
+
+        var items = RadialMenuModel.Build(ToolCatalog.Create(), Loc.Current == "vi");
+        _radial = new RadialMenuWindow(items, OnRadialChosen);
+        _radial.Closed += (_, _) => _radial = null;
+        _radial.ShowAt(x, y);
+    }
+
+    private void ShowRadialAtCursor()
+    {
+        var (x, y) = GlobalHotkey.CursorPosition();
+        ShowRadial(x, y);
+    }
+
+    private void OnRadialChosen(RadialItem item, RadialAction? action)
+    {
+        ActivateAndForeground();
+
+        if (item.IsRename)
+        {
+            NavigateTo("Rename");
+            if (action is not null) ApplyPresetByName(action.Value);
+            return;
+        }
+
+        var values = action is null
+            ? null
+            : new Dictionary<string, string> { [action.OptionKey] = action.Value };
+        OpenTool(item.Key, Array.Empty<string>(), values);
+    }
+
+    /// <summary>Đăng ký/gỡ phím tắt toàn cục mở menu tròn theo cài đặt.</summary>
+    private void ApplyRadialHotkeySetting()
+    {
+        var settings = SettingsStore.Load();
+        BFR.Core.HotkeySpec? wanted = null;
+        if (settings.RadialHotkeyEnabled && BFR.Core.HotkeySpec.TryParse(settings.RadialHotkey, out var parsed)) wanted = parsed;
+
+        if (_radialHotkey is not null && (wanted is null || _radialHotkey.Spec != wanted))
+        {
+            _radialHotkey.Dispose();
+            _radialHotkey = null;
+        }
+
+        if (wanted is null || _radialHotkey is not null) return;
+
+        try
+        {
+            _radialHotkey = new GlobalHotkey(wanted, () => Dispatcher.BeginInvoke(ShowRadialAtCursor));
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            MessageBox.Show(Loc.F("HotkeyRegisterFailed", wanted.ToString()), "Batch File Renamer", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     public void SendToTools(IReadOnlyList<string> paths)
@@ -218,6 +287,7 @@ public partial class MainWindow : FluentWindow
     /// <summary>Đăng ký/gỡ phím tắt toàn cục mở Shelf theo cài đặt hiện tại (B4).</summary>
     public void ApplyHotkeySetting()
     {
+        ApplyRadialHotkeySetting();
         var settings = SettingsStore.Load();
         BFR.Core.HotkeySpec? wanted = null;
         if (settings.ShelfHotkeyEnabled && BFR.Core.HotkeySpec.TryParse(settings.ShelfHotkey, out var parsed)) wanted = parsed;
@@ -732,6 +802,7 @@ public partial class MainWindow : FluentWindow
         registry.Register(Loc.T("ShelfCommand"), files, () => OpenShelf(), "Ctrl+Shift+S");
         registry.Register(Loc.T("CommandClearList"), files, () => ClearList_Click(this, new RoutedEventArgs()));
         registry.Register(Loc.T("CommandSendToTools"), files, () => SendToTools_Click(this, new RoutedEventArgs()));
+        registry.Register(Loc.T("CommandRadial"), tools, () => ShowRadialAtCursor());
         registry.Register(Loc.T("CommandApply"), files, () => Apply_Click(this, new RoutedEventArgs()), "Ctrl+Enter");
         registry.Register(Loc.T("CommandUndo"), files, () => Undo_Click(this, new RoutedEventArgs()), "Ctrl+Z");
         registry.Register(Loc.T("CommandSavePreset"), rules, () => SavePreset_Click(this, new RoutedEventArgs()), "Ctrl+S");

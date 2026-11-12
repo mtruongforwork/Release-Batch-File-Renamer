@@ -147,10 +147,13 @@ public sealed class ToolsPage : PageBase
     }
 
     /// <summary>Mở công cụ theo khoá và đưa tệp vào đó (khoá lạ: về Trang chủ và giữ tệp lại).</summary>
-    public void OpenTool(string key, IEnumerable<string> paths)
+    public void OpenTool(string key, IEnumerable<string> paths, IReadOnlyDictionary<string, string>? values = null)
     {
         AddPending(paths);
-        OpenTool(KnownTools.IsKnown(key) ? key : "home");
+        var target = KnownTools.IsKnown(key) ? key : "home";
+        OpenTool(target);
+
+        if (values is { Count: > 0 } && _views.TryGetValue(target, out var view) && view is ToolView toolView) toolView.ApplyValues(values);
     }
 
     private void AddPending(IEnumerable<string> paths)

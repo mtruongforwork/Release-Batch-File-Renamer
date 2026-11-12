@@ -18,6 +18,7 @@ public sealed class FolderTool : ITool
     public string Icon => "";
     public bool ReadOnly => false;
     public bool AcceptsFiles => true;
+    public string? QuickOptionKey => "mode";
 
     public IReadOnlyList<ToolOption> Options { get; } = new ToolOption[]
     {
@@ -105,6 +106,7 @@ public sealed class MetadataTool : ITool
     public string Icon => "";
     public bool ReadOnly => false;
     public bool AcceptsFiles => true;
+    public string? QuickOptionKey => "mode";
 
     public IReadOnlyList<ToolOption> Options { get; } = new ToolOption[]
     {

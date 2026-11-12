@@ -852,4 +852,9 @@
     <sys:String x:Key="FeatureAnalyzeExport">Xuất báo cáo phân tích</sys:String>
     <sys:String x:Key="FeatureWorkflow">Workflow nhiều bước</sys:String>
     <sys:String x:Key="FeatureQuarantineRetention">Chỉnh thời gian giữ khu cách ly</sys:String>
+    <sys:String x:Key="RadialHint">Rê chuột vào ô để xem tên · chuột phải: chức năng · chuột trái: mở</sys:String>
+    <sys:String x:Key="RadialHintFlyout">Chọn một chức năng · Esc: quay lại</sys:String>
+    <sys:String x:Key="SettingsRadial">Phím tắt mở menu tròn các công cụ</sys:String>
+    <sys:String x:Key="SettingsRadialHint">Hiện một menu tròn nhỏ ngay tại con trỏ với 8 công cụ. Chỉ nhận đúng tổ hợp phím bạn chọn; không ghi lại thao tác gõ phím.</sys:String>
+    <sys:String x:Key="CommandRadial">Mở menu tròn các công cụ</sys:String>
 </ResourceDictionary>

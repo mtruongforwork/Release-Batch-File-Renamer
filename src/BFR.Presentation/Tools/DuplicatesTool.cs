@@ -25,6 +25,7 @@ public sealed class DuplicatesTool : ITool
     public string Icon => "";
     public bool ReadOnly => false;
     public bool AcceptsFiles => true;
+    public string? QuickOptionKey => "keep";
 
     public IReadOnlyList<ToolOption> Options { get; } = new ToolOption[]
     {

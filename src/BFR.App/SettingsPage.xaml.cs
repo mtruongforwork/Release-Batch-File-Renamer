@@ -119,6 +119,23 @@ public class SettingsPage : PageBase
         shelf.Children.Add(hotkeyBox);
         shelf.Children.Add(Caption(Loc.T("SettingsHotkeyHint")));
 
+        // Menu tròn các công cụ: phím tắt toàn cục riêng, mặc định tắt.
+        var radialToggle = Toggle(Loc.T("SettingsRadial"), _settings.RadialHotkeyEnabled, on => _settings.RadialHotkeyEnabled = on);
+        radialToggle.Margin = new Thickness(0, 12, 0, 0);
+        shelf.Children.Add(radialToggle);
+        var radialBox = new ComboBox { MinWidth = 200, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 6, 0, 0) };
+        AutomationProperties.SetName(radialBox, "Radial menu hotkey");
+        foreach (var h in BFR.Core.HotkeySpec.Presets) radialBox.Items.Add(h);
+        radialBox.SelectedItem = BFR.Core.HotkeySpec.TryParse(_settings.RadialHotkey, out var currentRadial)
+            ? currentRadial.ToString()
+            : "Ctrl+Alt+Q";
+        radialBox.SelectionChanged += (_, _) =>
+        {
+            if (radialBox.SelectedItem is string chosen) { _settings.RadialHotkey = chosen; SettingsStore.Save(_settings); }
+        };
+        shelf.Children.Add(radialBox);
+        shelf.Children.Add(Caption(Loc.T("SettingsRadialHint")));
+
         var bg = Toggle(
             Loc.T("SettingsRunInBackground"),
             _settings.RunInBackground,

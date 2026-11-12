@@ -36,6 +36,11 @@ public sealed class AppSettings
     /// <summary>Tổ hợp phím, ví dụ "Ctrl+Alt+Space" (xem <c>HotkeySpec.Presets</c>).</summary>
     public string ShelfHotkey { get; set; } = "Ctrl+Shift+Space";
 
+    /// <summary>Phím tắt toàn cục mở menu tròn các công cụ. Mặc định TẮT (opt-in).</summary>
+    public bool RadialHotkeyEnabled { get; set; } = false;
+
+    public string RadialHotkey { get; set; } = "Ctrl+Alt+Q";
+
     /// <summary>
     /// Chạy nền ở khay hệ thống: đóng cửa sổ chính chỉ ẩn đi, ứng dụng vẫn chạy
     /// (cần cho lắc chuột mở Shelf khi không mở cửa sổ). Mặc định TẮT.

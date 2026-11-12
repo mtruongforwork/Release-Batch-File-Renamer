@@ -20,6 +20,7 @@ public sealed class ChecksumTool : ITool
     public string Icon => "";
     public bool ReadOnly => true;
     public bool AcceptsFiles => true;
+    public string? QuickOptionKey => "mode";
 
     public IReadOnlyList<ToolOption> Options { get; } = new ToolOption[]
     {

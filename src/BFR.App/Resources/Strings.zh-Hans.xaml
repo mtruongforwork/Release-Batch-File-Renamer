@@ -852,4 +852,9 @@
     <sys:String x:Key="FeatureAnalyzeExport">导出分析报告</sys:String>
     <sys:String x:Key="FeatureWorkflow">多步骤工作流</sys:String>
     <sys:String x:Key="FeatureQuarantineRetention">可调整隔离区保留时间</sys:String>
+    <sys:String x:Key="RadialHint">悬停查看名称 · 右键:功能 · 左键:打开</sys:String>
+    <sys:String x:Key="RadialHintFlyout">选择一项功能 · Esc:返回</sys:String>
+    <sys:String x:Key="SettingsRadial">工具环形菜单快捷键</sys:String>
+    <sys:String x:Key="SettingsRadialHint">在光标处弹出包含 8 个工具的小型环形菜单。仅接收您选择的组合键,不会记录键盘输入。</sys:String>
+    <sys:String x:Key="CommandRadial">打开工具环形菜单</sys:String>
 </ResourceDictionary>

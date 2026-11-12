@@ -852,4 +852,9 @@
     <sys:String x:Key="FeatureAnalyzeExport">Export analysis reports</sys:String>
     <sys:String x:Key="FeatureWorkflow">Multi-step workflows</sys:String>
     <sys:String x:Key="FeatureQuarantineRetention">Adjustable quarantine retention</sys:String>
+    <sys:String x:Key="RadialHint">Hover for the name · right-click: functions · left-click: open</sys:String>
+    <sys:String x:Key="RadialHintFlyout">Pick a function · Esc: back</sys:String>
+    <sys:String x:Key="SettingsRadial">Hotkey for the radial tools menu</sys:String>
+    <sys:String x:Key="SettingsRadialHint">Shows a small round menu with 8 tools right at the cursor. It only receives the exact combination you choose and never records typing.</sys:String>
+    <sys:String x:Key="CommandRadial">Open the radial tools menu</sys:String>
 </ResourceDictionary>

@@ -67,6 +67,7 @@ internal sealed class ToolView : UserControl
     private readonly List<string> _paths = new();
     private readonly Dictionary<string, string> _values = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, FrameworkElement> _optionRows = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Action<string>> _setters = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly TextBlock _inputSummary = new();
     private readonly ListBox _inputList = new() { MaxHeight = 96 };
@@ -290,6 +291,7 @@ internal sealed class ToolView : UserControl
                 IsChecked = string.Equals(option.Default, "true", StringComparison.OrdinalIgnoreCase)
             };
             check.Click += (_, _) => SetValue(option.Key, check.IsChecked == true ? "true" : "false");
+            _setters[option.Key] = v => { check.IsChecked = string.Equals(v, "true", StringComparison.OrdinalIgnoreCase); SetValue(option.Key, check.IsChecked == true ? "true" : "false"); };
             line.Children.Add(check);
         }
         else
@@ -352,6 +354,10 @@ internal sealed class ToolView : UserControl
                 {
                     if (combo.SelectedItem is Choice c) SetValue(option.Key, c.Value);
                 };
+                _setters[option.Key] = v =>
+                {
+                    if (items.FirstOrDefault(i => i.Value == v) is { } match) combo.SelectedItem = match;
+                };
                 return combo;
             }
             case OptionKind.MultiLine:
@@ -367,6 +373,7 @@ internal sealed class ToolView : UserControl
                     TextWrapping = TextWrapping.NoWrap
                 };
                 box.TextChanged += (_, _) => SetValue(option.Key, box.Text);
+                _setters[option.Key] = v => box.Text = v;
                 return box;
             }
             case OptionKind.Folder:
@@ -374,6 +381,7 @@ internal sealed class ToolView : UserControl
             {
                 var box = new TextBox { Style = AppStyle("AppTextBoxStyle"), Text = option.Default, Width = 300 };
                 box.TextChanged += (_, _) => SetValue(option.Key, box.Text);
+                _setters[option.Key] = v => box.Text = v;
                 var browse = MakeButton("…");
                 browse.Margin = new Thickness(4, 0, 0, 0);
                 browse.Click += (_, _) =>
@@ -403,8 +411,18 @@ internal sealed class ToolView : UserControl
                     Width = option.Kind == OptionKind.Number ? 100 : 320
                 };
                 box.TextChanged += (_, _) => SetValue(option.Key, box.Text);
+                _setters[option.Key] = v => box.Text = v;
                 return box;
             }
+        }
+    }
+
+    /// <summary>Đặt sẵn giá trị tuỳ chọn (ví dụ chọn chức năng từ menu tròn). Khoá lạ bị bỏ qua.</summary>
+    public void ApplyValues(IReadOnlyDictionary<string, string> values)
+    {
+        foreach (var (key, value) in values)
+        {
+            if (_setters.TryGetValue(key, out var set)) set(value);
         }
     }
 

@@ -852,4 +852,9 @@
     <sys:String x:Key="FeatureAnalyzeExport">Exporter les rapports d'analyse</sys:String>
     <sys:String x:Key="FeatureWorkflow">Workflows multi-étapes</sys:String>
     <sys:String x:Key="FeatureQuarantineRetention">Durée de quarantaine réglable</sys:String>
+    <sys:String x:Key="RadialHint">Survolez pour le nom · clic droit : fonctions · clic gauche : ouvrir</sys:String>
+    <sys:String x:Key="RadialHintFlyout">Choisissez une fonction · Échap : retour</sys:String>
+    <sys:String x:Key="SettingsRadial">Raccourci du menu radial des outils</sys:String>
+    <sys:String x:Key="SettingsRadialHint">Affiche un petit menu rond de 8 outils au niveau du curseur. Il ne reçoit que la combinaison choisie et n'enregistre jamais la frappe.</sys:String>
+    <sys:String x:Key="CommandRadial">Ouvrir le menu radial des outils</sys:String>
 </ResourceDictionary>

@@ -17,6 +17,7 @@ public sealed class OrganizeTool : ITool
     public string Icon => "";
     public bool ReadOnly => false;
     public bool AcceptsFiles => true;
+    public string? QuickOptionKey => "template";
 
     public IReadOnlyList<ToolOption> Options { get; } = new ToolOption[]
     {
