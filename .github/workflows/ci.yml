@@ -37,6 +37,12 @@ jobs:
       - name: Run ViewModel Tests (UI layer, không phụ thuộc WPF)
         run: dotnet test tests/BFR.Presentation.Tests/BFR.Presentation.Tests.csproj -c Release --no-build --verbosity normal
 
+      - name: Run CLI Tests (v2.0 tool commands)
+        run: dotnet test tests/BFR.Cli.Tests/BFR.Cli.Tests.csproj -c Release --no-build --verbosity normal
+
+      - name: Run Media Tests (WIC image processor)
+        run: dotnet test tests/BFR.Media.Tests/BFR.Media.Tests.csproj -c Release --no-build --verbosity normal
+
       - name: Run Property-Based Tests (FsCheck 1000 runs)
         run: dotnet test tests/BFR.Core.PropertyTests/BFR.Core.PropertyTests.csproj -c Release --no-build --verbosity normal
 
@@ -100,6 +106,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "bfr license status thất bại." }
           & "$layout/bfr.exe" context-menu status
           if ($LASTEXITCODE -ne 0) { throw "bfr context-menu status thất bại." }
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          path: artifacts/msix-layout
+          format: spdx-json
+          output-file: artifacts/sbom.spdx.json
+          upload-artifact: false
 
       - name: Upload Packaging Artifacts
         if: always()
