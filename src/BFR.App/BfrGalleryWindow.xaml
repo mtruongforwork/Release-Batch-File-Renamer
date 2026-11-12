@@ -1,6 +1,7 @@
 <Window x:Class="BFR.App.BfrGalleryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="clr-namespace:BFR.App.Controls"
         Title="BFR Gallery (dev)" Width="1100" Height="860" MinWidth="560" MinHeight="480"
         Background="{DynamicResource BfrBgBase}" FontFamily="{DynamicResource BfrFontBody}" FontSize="{DynamicResource BfrSizeBody}"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Ideal"
@@ -175,6 +176,19 @@
                     <TextBlock Style="{StaticResource BfrCaptionText}" Text="Vô hiệu" Margin="0,12,0,4" />
                     <TextBox Style="{StaticResource BfrTextField}" Text="Chỉ đọc" IsEnabled="False" AutomationProperties.Name="Ô nhập vô hiệu" />
                 </StackPanel>
+            </Border>
+
+            <!-- Linh vật Tem -->
+            <TextBlock Style="{StaticResource BfrTitleText}" Text="Linh vật Tem (5 trạng thái)" Margin="0,8,0,10" />
+            <Border Style="{StaticResource BfrCard}" Margin="0,0,0,16">
+                <WrapPanel>
+                    <StackPanel Margin="0,0,24,0"><ctl:TemMascot State="Idle" Width="110" Height="114" /><TextBlock Style="{StaticResource BfrCaptionText}" Text="Nghỉ" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel Margin="0,0,24,0"><ctl:TemMascot State="Working" Width="110" Height="114" /><TextBlock Style="{StaticResource BfrCaptionText}" Text="Đang làm" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel Margin="0,0,24,0"><ctl:TemMascot State="Happy" Width="110" Height="114" /><TextBlock Style="{StaticResource BfrCaptionText}" Text="Vui" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel Margin="0,0,24,0"><ctl:TemMascot State="Oops" Width="110" Height="114" /><TextBlock Style="{StaticResource BfrCaptionText}" Text="Ái ngại" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel Margin="0,0,24,0"><ctl:TemMascot State="Sleep" Width="110" Height="114" /><TextBlock Style="{StaticResource BfrCaptionText}" Text="Ngủ" HorizontalAlignment="Center" /></StackPanel>
+                    <StackPanel VerticalAlignment="Bottom"><ctl:TemMascot State="Idle" Width="44" Height="46" /><TextBlock Style="{StaticResource BfrCaptionText}" Text="Nhỏ (44 px)" HorizontalAlignment="Center" /></StackPanel>
+                </WrapPanel>
             </Border>
 
             <!-- Tương phản -->

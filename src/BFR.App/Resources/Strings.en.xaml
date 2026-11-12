@@ -471,6 +471,7 @@
     <sys:String x:Key="QuickUndone">Undid {0} files.</sys:String>
     <sys:String x:Key="QuickUnknownPreset">Unknown quick-rename preset: {0}</sys:String>
     <sys:String x:Key="NavRename">Rename</sys:String>
+    <sys:String x:Key="TemName">Tem, the BFR mascot</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">History</sys:String>
     <sys:String x:Key="NavPresets">Presets</sys:String>

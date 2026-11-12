@@ -471,6 +471,7 @@
     <sys:String x:Key="QuickUndone">{0} fichiers restaurés.</sys:String>
     <sys:String x:Key="QuickUnknownPreset">Préréglage de renommage rapide inconnu : {0}</sys:String>
     <sys:String x:Key="NavRename">Renommer</sys:String>
+    <sys:String x:Key="TemName">Tem, la mascotte de BFR</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">Historique</sys:String>
     <sys:String x:Key="NavPresets">Préréglages</sys:String>
