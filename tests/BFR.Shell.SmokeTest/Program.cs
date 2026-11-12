@@ -88,7 +88,8 @@ public static class Program
     /// </summary>
     private static int CheckSubCommands(IExplorerCommand parent)
     {
-        string[] expectedKeys = { "Open", "number", "ascii", "date", "clean", "lower" };
+        // 6 lệnh đổi tên nhanh + 5 công cụ tệp v2.0 (Organize, Duplicates, Metadata, Archive, Checksum).
+        string[] expectedKeys = { "Open", "number", "ascii", "date", "clean", "lower", "organize", "duplicates", "metadata", "archive", "checksum" };
 
         int hr = parent.EnumSubCommands(out var enumPtr);
         RequireHr("EnumSubCommands", hr);
