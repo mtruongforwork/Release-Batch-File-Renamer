@@ -23,6 +23,9 @@ public class SettingsPage : PageBase
     /// <summary>Trang bị rời đi: cửa sổ chính áp dụng các thay đổi (khay, hook, phím tắt...).</summary>
     public event EventHandler? SettingsLeft;
 
+    /// <summary>Một cài đặt vừa đổi: cửa sổ chính áp dụng ngay (phím tắt, lắc chuột, chạy nền) thay vì đợi rời trang.</summary>
+    public event EventHandler? SettingsChanged;
+
     public override void OnHidden() => SettingsLeft?.Invoke(this, EventArgs.Empty);
 
     private readonly LicenseCoordinator _license;
@@ -150,7 +153,7 @@ public class SettingsPage : PageBase
             : BFR.Core.HotkeySpec.Default;
         hotkeyBox.SelectionChanged += (_, _) =>
         {
-            if (hotkeyBox.SelectedItem is string chosen) { _settings.ShelfHotkey = chosen; SettingsStore.Save(_settings); }
+            if (hotkeyBox.SelectedItem is string chosen) { _settings.ShelfHotkey = chosen; SettingsStore.Save(_settings); SettingsChanged?.Invoke(this, EventArgs.Empty); }
         };
         shelf.Children.Add(hotkeyBox);
         shelf.Children.Add(Caption(Loc.T("SettingsHotkeyHint")));
@@ -167,7 +170,7 @@ public class SettingsPage : PageBase
             : "Ctrl+Alt+Q";
         radialBox.SelectionChanged += (_, _) =>
         {
-            if (radialBox.SelectedItem is string chosen) { _settings.RadialHotkey = chosen; SettingsStore.Save(_settings); }
+            if (radialBox.SelectedItem is string chosen) { _settings.RadialHotkey = chosen; SettingsStore.Save(_settings); SettingsChanged?.Invoke(this, EventArgs.Empty); }
         };
         shelf.Children.Add(radialBox);
         shelf.Children.Add(Caption(Loc.T("SettingsRadialHint")));
@@ -448,8 +451,8 @@ public class SettingsPage : PageBase
         var label = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, MaxWidth = 460 };
         var toggle = new Ui.ToggleSwitch { Content = label, IsChecked = isOn };
         AutomationProperties.SetName(toggle, text);
-        toggle.Checked += (_, _) => { set(true); SettingsStore.Save(_settings); };
-        toggle.Unchecked += (_, _) => { set(false); SettingsStore.Save(_settings); };
+        toggle.Checked += (_, _) => { set(true); SettingsStore.Save(_settings); SettingsChanged?.Invoke(this, EventArgs.Empty); };
+        toggle.Unchecked += (_, _) => { set(false); SettingsStore.Save(_settings); SettingsChanged?.Invoke(this, EventArgs.Empty); };
         return toggle;
     }
 

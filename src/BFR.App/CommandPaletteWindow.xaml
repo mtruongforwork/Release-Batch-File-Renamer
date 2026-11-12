@@ -36,7 +36,7 @@
                 <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="{StaticResource IconFont}" FontSize="16"
                            Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,10,0" />
 
-                <TextBox x:Name="InputBox" Grid.Column="1" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox x:Name="InputBox" Grid.Column="1" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" InputMethod.IsInputMethodEnabled="False"
                          Style="{StaticResource AppTextBoxStyle}"
                          AutomationProperties.Name="Command palette search" />
             </Grid>

@@ -1052,6 +1052,7 @@ public partial class MainWindow : FluentWindow
                 var settings = new SettingsPage(_license);
                 settings.UpgradeRequested += (_, _) => ShowUpgradeDialog(contextFeature: null);
                 settings.SettingsLeft += (_, _) => ApplySettingsChanges();
+                settings.SettingsChanged += (_, _) => ApplyLiveSettings();
                 page = settings;
                 break;
         }
@@ -1061,6 +1062,14 @@ public partial class MainWindow : FluentWindow
         PageHost.Children.Add(page);
         _pages[key] = page;
         return page;
+    }
+
+    /// <summary>Áp dụng ngay khi bật/tắt một cài đặt: chạy nền, lắc chuột, phím tắt toàn cục. Không dựng lại danh sách xem trước.</summary>
+    private void ApplyLiveSettings()
+    {
+        (Application.Current as App)?.ApplyBackgroundSetting();
+        ApplyShakeSetting();
+        ApplyHotkeySetting();
     }
 
     /// <summary>Áp dụng ngay các thay đổi trong Cài đặt khi người dùng rời trang (khay, hook, phím tắt, giấy phép).</summary>
