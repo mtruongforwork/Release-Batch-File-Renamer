@@ -32,6 +32,36 @@ public sealed class WicImageProcessor : IImageProcessor
         }
     }
 
+    public byte[]? GrayThumbnail(string path, int width, int height)
+    {
+        try
+        {
+            using var stream = OpenRead(path);
+            // DecodePixelWidth cho phép bộ giải mã JPEG thu nhỏ ngay khi giải mã: nhanh và ít bộ nhớ hơn nhiều.
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
+            bitmap.DecodePixelWidth = Math.Max(64, width * 8);
+            bitmap.StreamSource = stream;
+            bitmap.EndInit();
+            bitmap.Freeze();
+
+            BitmapSource source = bitmap;
+            if (HasAlpha(source.Format)) source = FlattenOnWhite(source);
+
+            var scaled = new TransformedBitmap(source, new ScaleTransform((double)width / source.PixelWidth, (double)height / source.PixelHeight));
+            var gray = new FormatConvertedBitmap(scaled, PixelFormats.Gray8, null, 0);
+            var pixels = new byte[width * height];
+            gray.CopyPixels(pixels, width, 0);
+            return pixels;
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            return null;
+        }
+    }
+
     public ImageResult Process(string source, string destination, ImageOptions options, ImageFormat outputFormat)
     {
         try

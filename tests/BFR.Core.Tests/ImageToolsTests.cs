@@ -20,6 +20,8 @@ public class ImageToolsTests
 
         public FakeProcessor(FakeFileSystem fs) { _fs = fs; }
 
+        public byte[]? GrayThumbnail(string path, int width, int height) => null;
+
         public ImageInfo? Probe(string path) => path.Contains("big") ? new ImageInfo(20000, 10000) : new ImageInfo(100, 50);
 
         public ImageResult Process(string source, string destination, ImageOptions options, ImageFormat outputFormat)

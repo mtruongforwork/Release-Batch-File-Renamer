@@ -161,4 +161,46 @@ public class WicImageProcessorTests : IDisposable
         Assert.False(File.Exists(output));
         Assert.True(File.Exists(src));
     }
+
+    [Fact]
+    public void GrayThumbnail_GivesSameHashForResizedCopy_AndDifferentForOtherImage()
+    {
+        // Ảnh có cấu trúc (gradient + khối) để băm có ý nghĩa.
+        BitmapSource Structured(int w, int h, bool invert)
+        {
+            var data = new byte[w * h * 3];
+            for (var y = 0; y < h; y++)
+                for (var x = 0; x < w; x++)
+                {
+                    var v = (byte)((x * 255 / w) ^ (((x * 4 / w) + (y * 4 / h)) % 2 == 0 ? 0 : 90));
+                    if (invert) v = (byte)(255 - v);
+                    var o = (y * w + x) * 3;
+                    data[o] = data[o + 1] = data[o + 2] = v;
+                }
+            var b = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgr24, null, data, w * 3);
+            b.Freeze();
+            return b;
+        }
+
+        string Save(string name, BitmapSource img)
+        {
+            var path = Path.Combine(_dir, name);
+            var enc = new JpegBitmapEncoder { QualityLevel = 90 };
+            enc.Frames.Add(BitmapFrame.Create(img));
+            using var fs = File.Create(path);
+            enc.Save(fs);
+            return path;
+        }
+
+        var big = Save("big.jpg", Structured(640, 480, false));
+        var small = Save("small.jpg", Structured(160, 120, false));
+        var other = Save("other.jpg", Structured(640, 480, true));
+        var p = new WicImageProcessor();
+
+        ulong H(string path) => PerceptualHash.FromGray9x8(p.GrayThumbnail(path, 9, 8)!);
+
+        Assert.True(PerceptualHash.Distance(H(big), H(small)) <= 6);
+        Assert.True(PerceptualHash.Distance(H(big), H(other)) > 20);
+        Assert.Null(p.GrayThumbnail(Path.Combine(_dir, "missing.jpg"), 9, 8));
+    }
 }

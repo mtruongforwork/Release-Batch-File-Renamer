@@ -61,6 +61,12 @@ public interface IImageProcessor
     /// <summary>Đọc kích thước mà không giải mã toàn bộ ảnh; null nếu không đọc được.</summary>
     ImageInfo? Probe(string path);
 
+    /// <summary>
+    /// Ảnh xám thu nhỏ <paramref name="width"/>×<paramref name="height"/> (từng dòng, 1 byte mỗi điểm) để tính băm cảm nhận.
+    /// null nếu không đọc được. Phải an toàn khi gọi song song.
+    /// </summary>
+    byte[]? GrayThumbnail(string path, int width, int height);
+
     /// <summary>Xử lý <paramref name="source"/> và ghi kết quả ra <paramref name="destination"/> (đường dẫn thật, tệp tạm).</summary>
     ImageResult Process(string source, string destination, ImageOptions options, ImageFormat outputFormat);
 }
