@@ -494,6 +494,9 @@
     <sys:String x:Key="HistoryEmptyTitle">Nothing to undo yet</sys:String>
     <sys:String x:Key="WatchRulesEmptyTitle">No watch rules yet</sys:String>
     <sys:String x:Key="WatchRulesEmptyHint">Pick a folder and a preset, and new files get renamed automatically.</sys:String>
+    <sys:String x:Key="TitleMinimize">Minimize</sys:String>
+    <sys:String x:Key="TitleMaximize">Maximize</sys:String>
+    <sys:String x:Key="TitleClose">Close</sys:String>
     <sys:String x:Key="TemName">Tem, the BFR mascot</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">History</sys:String>

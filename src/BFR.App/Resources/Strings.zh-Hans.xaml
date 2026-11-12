@@ -494,6 +494,9 @@
     <sys:String x:Key="HistoryEmptyTitle">暂无可撤销的内容</sys:String>
     <sys:String x:Key="WatchRulesEmptyTitle">还没有监视规则</sys:String>
     <sys:String x:Key="WatchRulesEmptyHint">选择一个文件夹和一个预设，新文件将被自动重命名。</sys:String>
+    <sys:String x:Key="TitleMinimize">最小化</sys:String>
+    <sys:String x:Key="TitleMaximize">最大化</sys:String>
+    <sys:String x:Key="TitleClose">关闭</sys:String>
     <sys:String x:Key="TemName">Tem，BFR 吉祥物</sys:String>
     <sys:String x:Key="NavShelf">文件架</sys:String>
     <sys:String x:Key="NavHistory">历史</sys:String>

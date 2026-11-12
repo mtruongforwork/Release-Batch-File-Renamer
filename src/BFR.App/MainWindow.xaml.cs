@@ -67,6 +67,7 @@ public partial class MainWindow : FluentWindow
         {
             ThemeManager.RefreshBackdrop(this);
             UpdateLicenseState();
+            Dispatcher.BeginInvoke(NameTitleBarButtons, System.Windows.Threading.DispatcherPriority.ContextIdle);
 
             // Trang chủ là điểm vào mặc định; mở từ Explorer/IPC kèm tệp thì vào thẳng Đổi tên.
             bool hasStartupFiles;
@@ -961,6 +962,31 @@ public partial class MainWindow : FluentWindow
         page.Visibility = Visibility.Visible;
         FadeIn(page);
         page.OnShown();
+    }
+
+    /// <summary>Nút thu nhỏ/phóng to/đóng của WPF-UI TitleBar không có tên: đặt tên để trình đọc màn hình đọc được.</summary>
+    private void NameTitleBarButtons()
+    {
+        var names = new Dictionary<string, string>
+        {
+            ["TitleBarMinimizeButton"] = Loc.T("TitleMinimize"),
+            ["TitleBarMaximizeButton"] = Loc.T("TitleMaximize"),
+            ["TitleBarCloseButton"] = Loc.T("TitleClose")
+        };
+
+        void Walk(DependencyObject node)
+        {
+            var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(node);
+            for (var i = 0; i < count; i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(node, i);
+                if (child is FrameworkElement fe && names.TryGetValue(System.Windows.Automation.AutomationProperties.GetAutomationId(fe) ?? string.Empty, out var label))
+                    System.Windows.Automation.AutomationProperties.SetName(fe, label);
+                Walk(child);
+            }
+        }
+
+        Walk(this);
     }
 
     /// <summary>Chuyển trang: hiện dần trong 220 ms; tắt khi giảm chuyển động.</summary>

@@ -31,9 +31,11 @@ public static class LegacyBridge
 
         if (BfrTheme.IsHighContrast)
         {
-            foreach (var key in Keys) app.Resources.Remove(key);
+            ApplyHighContrast(app);
             return;
         }
+
+        app.Resources.Remove("BfrAccFg");
 
         var dark = BfrTheme.IsDark;
         var bg = C("BfrBgBase");
@@ -88,6 +90,44 @@ public static class LegacyBridge
         Set("AccentFillColorTertiaryBrush", Mix(fill, Colors.Black, 0.12));
         Set("TextOnAccentFillColorPrimaryBrush", Colors.White);
         Set("TextOnAccentFillColorSecondaryBrush", Mix(Colors.White, fill, 0.15));
+    }
+
+    /// <summary>
+    /// Tương phản cao: khoá cũ lấy thẳng màu hệ thống (nền = Window, chữ = WindowText, chọn = Highlight/HighlightText)
+    /// để chữ của token mới (cũng là màu hệ thống) không bị đặt trên nền tối của theme cũ. Không dựa vào màu để phân biệt trạng thái.
+    /// </summary>
+    private static void ApplyHighContrast(Application app)
+    {
+        var window = SystemColors.WindowColor;
+        var text = SystemColors.WindowTextColor;
+        var highlight = SystemColors.HighlightColor;
+        var onHighlight = SystemColors.HighlightTextColor;
+
+        void Set(string key, Color color) => app.Resources[key] = Frozen(color);
+
+        foreach (var key in new[] { "AppBackground", "PanelBackground", "SurfaceBackground", "CardBackground", "SuccessSoft", "WarningSoft", "ErrorSoft", "InfoSoft", "AccentSoft", "ChipBackground" })
+            Set(key, window);
+
+        Set("SurfaceHover", SystemColors.ControlColor);
+        Set("SurfaceSelected", highlight);
+        Set("TextPrimary", text);
+        Set("TextSecondary", text);
+        Set("TextDisabled", SystemColors.GrayTextColor);
+        Set("TextOnAccent", onHighlight);
+        Set("Accent", highlight);
+        Set("AccentHover", highlight);
+        Set("AccentPressed", highlight);
+        Set("AccentBorder", text);
+        foreach (var key in new[] { "Border", "BorderStrong", "Divider", "ChipBorder" }) Set(key, text);
+        foreach (var key in new[] { "Success", "Warning", "Error" }) Set(key, text);
+        Set("Info", SystemColors.HotTrackColor);
+        Set("ChipSelectedBackground", highlight);
+        Set("ChipSelectedBorder", text);
+        Set("AccentFillColorDefaultBrush", highlight);
+        Set("AccentFillColorSecondaryBrush", highlight);
+        Set("AccentFillColorTertiaryBrush", highlight);
+        Set("TextOnAccentFillColorPrimaryBrush", onHighlight);
+        Set("TextOnAccentFillColorSecondaryBrush", onHighlight);
     }
 
     private static Color C(string key) =>

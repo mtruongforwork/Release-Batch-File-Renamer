@@ -44,6 +44,8 @@ public static class BfrTheme
 
         IsDark = dark;
         CurrentAccent = accent;
+        // BFR_HC=1: dev ép tương phản cao để kiểm giao diện mà không phải đổi chế độ của Windows.
+        HighContrastOverride ??= Environment.GetEnvironmentVariable("BFR_HC") == "1" ? true : null;
         IsHighContrast = HighContrastOverride ?? SystemParameters.HighContrast;
 
         var merged = app.Resources.MergedDictionaries;
@@ -70,7 +72,11 @@ public static class BfrTheme
         SystemParameters.StaticPropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(SystemParameters.HighContrast) or nameof(SystemParameters.ClientAreaAnimation))
-                Application.Current?.Dispatcher.BeginInvoke(() => Apply(IsDark, CurrentAccent));
+                Application.Current?.Dispatcher.BeginInvoke(() =>
+                {
+                    Apply(IsDark, CurrentAccent);
+                    LegacyBridge.Apply();
+                });
         };
     }
 

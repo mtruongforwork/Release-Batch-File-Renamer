@@ -364,16 +364,16 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <WrapPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Nhóm nạp tệp nguồn -->
-                    <Button Style="{StaticResource BfrPrimaryButton}" Click="AddFiles_Click" Padding="14,6">
+                    <Button Style="{StaticResource BfrPrimaryButton}" Click="AddFiles_Click" Padding="14,6" AutomationProperties.Name="{DynamicResource AddFilesButton}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
                             <TextBlock Text="{DynamicResource AddFilesButton}" Margin="6,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
-                    <ui:Button Appearance="Secondary" Click="AddFolder_Click" Margin="6,0,0,0" Padding="12,6">
+                    <ui:Button Appearance="Secondary" Click="AddFolder_Click" Margin="6,0,0,0" Padding="12,6" AutomationProperties.Name="{DynamicResource AddFolderButton}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
                             <TextBlock Text="{DynamicResource AddFolderButton}" Margin="6,0,0,0" VerticalAlignment="Center" />
@@ -382,7 +382,7 @@
 
                     <Rectangle Style="{StaticResource VerticalDividerStyle}" />
 
-                    <ui:Button x:Name="ShelfButton" Appearance="Secondary" Click="Shelf_Click" Margin="6,0,0,0" Padding="12,6">
+                    <ui:Button x:Name="ShelfButton" Appearance="Secondary" Click="Shelf_Click" Margin="6,0,0,0" Padding="12,6" AutomationProperties.Name="{DynamicResource ShelfCommand}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE8A1;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
                             <TextBlock x:Name="ShelfButtonText" Margin="6,0,0,0" VerticalAlignment="Center" />
@@ -415,7 +415,7 @@
                             <ComboBoxItem Content="{DynamicResource SortLoadOrder}" Tag="LoadOrder" />
                         </ComboBox>
                     </StackPanel>
-                </StackPanel>
+                </WrapPanel>
 
                 <!-- Nhóm thao tác bên phải -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -608,17 +608,17 @@
                             </DataGridTemplateColumn>
 
                             <!-- Cột Tên cũ -->
-                            <DataGridTemplateColumn Header="{DynamicResource ColOld}" Width="*"
+                            <DataGridTemplateColumn Header="{DynamicResource ColOld}" Width="*" MinWidth="130"
                                                     SortMemberPath="OldName" CanUserSort="True"
                                                     CellTemplate="{StaticResource OldNameTemplate}" />
 
                             <!-- Cột Tên mới -->
-                            <DataGridTemplateColumn Header="{DynamicResource ColNew}" Width="*"
+                            <DataGridTemplateColumn Header="{DynamicResource ColNew}" Width="*" MinWidth="130"
                                                     SortMemberPath="NewName" CanUserSort="True"
                                                     CellTemplate="{StaticResource NewNameTemplate}" />
 
                             <!-- Cột Trạng thái dạng Pill Badge hiện đại -->
-                            <DataGridTemplateColumn Header="{DynamicResource ColStatus}" Width="140"
+                            <DataGridTemplateColumn Header="{DynamicResource ColStatus}" Width="124"
                                                     SortMemberPath="StatusText" CanUserSort="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -662,7 +662,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- Cột Thư mục -->
-                            <DataGridTemplateColumn Header="{DynamicResource ColFolder}" Width="200" SortMemberPath="FolderText" CanUserSort="True">
+                            <DataGridTemplateColumn Header="{DynamicResource ColFolder}" Width="0.7*" MinWidth="70" SortMemberPath="FolderText" CanUserSort="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FolderText}" TextTrimming="CharacterEllipsis"

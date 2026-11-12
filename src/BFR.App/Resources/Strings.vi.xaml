@@ -494,6 +494,9 @@
     <sys:String x:Key="HistoryEmptyTitle">Chưa có gì để hoàn tác</sys:String>
     <sys:String x:Key="WatchRulesEmptyTitle">Chưa có luật theo dõi nào</sys:String>
     <sys:String x:Key="WatchRulesEmptyHint">Chọn một thư mục và một preset, tệp mới sẽ được đổi tên tự động.</sys:String>
+    <sys:String x:Key="TitleMinimize">Thu nhỏ</sys:String>
+    <sys:String x:Key="TitleMaximize">Phóng to</sys:String>
+    <sys:String x:Key="TitleClose">Đóng</sys:String>
     <sys:String x:Key="TemName">Tem, linh vật của BFR</sys:String>
     <sys:String x:Key="NavShelf">Khay tệp</sys:String>
     <sys:String x:Key="NavHistory">Lịch sử</sys:String>

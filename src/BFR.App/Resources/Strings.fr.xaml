@@ -494,6 +494,9 @@
     <sys:String x:Key="HistoryEmptyTitle">Rien à annuler pour l’instant</sys:String>
     <sys:String x:Key="WatchRulesEmptyTitle">Aucune règle de surveillance</sys:String>
     <sys:String x:Key="WatchRulesEmptyHint">Choisissez un dossier et un préréglage : les nouveaux fichiers seront renommés automatiquement.</sys:String>
+    <sys:String x:Key="TitleMinimize">Réduire</sys:String>
+    <sys:String x:Key="TitleMaximize">Agrandir</sys:String>
+    <sys:String x:Key="TitleClose">Fermer</sys:String>
     <sys:String x:Key="TemName">Tem, la mascotte de BFR</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">Historique</sys:String>
