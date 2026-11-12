@@ -412,6 +412,14 @@
 
                 <!-- Nhóm thao tác bên phải -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:Button Appearance="Transparent" Click="SendToTools_Click"
+                            ToolTip="{DynamicResource SendToToolsTip}" Margin="0,0,4,0"
+                            AutomationProperties.Name="Send to tools">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE90F;" FontFamily="{StaticResource IconFont}" FontSize="13" />
+                            <TextBlock Text="{DynamicResource SendToToolsButton}" Margin="6,0,0,0" />
+                        </StackPanel>
+                    </ui:Button>
                     <ui:Button Appearance="Transparent" Click="ClearList_Click"
                             ToolTip="{DynamicResource ClearListButton}" Margin="0,0,4,0"
                             AutomationProperties.Name="Clear list">

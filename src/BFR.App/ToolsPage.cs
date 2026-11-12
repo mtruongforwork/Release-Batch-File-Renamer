@@ -33,6 +33,9 @@ public sealed class ToolsPage : PageBase
     private readonly TextBlock _status = new();
     private readonly Dictionary<string, FrameworkElement> _views = new(StringComparer.OrdinalIgnoreCase);
     private QuarantineView? _quarantine;
+    private ToolsHomeView? _home;
+    private readonly List<string> _pending = new();
+    private List<Entry> _entries = new();
 
     public ToolsPage(
         IFileSystem fs, LicenseService license, HistoryStore history, string journalDir, string version,
@@ -50,10 +53,10 @@ public sealed class ToolsPage : PageBase
         FontFamily = (System.Windows.Media.FontFamily)Application.Current.FindResource("AppFont");
         FontSize = (double)Application.Current.FindResource("AppFontSizeBody");
 
-        var entries = ToolCatalog.Create()
-            .Select(t => new Entry(t.Key, Loc.T(t.TitleKey), t.Icon, t))
-            .Append(new Entry("quarantine", Loc.T("ToolQuarantineTitle"), "", null))
-            .ToList();
+        var entries = new List<Entry> { new("home", Loc.T("ToolsHomeTitle"), "", null) };
+        entries.AddRange(ToolCatalog.Create().Select(t => new Entry(t.Key, Loc.T(t.TitleKey), t.Icon, t)));
+        entries.Add(new Entry("quarantine", Loc.T("ToolQuarantineTitle"), "", null));
+        _entries = entries;
 
         _list.ItemsSource = entries;
         _list.Style = (Style)Application.Current.FindResource("AppListBoxStyle");
@@ -108,6 +111,12 @@ public sealed class ToolsPage : PageBase
             {
                 view = new ToolView(entry.Tool, () => (_fs, _license, _runner, _version, _metadata, _images), _requestUpgrade, s => _status.Text = s);
             }
+            else if (entry.Key == "home")
+            {
+                _home = new ToolsHomeView(ToolCatalog.Create(), OpenTool, AddPending);
+                _home.SetPending(_pending.Count);
+                view = _home;
+            }
             else
             {
                 _quarantine = new QuarantineView(_fs, _license);
@@ -121,11 +130,42 @@ public sealed class ToolsPage : PageBase
         if (view is QuarantineView q) q.Refresh();
     }
 
-    /// <summary>Gửi tệp tới công cụ đang mở (ví dụ từ Shelf hoặc menu chuột phải).</summary>
+    /// <summary>
+    /// Gửi tệp tới Công cụ (từ danh sách Đổi tên, Shelf...). Nếu đang mở một công cụ thì thêm thẳng vào đó;
+    /// nếu không, giữ lại ở Trang chủ để người dùng chọn công cụ.
+    /// </summary>
     public void AddPaths(IEnumerable<string> paths)
     {
         if (_list.SelectedItem is Entry { Tool: not null } entry && _views.TryGetValue(entry.Key, out var view) && view is ToolView toolView)
+        {
             toolView.AddPaths(paths);
+            return;
+        }
+
+        AddPending(paths);
+        _list.SelectedIndex = 0;
+    }
+
+    private void AddPending(IEnumerable<string> paths)
+    {
+        foreach (var p in paths)
+        {
+            if (!string.IsNullOrWhiteSpace(p) && !_pending.Contains(p, StringComparer.OrdinalIgnoreCase)) _pending.Add(p);
+        }
+        _home?.SetPending(_pending.Count);
+    }
+
+    /// <summary>Mở một công cụ từ Trang chủ và đưa các tệp đang chờ vào đó.</summary>
+    private void OpenTool(string key)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Key == key);
+        if (entry is null) return;
+
+        var carry = _pending.ToList();
+        _pending.Clear();
+        _home?.SetPending(0);
+        _list.SelectedItem = entry;
+        if (carry.Count > 0 && _views.TryGetValue(key, out var view) && view is ToolView toolView) toolView.AddPaths(carry);
     }
 
     public override void OnShown() => _quarantine?.Refresh();

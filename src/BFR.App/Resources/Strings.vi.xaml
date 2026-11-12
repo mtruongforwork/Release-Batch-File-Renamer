@@ -834,4 +834,10 @@
     <sys:String x:Key="WatchRemoveRule">Xoá quy tắc</sys:String>
     <sys:String x:Key="WatchRuleDefaultName">Quy tắc {0}</sys:String>
     <sys:String x:Key="WatchRunning">Đang theo dõi {0} thư mục.</sys:String>
+    <sys:String x:Key="ToolsHomeTitle">Trang chủ công cụ</sys:String>
+    <sys:String x:Key="ToolsHomeSubtitle">Chọn một công cụ, hoặc thả tệp vào đây rồi chọn công cụ để xử lý. Mọi thay đổi đều xem trước được và hoàn tác được.</sys:String>
+    <sys:String x:Key="ToolsHomePending">{0} mục đang chờ. Chọn một công cụ bên dưới để dùng chúng.</sys:String>
+    <sys:String x:Key="SendToToolsButton">Gửi tới Công cụ</sys:String>
+    <sys:String x:Key="SendToToolsTip">Gửi các tệp trong danh sách sang trang Công cụ (sắp xếp, tìm trùng, nén…)</sys:String>
+    <sys:String x:Key="CommandSendToTools">Gửi danh sách tới Công cụ</sys:String>
 </ResourceDictionary>

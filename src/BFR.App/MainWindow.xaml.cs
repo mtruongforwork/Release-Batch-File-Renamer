@@ -191,6 +191,15 @@ public partial class MainWindow : FluentWindow
 
     private void ClearList_Click(object sender, RoutedEventArgs e) => _vm.ClearList();
 
+    /// <summary>Gửi các tệp đang có trong danh sách sang trang Công cụ (Trang chủ của Công cụ để chọn công cụ).</summary>
+    private void SendToTools_Click(object sender, RoutedEventArgs e) => SendToTools(_vm.Rows.Select(r => r.File.FullPath).ToList());
+
+    public void SendToTools(IReadOnlyList<string> paths)
+    {
+        NavigateTo("Tools");
+        if (GetPage("Tools") is ToolsPage tools) tools.AddPaths(paths);
+    }
+
     private ShelfWindow? _shelf;
     private ShelfModel _shelfModel = null!;
     private readonly Dictionary<string, PageBase> _pages = new();
@@ -715,6 +724,7 @@ public partial class MainWindow : FluentWindow
         registry.Register(Loc.T("CommandAddFolder"), files, () => AddFolder_Click(this, new RoutedEventArgs()), "Ctrl+Shift+O");
         registry.Register(Loc.T("ShelfCommand"), files, () => OpenShelf(), "Ctrl+Shift+S");
         registry.Register(Loc.T("CommandClearList"), files, () => ClearList_Click(this, new RoutedEventArgs()));
+        registry.Register(Loc.T("CommandSendToTools"), files, () => SendToTools_Click(this, new RoutedEventArgs()));
         registry.Register(Loc.T("CommandApply"), files, () => Apply_Click(this, new RoutedEventArgs()), "Ctrl+Enter");
         registry.Register(Loc.T("CommandUndo"), files, () => Undo_Click(this, new RoutedEventArgs()), "Ctrl+Z");
         registry.Register(Loc.T("CommandSavePreset"), rules, () => SavePreset_Click(this, new RoutedEventArgs()), "Ctrl+S");

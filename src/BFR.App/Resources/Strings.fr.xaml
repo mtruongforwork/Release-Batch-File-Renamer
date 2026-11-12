@@ -834,4 +834,10 @@
     <sys:String x:Key="WatchRemoveRule">Supprimer la règle</sys:String>
     <sys:String x:Key="WatchRuleDefaultName">Règle {0}</sys:String>
     <sys:String x:Key="WatchRunning">Surveillance de {0} dossiers.</sys:String>
+    <sys:String x:Key="ToolsHomeTitle">Accueil des outils</sys:String>
+    <sys:String x:Key="ToolsHomeSubtitle">Choisissez un outil, ou déposez des fichiers ici puis choisissez l'outil à utiliser. Chaque modification peut être prévisualisée et annulée.</sys:String>
+    <sys:String x:Key="ToolsHomePending">{0} éléments en attente. Choisissez un outil ci-dessous pour les utiliser.</sys:String>
+    <sys:String x:Key="SendToToolsButton">Envoyer aux Outils</sys:String>
+    <sys:String x:Key="SendToToolsTip">Envoyer les fichiers de la liste à la page Outils (classer, doublons, zip…)</sys:String>
+    <sys:String x:Key="CommandSendToTools">Envoyer la liste aux Outils</sys:String>
 </ResourceDictionary>

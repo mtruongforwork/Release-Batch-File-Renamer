@@ -834,4 +834,10 @@
     <sys:String x:Key="WatchRemoveRule">删除规则</sys:String>
     <sys:String x:Key="WatchRuleDefaultName">规则 {0}</sys:String>
     <sys:String x:Key="WatchRunning">正在监视 {0} 个文件夹。</sys:String>
+    <sys:String x:Key="ToolsHomeTitle">工具主页</sys:String>
+    <sys:String x:Key="ToolsHomeSubtitle">选择一个工具,或将文件拖到此处再选择要使用的工具。所有更改都可预览并可撤销。</sys:String>
+    <sys:String x:Key="ToolsHomePending">有 {0} 项待处理。请在下方选择一个工具来使用它们。</sys:String>
+    <sys:String x:Key="SendToToolsButton">发送到工具</sys:String>
+    <sys:String x:Key="SendToToolsTip">将列表中的文件发送到“工具”页面(整理、查重、压缩等)</sys:String>
+    <sys:String x:Key="CommandSendToTools">将列表发送到工具</sys:String>
 </ResourceDictionary>

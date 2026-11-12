@@ -834,4 +834,10 @@
     <sys:String x:Key="WatchRemoveRule">Remove rule</sys:String>
     <sys:String x:Key="WatchRuleDefaultName">Rule {0}</sys:String>
     <sys:String x:Key="WatchRunning">Watching {0} folders.</sys:String>
+    <sys:String x:Key="ToolsHomeTitle">Tools home</sys:String>
+    <sys:String x:Key="ToolsHomeSubtitle">Pick a tool, or drop files here and then choose the tool to run them through. Every change can be previewed and undone.</sys:String>
+    <sys:String x:Key="ToolsHomePending">{0} items waiting. Choose a tool below to use them.</sys:String>
+    <sys:String x:Key="SendToToolsButton">Send to Tools</sys:String>
+    <sys:String x:Key="SendToToolsTip">Send the files in the list to the Tools page (organize, find duplicates, zip…)</sys:String>
+    <sys:String x:Key="CommandSendToTools">Send list to Tools</sys:String>
 </ResourceDictionary>
