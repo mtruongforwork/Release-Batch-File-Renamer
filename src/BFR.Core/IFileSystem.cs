@@ -18,4 +18,17 @@ public interface IFileSystem
     long GetLength(string path);
     DateTime GetCreationTimeUtc(string path);
     DateTime GetLastWriteTimeUtc(string path);
+
+    // --- Mở rộng cho các công cụ ngoài đổi tên (Organize, Folder Tools, Metadata, Archive...) ---
+
+    /// <summary>Sao chép tệp (không ghi đè nếu <paramref name="overwrite"/> = false).</summary>
+    void Copy(string from, string to, bool overwrite);
+
+    FileTimes GetTimes(string path);
+    void SetTimes(string path, FileTimes times);
+    FileAttributes GetAttributes(string path);
+    void SetAttributes(string path, FileAttributes attributes);
+
+    /// <summary>True nếu thư mục tồn tại và không chứa tệp hay thư mục con nào.</summary>
+    bool IsDirectoryEmpty(string path);
 }

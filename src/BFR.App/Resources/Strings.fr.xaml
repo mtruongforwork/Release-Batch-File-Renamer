@@ -496,6 +496,8 @@
     <sys:String x:Key="CoreAutoResolved">Doublon corrigé automatiquement → {0}</sys:String>
     <sys:String x:Key="CoreRegexTimeout">Regex trop lente (délai dépassé)</sys:String>
     <sys:String x:Key="CoreProtectedZone">Dans une zone système protégée</sys:String>
+    <sys:String x:Key="CoreDirNotEmpty">Le dossier n'est pas vide</sys:String>
+    <sys:String x:Key="CoreUndoBackupMissing">La sauvegarde dans la zone de quarantaine n'existe plus</sys:String>
     <sys:String x:Key="CoreRegexInvalid">Motif regex invalide</sys:String>
     <sys:String x:Key="CoreListNoMatch">Liste (aucune correspondance)</sys:String>
     <sys:String x:Key="CoreDictEmpty">Dictionnaire (vide)</sys:String>

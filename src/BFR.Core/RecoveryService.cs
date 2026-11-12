@@ -58,13 +58,19 @@ public sealed class RecoveryService
             .Select(e => e.Seq)
             .ToHashSet();
         var pending = entries
-            .Where(e => e.Type == "step" && e.Status == "pending" && e.From is not null && e.To is not null
+            .Where(e => e.Type == "step" && e.Status == "pending" && e.From is not null && (e.To is not null || !e.IsMoveLike)
                         && !doneSeqs.Contains(e.Seq))
             .OrderBy(e => e.Seq)
             .ToList();
 
         foreach (var step in pending)
         {
+            if (!step.IsMoveLike)
+            {
+                CompleteOperation(journalPath, step, result);
+                continue;
+            }
+
             var from = step.From!;
             var to = step.To!;
 
@@ -125,7 +131,7 @@ public sealed class RecoveryService
 
         // Mỗi seq có thể có dòng pending và done; ưu tiên dòng done.
         var steps = entries
-            .Where(e => e.Type == "step" && e.From is not null && e.To is not null)
+            .Where(e => e.Type == "step" && e.From is not null && (e.To is not null || !e.IsMoveLike))
             .GroupBy(e => e.Seq)
             .Select(g => g.OrderByDescending(e => e.Status == "done" ? 1 : 0).First())
             .OrderByDescending(e => e.Seq)
@@ -133,6 +139,12 @@ public sealed class RecoveryService
 
         foreach (var step in steps)
         {
+            if (!step.IsMoveLike)
+            {
+                RollbackOperation(step, result);
+                continue;
+            }
+
             var from = step.From!;
             var to = step.To!;
 
@@ -169,16 +181,45 @@ public sealed class RecoveryService
         return result;
     }
 
+    private static readonly JsonSerializerOptions WriteOptions = new() { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
+
+    /// <summary>Ghi lại bước với trạng thái mới, giữ nguyên mọi trường (journal v2 cần chúng để hoàn tác).</summary>
     private void Append(string journalPath, JournalEntry step, string status)
     {
-        _fs.AppendAllText(journalPath, JsonSerializer.Serialize(new JournalEntry
+        _fs.AppendAllText(journalPath, JsonSerializer.Serialize(step.WithStatus(status), WriteOptions) + "\n");
+    }
+
+    /// <summary>Hoàn tất một thao tác (không phải đổi tên) còn dang dở.</summary>
+    private void CompleteOperation(string journalPath, JournalEntry step, RecoveryResult result)
+    {
+        try
         {
-            Type = "step",
-            Seq = step.Seq,
-            From = step.From,
-            To = step.To,
-            Kind = step.Kind,
-            Status = status
-        }) + "\n");
+            if (!OperationUndo.IsApplied(_fs, step)) OperationExecutor.Apply(_fs, step);
+            result.Processed++;
+            Append(journalPath, step, "done");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException)
+        {
+            result.Failed++;
+            result.Errors.Add($"{step.From}: {ex.Message}");
+            Append(journalPath, step, "failed");
+        }
+    }
+
+    /// <summary>Đưa một thao tác (không phải đổi tên) về trạng thái ban đầu nếu nó đã thực sự xảy ra.</summary>
+    private void RollbackOperation(JournalEntry step, RecoveryResult result)
+    {
+        if (step.Status != "done" && !OperationUndo.IsApplied(_fs, step)) return; // chưa xảy ra
+
+        var error = OperationUndo.Undo(_fs, step);
+        if (error is null)
+        {
+            result.Processed++;
+        }
+        else
+        {
+            result.Failed++;
+            result.Errors.Add($"{step.From}: {error}");
+        }
     }
 }

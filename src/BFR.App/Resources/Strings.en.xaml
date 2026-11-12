@@ -496,6 +496,8 @@
     <sys:String x:Key="CoreAutoResolved">Auto-fixed duplicate → {0}</sys:String>
     <sys:String x:Key="CoreRegexTimeout">Regex too slow (timeout)</sys:String>
     <sys:String x:Key="CoreProtectedZone">Inside a protected system area</sys:String>
+    <sys:String x:Key="CoreDirNotEmpty">Folder is not empty</sys:String>
+    <sys:String x:Key="CoreUndoBackupMissing">The backup in the quarantine folder is gone</sys:String>
     <sys:String x:Key="CoreRegexInvalid">Invalid regex pattern</sys:String>
     <sys:String x:Key="CoreListNoMatch">List map (no match)</sys:String>
     <sys:String x:Key="CoreDictEmpty">Replace dictionary (empty)</sys:String>

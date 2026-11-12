@@ -496,6 +496,8 @@
     <sys:String x:Key="CoreAutoResolved">自动处理重名 → {0}</sys:String>
     <sys:String x:Key="CoreRegexTimeout">正则表达式过慢（超时）</sys:String>
     <sys:String x:Key="CoreProtectedZone">位于受保护的系统区域内</sys:String>
+    <sys:String x:Key="CoreDirNotEmpty">文件夹不为空</sys:String>
+    <sys:String x:Key="CoreUndoBackupMissing">隔离区中的备份已不存在</sys:String>
     <sys:String x:Key="CoreRegexInvalid">正则表达式无效</sys:String>
     <sys:String x:Key="CoreListNoMatch">按列表（无匹配）</sys:String>
     <sys:String x:Key="CoreDictEmpty">替换词典（空）</sys:String>

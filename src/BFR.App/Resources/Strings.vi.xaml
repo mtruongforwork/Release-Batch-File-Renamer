@@ -496,6 +496,8 @@
     <sys:String x:Key="CoreAutoResolved">Tự xử lý trùng tên → {0}</sys:String>
     <sys:String x:Key="CoreRegexTimeout">Regex quá chậm (timeout)</sys:String>
     <sys:String x:Key="CoreProtectedZone">Nằm trong vùng hệ thống được bảo vệ</sys:String>
+    <sys:String x:Key="CoreDirNotEmpty">Thư mục không rỗng</sys:String>
+    <sys:String x:Key="CoreUndoBackupMissing">Bản sao lưu trong khu cách ly không còn</sys:String>
     <sys:String x:Key="CoreRegexInvalid">Mẫu Regex không hợp lệ</sys:String>
     <sys:String x:Key="CoreListNoMatch">ListMap (không khớp)</sys:String>
     <sys:String x:Key="CoreDictEmpty">ReplaceDict (trống)</sys:String>

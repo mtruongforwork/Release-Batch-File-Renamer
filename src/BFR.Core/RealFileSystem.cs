@@ -32,4 +32,36 @@ public sealed class RealFileSystem : IFileSystem
     public long GetLength(string path) => new FileInfo(path).Length;
     public DateTime GetCreationTimeUtc(string path) => File.GetCreationTimeUtc(path);
     public DateTime GetLastWriteTimeUtc(string path) => File.GetLastWriteTimeUtc(path);
+
+    public void Copy(string from, string to, bool overwrite) => File.Copy(from, to, overwrite);
+
+    public FileTimes GetTimes(string path)
+    {
+        FileSystemInfo info = Directory.Exists(path) ? new DirectoryInfo(path) : new FileInfo(path);
+        if (!info.Exists) throw new FileNotFoundException("Tệp không tồn tại", path);
+        return FileTimes.From(info.CreationTimeUtc, info.LastWriteTimeUtc, info.LastAccessTimeUtc);
+    }
+
+    public void SetTimes(string path, FileTimes times)
+    {
+        if (Directory.Exists(path))
+        {
+            Directory.SetCreationTimeUtc(path, times.CreatedUtc);
+            Directory.SetLastWriteTimeUtc(path, times.ModifiedUtc);
+            Directory.SetLastAccessTimeUtc(path, times.AccessedUtc);
+        }
+        else
+        {
+            File.SetCreationTimeUtc(path, times.CreatedUtc);
+            File.SetLastWriteTimeUtc(path, times.ModifiedUtc);
+            File.SetLastAccessTimeUtc(path, times.AccessedUtc);
+        }
+    }
+
+    public FileAttributes GetAttributes(string path) => File.GetAttributes(path);
+
+    public void SetAttributes(string path, FileAttributes attributes) => File.SetAttributes(path, attributes);
+
+    public bool IsDirectoryEmpty(string path) =>
+        Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
 }
