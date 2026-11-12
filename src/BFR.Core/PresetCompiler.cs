@@ -5,13 +5,13 @@ namespace BFR.Core;
 /// </summary>
 public sealed class PresetCompiler
 {
-    public RulePipeline Compile(Preset preset)
+    public RulePipeline Compile(Preset preset, int maxListRows = int.MaxValue)
     {
         var pipeline = new RulePipeline();
         foreach (var def in preset.Rules)
         {
             if (!def.Enabled) continue;
-            pipeline.Add(RuleFactory.Create(def, preset.Options.AllowExtensionChange));
+            pipeline.Add(RuleFactory.Create(def, preset.Options.AllowExtensionChange, maxListRows));
         }
         return pipeline;
     }

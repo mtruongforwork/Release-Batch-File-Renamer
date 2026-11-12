@@ -1,5 +1,6 @@
 namespace BFR.App;
 
+using BFR.Presentation.Tools;
 using BFR.Core;
 using BFR.App.Infrastructure;
 using BFR.Core.Licensing;
@@ -18,6 +19,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using FluentWindow = Wpf.Ui.Controls.FluentWindow;
 
 /// <summary>
 /// Cửa sổ chính (bố cục v2.0 theo docs/Plan/BFR_UIUX_REBUILD_PLAN.md):
@@ -26,7 +28,7 @@ using System.Windows.Threading;
 /// Code-behind chỉ làm việc nối view ↔ <see cref="MainViewModel"/>; toàn bộ logic đổi tên
 /// vẫn nằm trong BFR.Core nên kết quả test INV-1..INV-6 không đổi.
 /// </summary>
-public partial class MainWindow : Window
+public partial class MainWindow : FluentWindow
 {
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
@@ -55,17 +57,22 @@ public partial class MainWindow : Window
             new LicenseService(new LicenseStore(_fs), trialEnabled: false));
         _vm = new MainViewModel(_license, initialPayload, null, new LocStringProvider(), new WpfUiDispatcher());
         DataContext = _vm;
+        _shelfModel = new ShelfModel(_license.License);
 
         _collectorTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(350) };
         _collectorTimer.Tick += (_, _) => OnCollectorTimeout();
 
         KeyDown += MainWindow_KeyDown;
-        StateChanged += (_, _) => UpdateMaximizeButton();
         Loaded += (_, _) =>
         {
             ThemeManager.RefreshBackdrop(this);
             UpdateLicenseState();
-            UpdateMaximizeButton();
+            Dispatcher.BeginInvoke(NameTitleBarButtons, System.Windows.Threading.DispatcherPriority.ContextIdle);
+
+            // Trang chủ là điểm vào mặc định; mở từ Explorer/IPC kèm tệp thì vào thẳng Đổi tên.
+            bool hasStartupFiles;
+            lock (_collectorBuffer) hasStartupFiles = _collectorBuffer.Count > 0;
+            if (!hasStartupFiles && _vm.Rows.Count == 0) NavigateTo("Home");
         };
 
         PresetCombo.ItemsSource = _vm.Presets;
@@ -79,8 +86,30 @@ public partial class MainWindow : Window
             PresetCombo.SelectedIndex = 0;
         }
         SortCombo.SelectedIndex = 0;
+        Loaded += (_, _) =>
+        {
+            ApplyShakeSetting();
+            ApplyHotkeySetting();
+            // Dev: BFR_GALLERY=2 mở thẳng Gallery khi khởi động (dùng cho chụp ảnh tự động).
+            if (Environment.GetEnvironmentVariable("BFR_GALLERY") == "2")
+            {
+                try { new BfrGalleryWindow { Owner = this }.Show(); }
+                catch (Exception ex) { System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "bfr-gallery-error.txt"), ex.ToString()); }
+            }
+        };
+        Closed += (_, _) =>
+        {
+            _shakeHook?.Dispose();
+            _hotkey?.Dispose();
+            foreach (var page in _pages.Values) page.Shutdown();
+            _shakeHook = null;
+            _shelf?.Close();
+        };
+        ShelfButtonText.Text = Loc.T("ShelfButton");
+        ShelfButton.ToolTip = Loc.T("ShelfTooltip");
 
         _vm.ProLimitReached += (_, feature) => ShowUpgradeDialog(feature);
+        Loaded += (_, _) => (Application.Current as App)?.ApplyBackgroundSetting();
 
         if (_vm.IsEmptyStateVisible) _ = _vm.RebuildAsync();
     }
@@ -119,12 +148,7 @@ public partial class MainWindow : Window
     /// <summary>Bấm badge cấp: nếu đã là Pro thì mở màn hình thông tin license.</summary>
     private void TierBadge_Click(object sender, RoutedEventArgs e)
     {
-        if (_license.Status.IsPro && !_license.Status.IsTrial)
-        {
-            new LicenseInfoWindow(_license.License, _license.Status) { Owner = this }.ShowDialog();
-            return;
-        }
-
+        // Đã là Pro: hộp thoại hiện thông tin license; Free/dùng thử: hộp thoại nâng cấp.
         ShowUpgradeDialog(contextFeature: null);
     }
 
@@ -132,6 +156,7 @@ public partial class MainWindow : Window
     {
         try
         {
+            if (!IsVisible) Show();
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
 
             Activate();
@@ -163,6 +188,7 @@ public partial class MainWindow : Window
         }
 
         if (batch.Count == 0) return;
+        NavigateTo("Rename");
         _vm.AddPaths(batch);
     }
 
@@ -181,6 +207,202 @@ public partial class MainWindow : Window
     }
 
     private void ClearList_Click(object sender, RoutedEventArgs e) => _vm.ClearList();
+
+    /// <summary>Gửi các tệp đang có trong danh sách sang trang Công cụ (Trang chủ của Công cụ để chọn công cụ).</summary>
+    private void SendToTools_Click(object sender, RoutedEventArgs e) => SendToTools(_vm.Rows.Select(r => r.File.FullPath).ToList());
+
+    /// <summary>Mở một công cụ theo khoá (từ menu Explorer hoặc dòng lệnh) và đưa các tệp vào đó.</summary>
+    public void OpenTool(string toolKey, IReadOnlyList<string> paths, IReadOnlyDictionary<string, string>? values = null)
+    {
+        NavigateTo("Tools");
+        if (GetPage("Tools") is ToolsPage tools) tools.OpenTool(toolKey, paths, values);
+    }
+
+    // ----------------------------------------------------------------- Menu tròn
+
+    private GlobalHotkey? _radialHotkey;
+    private RadialMenuWindow? _radial;
+
+    /// <summary>Mở menu tròn tại toạ độ màn hình (vật lý). Đang mở thì đóng lại.</summary>
+    public void ShowRadial(int x, int y)
+    {
+        if (_radial is not null)
+        {
+            _radial.Close();
+            return;
+        }
+
+        var items = RadialMenuModel.Build(ToolCatalog.Create(), Loc.Current == "vi");
+        _radial = new RadialMenuWindow(items, OnRadialChosen);
+        _radial.Closed += (_, _) => _radial = null;
+        _radial.ShowAt(x, y);
+    }
+
+    private void ShowRadialAtCursor()
+    {
+        var (x, y) = GlobalHotkey.CursorPosition();
+        ShowRadial(x, y);
+    }
+
+    private void OnRadialChosen(RadialItem item, RadialAction? action)
+    {
+        ActivateAndForeground();
+
+        if (item.IsRename)
+        {
+            NavigateTo("Rename");
+            if (action is not null) ApplyPresetByName(action.Value);
+            return;
+        }
+
+        var values = action is null
+            ? null
+            : new Dictionary<string, string> { [action.OptionKey] = action.Value };
+        OpenTool(item.Key, Array.Empty<string>(), values);
+    }
+
+    /// <summary>Đăng ký/gỡ phím tắt toàn cục mở menu tròn theo cài đặt.</summary>
+    private void ApplyRadialHotkeySetting()
+    {
+        var settings = SettingsStore.Load();
+        BFR.Core.HotkeySpec? wanted = null;
+        if (settings.RadialHotkeyEnabled && BFR.Core.HotkeySpec.TryParse(settings.RadialHotkey, out var parsed)) wanted = parsed;
+
+        if (_radialHotkey is not null && (wanted is null || _radialHotkey.Spec != wanted))
+        {
+            _radialHotkey.Dispose();
+            _radialHotkey = null;
+        }
+
+        if (wanted is null || _radialHotkey is not null) return;
+
+        try
+        {
+            _radialHotkey = new GlobalHotkey(wanted, () => Dispatcher.BeginInvoke(ShowRadialAtCursor));
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            MessageBox.Show(Loc.F("HotkeyRegisterFailed", wanted.ToString()), "Batch File Renamer", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    public void SendToTools(IReadOnlyList<string> paths)
+    {
+        NavigateTo("Tools");
+        if (GetPage("Tools") is ToolsPage tools) tools.AddPaths(paths);
+    }
+
+    private ShelfWindow? _shelf;
+    private ShelfModel _shelfModel = null!;
+    private readonly Dictionary<string, PageBase> _pages = new();
+    private string _currentPage = "Rename";
+    private bool _navigating;
+    private MouseHook? _shakeHook;
+    private GlobalHotkey? _hotkey;
+
+    /// <summary>Đăng ký/gỡ phím tắt toàn cục mở Shelf theo cài đặt hiện tại (B4).</summary>
+    public void ApplyHotkeySetting()
+    {
+        ApplyRadialHotkeySetting();
+        var settings = SettingsStore.Load();
+        BFR.Core.HotkeySpec? wanted = null;
+        if (settings.ShelfHotkeyEnabled && BFR.Core.HotkeySpec.TryParse(settings.ShelfHotkey, out var parsed)) wanted = parsed;
+
+        if (_hotkey is not null && (wanted is null || _hotkey.Spec != wanted))
+        {
+            _hotkey.Dispose();
+            _hotkey = null;
+        }
+
+        if (wanted is null || _hotkey is not null) return;
+
+        try
+        {
+            _hotkey = new GlobalHotkey(wanted, () => Dispatcher.BeginInvoke(() =>
+            {
+                var (x, y) = GlobalHotkey.CursorPosition();
+                OpenShelfAt(x, y, autoClose: false);
+            }));
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            // Tổ hợp đang được ứng dụng khác dùng: báo để người dùng chọn tổ hợp khác.
+            MessageBox.Show(Loc.F("HotkeyRegisterFailed", wanted.ToString()), "Batch File Renamer",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    /// <summary>Bật/tắt hook lắc chuột theo cài đặt hiện tại.</summary>
+    public void ApplyShakeSetting()
+    {
+        var enabled = SettingsStore.Load().ShakeToOpenShelf;
+        if (enabled && _shakeHook is null)
+        {
+            try
+            {
+                _shakeHook = new MouseHook(new ShakeDetector());
+                _shakeHook.Shaken += (x, y) => Dispatcher.BeginInvoke(() => OpenShelfAt(x, y));
+            }
+            catch
+            {
+                _shakeHook = null;   // không cài được hook: bỏ qua, không làm hỏng ứng dụng
+            }
+        }
+        else if (!enabled && _shakeHook is not null)
+        {
+            _shakeHook.Dispose();
+            _shakeHook = null;
+        }
+    }
+
+    /// <summary>Mở Shelf ngay tại con trỏ (toạ độ vật lý) để thả tệp đang kéo vào.</summary>
+    private void OpenShelfAt(int screenX, int screenY, bool autoClose = true)
+    {
+        var created = OpenShelf(activate: false);
+        if (_shelf is null) return;
+
+        var dpi = VisualTreeHelper.GetDpi(this);
+        var vx = screenX / dpi.DpiScaleX;
+        var vy = screenY / dpi.DpiScaleY;
+        var maxLeft = SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth - _shelf.Width;
+        var maxTop = SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight - _shelf.Height;
+        _shelf.Left = Math.Clamp(vx - _shelf.Width / 2, SystemParameters.VirtualScreenLeft, Math.Max(SystemParameters.VirtualScreenLeft, maxLeft));
+        _shelf.Top = Math.Clamp(vy - 80, SystemParameters.VirtualScreenTop, Math.Max(SystemParameters.VirtualScreenTop, maxTop));
+        // Mở bằng lắc mà không thả gì thì tự đóng, tránh để lại cửa sổ thừa.
+        if (created && autoClose) _shelf.AutoCloseWhenUnused(TimeSpan.FromSeconds(6));
+    }
+
+    private void Shelf_Click(object sender, RoutedEventArgs e) => OpenShelf();
+
+    /// <summary>Mở (hoặc đưa lên trước) khay tệp gom từ nhiều thư mục.</summary>
+    public bool OpenShelf(IEnumerable<string>? paths = null, bool activate = true)
+    {
+        var created = _shelf is null;
+        if (created)
+        {
+            _shelf = new ShelfWindow(
+                _shelfModel,
+                batch => EnqueuePaths(batch),
+                feature => ShowUpgradeDialog(feature))
+            {
+                Topmost = true
+            };
+            _shelf.ShowActivated = activate;
+            // Cửa sổ chính đang minimize thì Left/Top không dùng được: lấy vùng đã lưu trước khi thu nhỏ.
+            var area = WindowState == WindowState.Normal ? new Rect(Left, Top, Width, Height) : RestoreBounds;
+            _shelf.Left = Math.Max(0, area.Right - _shelf.Width - 24);
+            _shelf.Top = Math.Max(0, area.Top + 96);
+            _shelf.Closed += (_, _) => _shelf = null;
+            _shelf.Show();
+        }
+        else
+        {
+            if (activate) _shelf?.Activate();
+        }
+
+        if (paths is not null) _shelf?.AddPaths(paths);
+        return created;
+    }
 
     private void SortCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -249,25 +471,48 @@ public partial class MainWindow : Window
         menu.IsOpen = true;
     }
 
-    private void AddRule_Click(object sender, RoutedEventArgs e)
+    /// <summary>Nhập danh sách từ tệp CSV/TSV vào ô tham số nhiều dòng (tính năng Pro).</summary>
+    private void ImportListFile_Click(object sender, RoutedEventArgs e)
     {
-        var menu = new ContextMenu { Style = (Style)FindResource("AppContextMenuStyle") };
+        if ((sender as FrameworkElement)?.DataContext is not RuleParameterViewModel parameter) return;
+        if (!_vm.CanImportListFile()) return;
 
-        foreach (var type in RuleCardViewModel.AllRuleTypes)
+        var dialog = new OpenFileDialog { Filter = Loc.T("ListImportFilter"), Multiselect = false };
+        if (dialog.ShowDialog(this) != true) return;
+
+        try
         {
-            var item = new MenuItem
-            {
-                Header = RuleTitles.Get(type, null, new LocStringProvider()),
-                Style = (Style)FindResource("AppMenuItemStyle")
-            };
-            var captured = type;
-            item.Click += (_, _) => _vm.AddRule(captured);
-            menu.Items.Add(item);
+            parameter.TextValue = System.IO.File.ReadAllText(dialog.FileName);
         }
+        catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(ex.Message, "Batch File Renamer", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
 
-        menu.PlacementTarget = (FrameworkElement)sender;
-        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Top;
-        menu.IsOpen = true;
+    /// <summary>Thêm quy tắc: thư viện thẻ có tìm kiếm trong hộp thoại nổi (thay cho menu chữ).</summary>
+    private async void AddRule_Click(object sender, RoutedEventArgs e)
+    {
+        var library = new RuleLibraryContent();
+        var dialog = new Wpf.Ui.Controls.ContentDialog(DialogHost)
+        {
+            Title = Loc.T("RuleLibraryTitle"),
+            Content = library,
+            CloseButtonText = Loc.T("CloseDialog"),
+            DialogMaxWidth = 800
+        };
+
+        string? chosen = null;
+        library.RuleChosen += (_, type) =>
+        {
+            chosen = type;
+            dialog.Hide();
+        };
+
+        ActivateAndForeground();
+        await dialog.ShowAsync();
+
+        if (chosen is not null) _vm.AddRule(chosen);
     }
 
     private void RuleToggleExpand_Click(object sender, RoutedEventArgs e)
@@ -291,6 +536,7 @@ public partial class MainWindow : Window
             Header = card.IsExpanded ? Loc.T("RuleCollapse") : Loc.T("RuleEditHint"),
             Style = (Style)FindResource("AppMenuItemStyle")
         };
+        System.Windows.Automation.AutomationProperties.SetName(expandItem, "Rule menu expand");
         expandItem.Click += (_, _) => card.IsExpanded = !card.IsExpanded;
         menu.Items.Add(expandItem);
 
@@ -300,6 +546,7 @@ public partial class MainWindow : Window
             Style = (Style)FindResource("AppMenuItemStyle"),
             IsEnabled = card.MoveUpCommand.CanExecute(null)
         };
+        System.Windows.Automation.AutomationProperties.SetName(upItem, "Rule menu move up");
         upItem.Click += (_, _) => card.MoveUpCommand.Execute(null);
         menu.Items.Add(upItem);
 
@@ -309,6 +556,7 @@ public partial class MainWindow : Window
             Style = (Style)FindResource("AppMenuItemStyle"),
             IsEnabled = card.MoveDownCommand.CanExecute(null)
         };
+        System.Windows.Automation.AutomationProperties.SetName(downItem, "Rule menu move down");
         downItem.Click += (_, _) => card.MoveDownCommand.Execute(null);
         menu.Items.Add(downItem);
 
@@ -470,7 +718,17 @@ public partial class MainWindow : Window
         var dialog = new OpenFileDialog { Filter = "BFR Preset (*.bfrpreset)|*.bfrpreset", Multiselect = false };
         if (dialog.ShowDialog() != true) return;
 
-        var preset = new PresetStore(_fs).Import(dialog.FileName);
+        Preset preset;
+        try
+        {
+            preset = new PresetStore(_fs).Import(dialog.FileName);
+        }
+        catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(this, ex.Message, Loc.T("WindowTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         PresetCombo.SelectedItem = null;
         _vm.LoadPreset(preset);
         StatusText.Text = Loc.F("ImportedPreset", preset.Name);
@@ -510,8 +768,12 @@ public partial class MainWindow : Window
         var summary = _vm.BuildApplySummary();
         if (summary.FileCount == 0) return;
 
-        var confirm = new ApplyConfirmWindow(summary);
-        if (confirm.ShowDialog() != true) return;
+        var confirmed = await ShowDialogAsync(
+            ApplyConfirmContent.Title(summary),
+            ApplyConfirmContent.Build(summary),
+            primaryText: Loc.T("ConfirmApplyButton"),
+            closeText: Loc.T("ConfirmCancel"));
+        if (!confirmed) return;
 
         await _vm.ApplyAsync();
         CheckAndPromptStoreRating();
@@ -553,7 +815,14 @@ public partial class MainWindow : Window
 
         registry.Register(Loc.T("CommandAddFiles"), files, () => AddFiles_Click(this, new RoutedEventArgs()), "Ctrl+O");
         registry.Register(Loc.T("CommandAddFolder"), files, () => AddFolder_Click(this, new RoutedEventArgs()), "Ctrl+Shift+O");
+        registry.Register(Loc.T("ShelfCommand"), files, () => OpenShelf(), "Ctrl+Shift+S");
         registry.Register(Loc.T("CommandClearList"), files, () => ClearList_Click(this, new RoutedEventArgs()));
+        registry.Register(Loc.T("CommandSendToTools"), files, () => SendToTools_Click(this, new RoutedEventArgs()));
+        registry.Register(Loc.T("CommandRadial"), tools, () => ShowRadialAtCursor());
+
+        // Gallery của giao diện mới: chỉ có khi dev đặt BFR_GALLERY=1 (không hiện với người dùng).
+        if (Environment.GetEnvironmentVariable("BFR_GALLERY") == "1")
+            registry.Register("Gallery (dev)", tools, () => new BfrGalleryWindow { Owner = this }.Show());
         registry.Register(Loc.T("CommandApply"), files, () => Apply_Click(this, new RoutedEventArgs()), "Ctrl+Enter");
         registry.Register(Loc.T("CommandUndo"), files, () => Undo_Click(this, new RoutedEventArgs()), "Ctrl+Z");
         registry.Register(Loc.T("CommandSavePreset"), rules, () => SavePreset_Click(this, new RoutedEventArgs()), "Ctrl+S");
@@ -606,45 +875,228 @@ public partial class MainWindow : Window
         OpenRegexTesterFor(card);
     }
 
+    // ----------------------------------------------------------------- Hộp thoại nổi (ContentDialog)
+
+    /// <summary>
+    /// Hiện hộp thoại nổi ngay trong cửa sổ (không mở cửa sổ mới). Trả về true nếu người dùng chọn nút chính.
+    /// Cửa sổ chính được đưa lên trước nếu đang ẩn trong khay.
+    /// </summary>
+    private async System.Threading.Tasks.Task<bool> ShowDialogAsync(
+        string title, object content, string primaryText, string closeText, bool showFooter = true)
+    {
+        ActivateAndForeground();
+
+        var dialog = new Wpf.Ui.Controls.ContentDialog(DialogHost)
+        {
+            Title = title,
+            Content = content,
+            PrimaryButtonText = primaryText,
+            CloseButtonText = closeText,
+            DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Primary,
+            IsFooterVisible = showFooter
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == Wpf.Ui.Controls.ContentDialogResult.Primary;
+    }
+
+    // ----------------------------------------------------------------- Điều hướng (v1.4)
+
+    private void Nav_Checked(object sender, RoutedEventArgs e)
+    {
+        if (sender is RadioButton { Tag: string key }) ShowPage(key);
+    }
+
+    private RadioButton NavButton(string key) => key switch
+    {
+        "Home" => NavHome,
+        "Tools" => NavTools,
+        "Shelf" => NavShelf,
+        "History" => NavHistory,
+        "Presets" => NavPresets,
+        "Watch" => NavWatch,
+        "Settings" => NavSettings,
+        _ => NavRename
+    };
+
+    /// <summary>Chuyển sang một trang và đồng bộ rail điều hướng.</summary>
+    public void NavigateTo(string key)
+    {
+        var button = NavButton(key);
+        if (button.IsChecked != true) button.IsChecked = true;   // kích hoạt Nav_Checked → ShowPage
+        else ShowPage(key);
+    }
+
+    private void ShowPage(string key)
+    {
+        if (_navigating) return;
+
+        // Watch Folder là tính năng Pro: Free thấy hộp thoại nâng cấp và ở lại trang hiện tại.
+        if (key == "Watch" && !EnsurePro(ProFeature.UnlimitedRecursion))
+        {
+            _navigating = true;
+            NavButton(_currentPage).IsChecked = true;
+            _navigating = false;
+            return;
+        }
+
+        if (key == _currentPage) return;
+
+        var leaving = _currentPage;
+        _currentPage = key;
+
+        if (leaving != "Rename" && _pages.TryGetValue(leaving, out var old))
+        {
+            old.Visibility = Visibility.Collapsed;
+            old.OnHidden();
+        }
+
+        RenamePage.Visibility = key == "Rename" ? Visibility.Visible : Visibility.Collapsed;
+        if (key == "Rename")
+        {
+            FadeIn(RenamePage);
+            return;
+        }
+
+        var page = GetPage(key);
+        page.Visibility = Visibility.Visible;
+        FadeIn(page);
+        page.OnShown();
+    }
+
+    /// <summary>Nút thu nhỏ/phóng to/đóng của WPF-UI TitleBar không có tên: đặt tên để trình đọc màn hình đọc được.</summary>
+    private void NameTitleBarButtons()
+    {
+        var names = new Dictionary<string, string>
+        {
+            ["TitleBarMinimizeButton"] = Loc.T("TitleMinimize"),
+            ["TitleBarMaximizeButton"] = Loc.T("TitleMaximize"),
+            ["TitleBarCloseButton"] = Loc.T("TitleClose")
+        };
+
+        void Walk(DependencyObject node)
+        {
+            var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(node);
+            for (var i = 0; i < count; i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(node, i);
+                if (child is FrameworkElement fe && names.TryGetValue(System.Windows.Automation.AutomationProperties.GetAutomationId(fe) ?? string.Empty, out var label))
+                    System.Windows.Automation.AutomationProperties.SetName(fe, label);
+                Walk(child);
+            }
+        }
+
+        Walk(this);
+    }
+
+    /// <summary>Chuyển trang: hiện dần trong 220 ms; tắt khi giảm chuyển động.</summary>
+    private static void FadeIn(UIElement element)
+    {
+        element.BeginAnimation(OpacityProperty, null);
+        if (BfrTheme.ReduceMotion) return;
+        element.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220))
+        {
+            EasingFunction = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut }
+        });
+    }
+
+    private PageBase GetPage(string key)
+    {
+        // Trang Cài đặt dựng từ cài đặt hiện tại nên tạo mới mỗi lần mở.
+        if (key == "Settings" && _pages.Remove(key, out var stale)) PageHost.Children.Remove(stale);
+        if (_pages.TryGetValue(key, out var existing)) return existing;
+
+        string AppData(string name) => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BatchFileRenamer", name);
+
+        PageBase page;
+        switch (key)
+        {
+            case "Home":
+                page = new HomePage(
+                    NavigateTo,
+                    dropped => { NavigateTo("Rename"); EnqueuePaths(dropped); },
+                    toolKey => OpenTool(toolKey, Array.Empty<string>()),
+                    ShowRadialAtCursor);
+                break;
+            case "Shelf":
+                page = new ShelfPage(_shelfModel, batch => { NavigateTo("Rename"); EnqueuePaths(batch); }, feature => ShowUpgradeDialog(feature));
+                break;
+            case "History":
+                var history = new HistoryPage(new HistoryStore(_fs, AppData("history.json")), _fs, _license.License);
+                history.Left += (_, _) => _ = _vm.RebuildAsync();
+                page = history;
+                break;
+            case "Presets":
+                var presets = new PresetsPage(new PresetStore(_fs, AppData("presets")), () => _vm.SelectedPreset ?? new Preset(), _license.License);
+                presets.Left += (_, _) => _vm.RefreshPresets();
+                presets.PresetApplied += (_, preset) =>
+                {
+                    _vm.RefreshPresets();
+                    PresetCombo.SelectedItem = null;
+                    _vm.LoadPreset(preset);
+                    _ = _vm.RebuildAsync();
+                    NavigateTo("Rename");
+                };
+                page = presets;
+                break;
+            case "Tools":
+                page = new ToolsPage(_fs, _license.License, new HistoryStore(_fs, AppData("history.json")), AppData("journal"), AppVersion.Current,
+                    new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader(), new AudioTagReader()),
+                    new BFR.Media.WicImageProcessor(), feature => ShowUpgradeDialog(feature));
+                break;
+            case "Watch":
+                page = new WatchFolderPage(new PresetStore(_fs, AppData("presets")), _license.License);
+                break;
+            default:
+                var settings = new SettingsPage(_license);
+                settings.UpgradeRequested += (_, _) => ShowUpgradeDialog(contextFeature: null);
+                settings.SettingsLeft += (_, _) => ApplySettingsChanges();
+                settings.SettingsChanged += (_, _) => ApplyLiveSettings();
+                page = settings;
+                break;
+        }
+
+        page.CloseRequested += (_, _) => NavigateTo("Rename");
+        page.Visibility = Visibility.Collapsed;
+        PageHost.Children.Add(page);
+        _pages[key] = page;
+        return page;
+    }
+
+    /// <summary>Áp dụng ngay khi bật/tắt một cài đặt: chạy nền, lắc chuột, phím tắt toàn cục. Không dựng lại danh sách xem trước.</summary>
+    private void ApplyLiveSettings()
+    {
+        (Application.Current as App)?.ApplyBackgroundSetting();
+        ApplyShakeSetting();
+        ApplyHotkeySetting();
+    }
+
+    /// <summary>Áp dụng ngay các thay đổi trong Cài đặt khi người dùng rời trang (khay, hook, phím tắt, giấy phép).</summary>
+    private void ApplySettingsChanges()
+    {
+        (Application.Current as App)?.ApplyBackgroundSetting();
+        ApplyShakeSetting();
+        ApplyHotkeySetting();
+        UpdateLicenseState();
+        _ = _vm.RebuildAsync();
+    }
+
     // ----------------------------------------------------------------- Màn phụ
 
     private void History_Click(object sender, RoutedEventArgs e)
     {
-        var store = new HistoryStore(_fs, Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "BatchFileRenamer", "history.json"));
-
-        new HistoryWindow(store, _fs, _license.License) { Owner = this }.ShowDialog();
-        _ = _vm.RebuildAsync();
+        NavigateTo("History");
     }
 
     private void PresetLibrary_Click(object sender, RoutedEventArgs e)
     {
-        var store = new PresetStore(_fs, Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "BatchFileRenamer", "presets"));
-
-        var window = new PresetLibraryWindow(store, _vm.SelectedPreset ?? new Preset(), _license.License) { Owner = this };
-        window.ShowDialog();
-        _vm.RefreshPresets();
-
-        if (window.SelectedPreset is not null)
-        {
-            PresetCombo.SelectedItem = null;
-            _vm.LoadPreset(window.SelectedPreset);
-            _ = _vm.RebuildAsync();
-        }
+        NavigateTo("Presets");
     }
 
     private void WatchFolder_Click(object sender, RoutedEventArgs e)
     {
-        if (!EnsurePro(ProFeature.UnlimitedRecursion)) return;
-
-        var store = new PresetStore(_fs, Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "BatchFileRenamer", "presets"));
-
-        new WatchFolderWindow(store, _license.License) { Owner = this }.ShowDialog();
+        NavigateTo("Watch");
     }
 
     private void ExportReport_Click(object sender, RoutedEventArgs e)
@@ -711,9 +1163,7 @@ public partial class MainWindow : Window
 
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
-        new SettingsWindow(_license) { Owner = this }.ShowDialog();
-        UpdateLicenseState();
-        _ = _vm.RebuildAsync();
+        NavigateTo("Settings");
     }
 
     /// <summary>
@@ -722,21 +1172,25 @@ public partial class MainWindow : Window
     /// </summary>
     private void Upgrade_Click(object sender, RoutedEventArgs e)
     {
-        if (_license.Status.IsPro && !_license.Status.IsTrial)
-        {
-            new LicenseInfoWindow(_license.License, _license.Status) { Owner = this }.ShowDialog();
-            return;
-        }
-
         ShowUpgradeDialog(contextFeature: null);
     }
 
     /// <summary>Mở hộp thoại nâng cấp, kèm dòng bối cảnh nêu tính năng đang cần Pro.</summary>
     private void ShowUpgradeDialog(ProFeature? contextFeature)
     {
+        _ = ShowUpgradeDialogAsync(contextFeature);
+    }
+
+    /// <summary>
+    /// Hộp thoại nâng cấp Pro hiện ngay trong cửa sổ (ContentDialog). Nếu đã là Pro (không phải dùng thử)
+    /// thì hiện thông tin license thay vì hộp nâng cấp.
+    /// </summary>
+    private async System.Threading.Tasks.Task ShowUpgradeDialogAsync(ProFeature? contextFeature)
+    {
         if (_license.Status.IsPro && !_license.Status.IsTrial)
         {
-            new LicenseInfoWindow(_license.License, _license.Status) { Owner = this }.ShowDialog();
+            await ShowDialogAsync(Loc.T("LicenseInfoTitle"), LicenseInfoContent.Build(_license.License, _license.Status),
+                primaryText: string.Empty, closeText: Loc.T("SettingsClose"));
             return;
         }
 
@@ -748,8 +1202,16 @@ public partial class MainWindow : Window
             settings.ProPriceText,
             new LocStringProvider());
 
-        var window = new UpgradeWindow(vm) { Owner = this };
-        window.ShowDialog();
+        var view = new UpgradeView(vm);
+        ActivateAndForeground();
+        var dialog = new Wpf.Ui.Controls.ContentDialog(DialogHost)
+        {
+            Content = view,
+            IsFooterVisible = false
+        };
+        view.CloseRequested += (_, _) => dialog.Hide();
+
+        await dialog.ShowAsync();
 
         UpdateLicenseState();
         _ = _vm.RebuildAsync();
@@ -827,11 +1289,22 @@ public partial class MainWindow : Window
 
     private void Window_Drop(object sender, DragEventArgs e)
     {
-        if (e.Data.GetData(DataFormats.FileDrop) is string[] paths) _vm.AddPaths(paths);
+        if (e.Data.GetData(DataFormats.FileDrop) is string[] paths)
+        {
+            NavigateTo("Rename");
+            _vm.AddPaths(paths);
+        }
     }
 
     private void MainWindow_KeyDown(object sender, KeyEventArgs e)
     {
+        if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.S)
+        {
+            OpenShelf();
+            e.Handled = true;
+            return;
+        }
+
         if (Keyboard.Modifiers == ModifierKeys.Control)
         {
             switch (e.Key)
@@ -1004,21 +1477,15 @@ public partial class MainWindow : Window
         return null;
     }
 
-    private void TitleBar_Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-
-    private void TitleBar_Maximize_Click(object sender, RoutedEventArgs e)
+    /// <summary>Chạy nền: đóng cửa sổ chỉ ẩn đi, trừ khi người dùng chọn Thoát ở khay.</summary>
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        WindowState = (WindowState == WindowState.Maximized) ? WindowState.Normal : WindowState.Maximized;
-        UpdateMaximizeButton();
-    }
-
-    private void TitleBar_Close_Click(object sender, RoutedEventArgs e) => Close();
-
-    private void UpdateMaximizeButton()
-    {
-        if (MaximizeButtonGlyph != null)
+        if (Application.Current is App { BackgroundEnabled: true, IsExiting: false })
         {
-            MaximizeButtonGlyph.Text = (WindowState == WindowState.Maximized) ? "\uE923" : "\uE922";
+            e.Cancel = true;
+            Hide();
+            return;
         }
+        base.OnClosing(e);
     }
 }

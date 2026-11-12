@@ -16,6 +16,24 @@ public sealed class IpcPayload
     public List<string> Paths { get; set; } = new();
     public string? FileListPath { get; set; }
     public string? PresetName { get; set; }
+
+    /// <summary>Khoá preset đổi tên nhanh (--quick): áp dụng ngay, không mở cửa sổ chính.</summary>
+    public string? QuickPreset { get; set; }
+
+    /// <summary>Khoá công cụ tệp (--tool): mở trang Công cụ với các tệp đã chọn. Chỉ nhận khoá trong <see cref="KnownTools"/>.</summary>
+    public string? Tool { get; set; }
+}
+
+/// <summary>Danh sách trắng khoá công cụ mà dòng lệnh khởi động, IPC và menu Explorer được phép mở (C2).</summary>
+public static class KnownTools
+{
+    public static readonly IReadOnlyList<string> Keys = new[]
+    {
+        "organize", "duplicates", "folders", "metadata", "images", "archive", "checksum", "analyze", "workflow"
+    };
+
+    public static bool IsKnown(string? key) =>
+        !string.IsNullOrEmpty(key) && Keys.Contains(key, StringComparer.Ordinal);
 }
 
 /// <summary>
@@ -69,7 +87,8 @@ public static class SingleInstanceClient
     {
         try
         {
-            using var client = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            using var client = new NamedPipeClientStream(
+                ".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(timeoutMs);
 
@@ -103,6 +122,26 @@ public sealed class SingleInstanceServer : IAsyncDisposable
     private readonly CancellationTokenSource _cts = new();
     private Task? _listenerTask;
 
+    /// <summary>Thời gian tối đa chờ client gửi xong một tin nhắn.</summary>
+    internal const int ReadTimeoutMs = 5000;
+
+    private static readonly byte[] AckBytes = System.Text.Encoding.UTF8.GetBytes("ACK\n");
+
+    /// <summary>Đọc một dòng nhưng dừng (trả null) nếu vượt <paramref name="maxChars"/> ký tự.</summary>
+    internal static async Task<string?> ReadLineBoundedAsync(TextReader reader, int maxChars, CancellationToken ct)
+    {
+        var sb = new System.Text.StringBuilder();
+        var buffer = new char[1];
+        while (true)
+        {
+            var n = await reader.ReadAsync(buffer.AsMemory(), ct).ConfigureAwait(false);
+            if (n == 0) return sb.Length == 0 ? null : sb.ToString();
+            if (buffer[0] == '\n') return sb.ToString();
+            if (buffer[0] != '\r') sb.Append(buffer[0]);
+            if (sb.Length > maxChars) return null;
+        }
+    }
+
     public SingleInstanceServer(Action<IpcPayload> onPayloadReceived, string pipeName = DefaultPipeName)
     {
         _pipeName = pipeName;
@@ -126,23 +165,32 @@ public sealed class SingleInstanceServer : IAsyncDisposable
                     PipeDirection.InOut,
                     NamedPipeServerStream.MaxAllowedServerInstances,
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous);
+                    PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
 
                 await server.WaitForConnectionAsync(_cts.Token).ConfigureAwait(false);
 
                 using var reader = new StreamReader(server, leaveOpen: true);
-                using var writer = new StreamWriter(server, leaveOpen: true);
 
-                var line = await reader.ReadLineAsync(_cts.Token).ConfigureAwait(false);
+                // Client im lặng hoặc gửi quá nhiều dữ liệu không được phép giữ server mãi mãi.
+                using var readCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+                readCts.CancelAfter(ReadTimeoutMs);
+
+                string? line = null;
+                try
+                {
+                    line = await ReadLineBoundedAsync(reader, PathGuard.MaxIpcMessageChars, readCts.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (!_cts.IsCancellationRequested)
+                {
+                    // hết thời gian đọc: bỏ kết nối này
+                }
+
                 if (!string.IsNullOrWhiteSpace(line))
                 {
                     try
                     {
-                        var payload = JsonSerializer.Deserialize<IpcPayload>(line);
-                        if (payload != null)
-                        {
-                            _onPayloadReceived(payload);
-                        }
+                        var payload = PathGuard.SanitizeIpcPayload(JsonSerializer.Deserialize<IpcPayload>(line));
+                        _onPayloadReceived(payload);
                     }
                     catch
                     {
@@ -150,8 +198,21 @@ public sealed class SingleInstanceServer : IAsyncDisposable
                     }
                 }
 
-                await writer.WriteLineAsync("ACK".AsMemory(), _cts.Token).ConfigureAwait(false);
-                await writer.FlushAsync(_cts.Token).ConfigureAwait(false);
+                // Pipe không có bộ đệm ghi: ghi tới client không chịu đọc sẽ treo mãi, nên chỉ phản hồi khi đã nhận được
+                // tin nhắn, và luôn kèm thời gian chờ.
+                if (line is not null)
+                {
+                    using var writeCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+                    writeCts.CancelAfter(ReadTimeoutMs);
+                    try
+                    {
+                        await server.WriteAsync(AckBytes, writeCts.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (!_cts.IsCancellationRequested)
+                    {
+                        // client không nhận phản hồi: bỏ kết nối
+                    }
+                }
             }
             catch (OperationCanceledException)
             {

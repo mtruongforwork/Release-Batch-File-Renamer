@@ -22,7 +22,7 @@
 
 ### A. Thanh tiêu đề (trên cùng)
 - **Badge `Free`** → đang ở cấp miễn phí. Bấm **Cài đặt** → xem mục *Giấy phép*.
-- Nút **Nâng cấp Pro** → bấm thử: hiện mô tả Pro + nút *"Dùng thử Pro 14 ngày"* và *"Mua Pro"*. Bấm **Dùng thử** → badge đổi thành **Pro (dùng thử)**.
+- Nút **Nâng cấp Pro** → bấm thử: hiện mô tả Pro + nút *"Dùng thử Pro 30 ngày"* và *"Mua Pro"*. Bấm **Dùng thử** → badge đổi thành **Pro (dùng thử)**.
   - Lưu ý: mua thật cần bản cài từ Microsoft Store (bản portable chỉ có Free).
 
 ### B. Thanh lệnh (1 hàng)
@@ -108,12 +108,12 @@ Bấm badge **Free** hoặc nút **Nâng cấp Pro** ở thanh tiêu đề → m
 
 | Hạng mục | Cách kiểm tra | Kỳ vọng |
 | :--- | :--- | :--- |
-| **Bố cục** | Quan sát | Header *"Nâng cấp lên Batch File Renamer Pro"*, dòng phụ *"Mua một lần, dùng trọn đời"*, bảng Free vs Pro 7 dòng, nút **Mua Pro** (chính) + **Dùng thử Pro 14 ngày** + **Để sau**, liên kết **Tôi đã có mã kích hoạt** |
+| **Bố cục** | Quan sát | Header *"Nâng cấp lên Batch File Renamer Pro"*, dòng phụ *"Mua một lần, dùng trọn đời"*, bảng Free vs Pro 7 dòng, nút **Mua Pro** (chính) + **Dùng thử Pro 30 ngày** + **Để sau**, liên kết **Tôi đã có mã kích hoạt** |
 | **Theme** | Đổi Sáng/Tối rồi mở lại dialog | Dialog đổi màu theo app, bo góc, có nút **X** |
 | **Đóng** | Bấm **X** hoặc phím **Esc** | Dialog đóng, app vẫn chạy |
 | **Mã kích hoạt** | Bấm *"Tôi đã có mã kích hoạt"* → nhập `BFR-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX` → **Kích hoạt** | Thông báo lỗi rõ ràng (sai định dạng / sai checksum), không bật Pro |
 | **Ngữ cảnh** | Ở cấp Free, thêm quy tắc thứ 4 hoặc bấm **Xuất báo cáo** | Dialog mở kèm dải *"Tính năng '…' chỉ có trong gói Pro."* |
-| **Dùng thử** | Bấm **Dùng thử Pro 14 ngày** | Badge đổi thành **Pro (dùng thử)**; mở lại dialog → ẩn nút dùng thử, hiện *"Còn 13 ngày dùng thử Pro."* |
+| **Dùng thử** | Bấm **Dùng thử Pro 30 ngày** | Badge đổi thành **Pro (dùng thử)**; mở lại dialog → ẩn nút dùng thử, hiện *"Còn 29 ngày dùng thử Pro."* |
 | **Đã là Pro** | Bấm badge **Pro** | Mở màn hình thông tin license (trạng thái, ngày mua, nguồn kích hoạt) |
 
 **Thử bản Pro (chỉ máy dev):** đóng app, mở PowerShell rồi chạy

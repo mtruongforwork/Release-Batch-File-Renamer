@@ -48,7 +48,7 @@ public sealed class MicrosoftStoreLicenseProvider : IStoreLicenseProvider
     {
         if (!IsAvailable || _context is null)
         {
-            return new StoreLicenseSnapshot { Error = "Không có package identity: không đọc được giấy phép Store." };
+            return new StoreLicenseSnapshot { Error = BFR.Core.CoreText.Get("CoreStoreNoIdentity", "Không có package identity: không đọc được giấy phép Store.") };
         }
 
         try
@@ -86,7 +86,7 @@ public sealed class MicrosoftStoreLicenseProvider : IStoreLicenseProvider
     {
         if (!IsAvailable || _context is null)
         {
-            return new PurchaseOutcome(PurchaseStatus.NotSupported, "Mua Pro chỉ khả dụng trong bản cài từ Microsoft Store.");
+            return new PurchaseOutcome(PurchaseStatus.NotSupported, BFR.Core.CoreText.Get("CoreStoreNotSupported", "Mua Pro chỉ khả dụng trong bản cài từ Microsoft Store."));
         }
 
         try
@@ -100,7 +100,7 @@ public sealed class MicrosoftStoreLicenseProvider : IStoreLicenseProvider
                 StorePurchaseStatus.AlreadyPurchased => new PurchaseOutcome(PurchaseStatus.Completed),
                 StorePurchaseStatus.NotPurchased => new PurchaseOutcome(PurchaseStatus.NotPurchased),
                 StorePurchaseStatus.NetworkError => new PurchaseOutcome(PurchaseStatus.StoreNotAvailable),
-                StorePurchaseStatus.ServerError => new PurchaseOutcome(PurchaseStatus.Failed, "Lỗi máy chủ Store."),
+                StorePurchaseStatus.ServerError => new PurchaseOutcome(PurchaseStatus.Failed, BFR.Core.CoreText.Get("CoreStoreServerError", "Lỗi máy chủ Store.")),
                 _ => new PurchaseOutcome(PurchaseStatus.Failed, status.ToString())
             };
         }

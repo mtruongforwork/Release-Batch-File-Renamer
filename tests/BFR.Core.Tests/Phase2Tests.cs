@@ -62,7 +62,8 @@ public class FileListReaderTests
     [Fact]
     public void ReadAndDelete_RemovesRealTemporaryFile()
     {
-        var listFile = Path.Combine(Path.GetTempPath(), $"bfr-list-{Guid.NewGuid():N}.txt");
+        Directory.CreateDirectory(Path.Combine(PathGuard.BfrTempRoot, "shell"));
+        var listFile = Path.Combine(PathGuard.BfrTempRoot, "shell", $"shell-{Guid.NewGuid():N}.txt");
         File.WriteAllLines(listFile, new[] { @"C:\Data\one.txt", @"C:\Data\two.txt" });
 
         var readBack = FileListReader.ReadAndDelete(listFile);

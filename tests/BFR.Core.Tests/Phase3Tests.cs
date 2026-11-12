@@ -76,10 +76,10 @@ public class Phase3Tests
         Assert.True(service.StartTrial());
         Assert.Equal(LicenseTier.Pro, service.Status.Tier);
         Assert.True(service.Status.IsTrial);
-        Assert.Equal(now + TimeSpan.FromDays(14), service.Status.TrialEndsUtc);
+        Assert.Equal(now + TimeSpan.FromDays(30), service.Status.TrialEndsUtc);
 
         // Hết hạn -> về Free.
-        now = now.AddDays(15);
+        now = now.AddDays(31);
         service.Evaluate();
         Assert.Equal(LicenseTier.Free, service.Status.Tier);
 
@@ -101,7 +101,7 @@ public class Phase3Tests
 
         var remaining = service.TrialRemaining();
         Assert.NotNull(remaining);
-        Assert.Equal(11, remaining!.Value.TotalDays);
+        Assert.Equal(27, remaining!.Value.TotalDays);
     }
 
     [Fact]

@@ -11,5 +11,7 @@ public enum PreviewStatus
     InvalidName,
     PathTooLong,
     Locked,
-    MissingData
+    MissingData,
+    /// <summary>Tệp nằm trong vùng hệ thống được bảo vệ (C10): không bao giờ được áp dụng.</summary>
+    Protected
 }

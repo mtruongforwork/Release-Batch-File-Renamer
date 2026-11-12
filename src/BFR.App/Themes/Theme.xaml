@@ -9,7 +9,6 @@
          ================================================================== -->
 
     <FontFamily x:Key="AppFont">Segoe UI Variable Text, Segoe UI, Tahoma</FontFamily>
-    <FontFamily x:Key="AppFontDisplay">Segoe UI Variable Display, Segoe UI, Tahoma</FontFamily>
     <FontFamily x:Key="AppFontMono">Cascadia Mono, Consolas, Courier New</FontFamily>
     <!-- Font icon: Segoe MDL2 Assets có mặt trên Windows 10 1809+ và Windows 11. -->
     <FontFamily x:Key="IconFont">Segoe MDL2 Assets</FontFamily>
@@ -91,40 +90,6 @@
     </Style>
 
     <!-- ============================ RadioButton (chip lọc) ============================ -->
-
-    <Style x:Key="AppRadioButtonStyle" TargetType="RadioButton">
-        <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
-        <Setter Property="FontSize" Value="{StaticResource AppFontSizeBody}" />
-        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Margin" Value="0,0,6,0" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Bd" Background="{DynamicResource ChipBackground}"
-                            BorderBrush="{DynamicResource ChipBorder}" BorderThickness="1"
-                            CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Ellipse x:Name="Dot" Width="8" Height="8" Margin="0,0,6,0"
-                                     Fill="{DynamicResource BorderStrong}" />
-                            <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="True" />
-                        </StackPanel>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ChipSelectedBackground}" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource ChipSelectedBorder}" />
-                            <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource Accent}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Accent}" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBorder}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
 
     <!-- ============================ Chip / Toggle ============================ -->
 
@@ -298,28 +263,6 @@
         </Setter>
     </Style>
 
-    <Style x:Key="CloseCaptionButtonStyle" TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="Bd" Background="{TemplateBinding Background}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#E81123" />
-                            <Setter Property="Foreground" Value="#FFFFFF" />
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="#C4101F" />
-                            <Setter Property="Foreground" Value="#FFFFFF" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- Vách ngăn đứng (Vertical Divider) -->
     <Style x:Key="VerticalDividerStyle" TargetType="Rectangle">
         <Setter Property="Width" Value="1" />
@@ -327,45 +270,6 @@
         <Setter Property="Fill" Value="{DynamicResource Divider}" />
         <Setter Property="Margin" Value="8,0" />
         <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-
-    <!-- Toggle Switch hiện đại (chuẩn WinUI 3) -->
-    <Style x:Key="AppToggleSwitchStyle" TargetType="CheckBox">
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="CheckBox">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Background="Transparent">
-                        <Border x:Name="Track" Width="38" Height="20" CornerRadius="10"
-                                Background="{DynamicResource ChipBackground}"
-                                BorderBrush="{DynamicResource BorderStrong}" BorderThickness="1"
-                                SnapsToDevicePixels="True">
-                            <Canvas Width="36" Height="18" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <Ellipse x:Name="Thumb" Width="12" Height="12"
-                                         Fill="{DynamicResource TextSecondary}"
-                                         Canvas.Left="3" Canvas.Top="3" />
-                            </Canvas>
-                        </Border>
-                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
-                    </StackPanel>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource Accent}" />
-                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource Accent}" />
-                            <Setter TargetName="Thumb" Property="Fill" Value="{DynamicResource TextOnAccent}" />
-                            <Setter TargetName="Thumb" Property="Canvas.Left" Value="21" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource Accent}" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.4" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <!-- Segmented Radio Button (Bộ lọc tệp dạng thẻ liền) -->
@@ -610,5 +514,42 @@
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <!-- ======================= Rail điều hướng bên trái (v1.4) ======================= -->
+    <Style x:Key="NavRailItemStyle" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Margin" Value="6,2" />
+        <Setter Property="Padding" Value="4,9,4,7" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid>
+                        <Border x:Name="Bd" CornerRadius="14" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Indicator" Width="3" Height="18" CornerRadius="2" HorizontalAlignment="Left"
+                                VerticalAlignment="Center" Margin="-6,0,0,0" Background="{DynamicResource Accent}" Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SurfaceHover}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BfrAccGradient}" />
+                            <Setter Property="Foreground" Value="{DynamicResource BfrOnAccent}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="1" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>

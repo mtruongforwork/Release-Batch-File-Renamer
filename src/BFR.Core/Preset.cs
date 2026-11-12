@@ -18,6 +18,13 @@ public sealed class Preset
     [JsonPropertyName("description")]
     public string Description { get; set; } = string.Empty;
 
+    /// <summary>Tên để hiển thị: preset dựng sẵn được dịch theo ngôn ngữ giao diện.</summary>
+    [JsonIgnore]
+    public string DisplayName => BuiltInPresets.DisplayName(Name);
+
+    [JsonIgnore]
+    public string DisplayDescription => BuiltInPresets.DisplayDescription(Name, Description);
+
     [JsonPropertyName("options")]
     public PresetOptions Options { get; set; } = new();
 

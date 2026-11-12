@@ -52,7 +52,7 @@ public sealed class LicenseCoordinator
         }
         else if (snapshot.IsTrialActive)
         {
-            // Store trial: dùng thử 14 ngày cục bộ tương ứng với thời hạn Store.
+            // Store trial: dùng thử 30 ngày cục bộ tương ứng với thời hạn Store.
             if (!_license.Status.IsTrial && _license.StartTrial()) { /* bắt đầu dùng thử */ }
         }
 
@@ -66,7 +66,7 @@ public sealed class LicenseCoordinator
     {
         if (_provider is null || !_provider.IsAvailable)
         {
-            return new PurchaseOutcome(PurchaseStatus.NotSupported, "Mua Pro chỉ khả dụng trong bản cài từ Microsoft Store.");
+            return new PurchaseOutcome(PurchaseStatus.NotSupported, CoreText.Get("CoreStoreNotSupported", "Mua Pro chỉ khả dụng trong bản cài từ Microsoft Store."));
         }
 
         PurchaseOutcome outcome;

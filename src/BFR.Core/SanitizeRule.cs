@@ -59,9 +59,9 @@ public sealed class SanitizeRule : IRule
 
     private static string ApplySpaceMode(string s, SpaceMode mode) => mode switch
     {
-        SpaceMode.Dash => Regex.Replace(s.Trim(), @"\s+", "-"),
-        SpaceMode.Underscore => Regex.Replace(s.Trim(), @"\s+", "_"),
-        SpaceMode.Remove => Regex.Replace(s, @"\s+", string.Empty),
+        SpaceMode.Dash => Regex.Replace(s.Trim(), @"\s+", "-", RegexOptions.None, RegexLimits.Timeout),
+        SpaceMode.Underscore => Regex.Replace(s.Trim(), @"\s+", "_", RegexOptions.None, RegexLimits.Timeout),
+        SpaceMode.Remove => Regex.Replace(s, @"\s+", string.Empty, RegexOptions.None, RegexLimits.Timeout),
         _ => s
     };
 
@@ -70,7 +70,7 @@ public sealed class SanitizeRule : IRule
         s = RemoveVietnameseDiacritics(s);
         s = s.Normalize(NormalizationForm.FormC);
         s = s.ToLowerInvariant();
-        s = Regex.Replace(s, @"[^a-z0-9]+", "-");
+        s = Regex.Replace(s, @"[^a-z0-9]+", "-", RegexOptions.None, RegexLimits.Timeout);
         return s.Trim('-');
     }
 

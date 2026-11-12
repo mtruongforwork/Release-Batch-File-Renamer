@@ -1,0 +1,50 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+    <!--
+        Token không đổi theo theme: phông, thang chữ, hình khối, khoảng cách, thời gian chuyển động.
+        Màu nằm ở Palette.*.xaml (theo sáng/tối) và Accent.*.xaml (theo bảng màu nhấn).
+        Quy ước: mọi khoá bắt đầu bằng "Bfr" để không đụng bộ token cũ trong Theme.xaml.
+    -->
+
+    <!-- Phông: Inter (thân chữ) và Plus Jakarta Sans (tiêu đề), nhúng trong Resources/Fonts, giấy phép OFL.
+         WPF gom phông tĩnh theo tên họ: mỗi độ đậm trung gian là một họ riêng. -->
+    <FontFamily x:Key="BfrFontBody">pack://application:,,,/Resources/Fonts/#Inter, Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="BfrFontBodyMedium">pack://application:,,,/Resources/Fonts/#Inter Medium, Segoe UI, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="BfrFontBodySemi">pack://application:,,,/Resources/Fonts/#Inter SemiBold, Segoe UI Semibold, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="BfrFontHeading">pack://application:,,,/Resources/Fonts/#Plus Jakarta Sans SemiBold, Segoe UI Semibold, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="BfrFontHeadingBold">pack://application:,,,/Resources/Fonts/#Plus Jakarta Sans, Segoe UI, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="BfrFontDisplay">pack://application:,,,/Resources/Fonts/#Plus Jakarta Sans ExtraBold, Segoe UI Black, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="BfrFontMono">Cascadia Mono, Consolas, Courier New</FontFamily>
+
+    <!-- Thang chữ -->
+    <sys:Double x:Key="BfrSizeDisplay">32</sys:Double>
+    <sys:Double x:Key="BfrSizeTitle">22</sys:Double>
+    <sys:Double x:Key="BfrSizeHeading">16</sys:Double>
+    <sys:Double x:Key="BfrSizeBody">14</sys:Double>
+    <sys:Double x:Key="BfrSizeCaption">12</sys:Double>
+
+    <!-- Hình khối: lưới 4 px -->
+    <CornerRadius x:Key="BfrRadiusCard">20</CornerRadius>
+    <CornerRadius x:Key="BfrRadiusControl">12</CornerRadius>
+    <CornerRadius x:Key="BfrRadiusPill">999</CornerRadius>
+    <sys:Double x:Key="BfrSpace1">4</sys:Double>
+    <sys:Double x:Key="BfrSpace2">8</sys:Double>
+    <sys:Double x:Key="BfrSpace3">12</sys:Double>
+    <sys:Double x:Key="BfrSpace4">16</sys:Double>
+    <sys:Double x:Key="BfrSpace5">20</sys:Double>
+    <sys:Double x:Key="BfrSpace6">24</sys:Double>
+    <sys:Double x:Key="BfrSpace8">32</sys:Double>
+    <Thickness x:Key="BfrPadCard">20</Thickness>
+    <Thickness x:Key="BfrPadControl">14,10</Thickness>
+    <Thickness x:Key="BfrPadField">12,9</Thickness>
+    <Thickness x:Key="BfrPadChip">11,4</Thickness>
+
+    <!-- Chuyển động (spec mục 3.3): phản hồi 90 ms, chuyển cảnh 220 ms, thành công 600 ms.
+         Thời lượng thật nằm ở Infrastructure/DurationExtension.cs (storyboard trong Style không dùng được DynamicResource);
+         các khoá dưới đây chỉ để tài liệu và code-behind (chuyển trang) dùng. -->
+    <Duration x:Key="BfrDurFast">0:0:0.09</Duration>
+    <Duration x:Key="BfrDurBase">0:0:0.22</Duration>
+    <Duration x:Key="BfrDurSlow">0:0:0.6</Duration>
+    <CubicEase x:Key="BfrEaseOut" EasingMode="EaseOut" />
+</ResourceDictionary>

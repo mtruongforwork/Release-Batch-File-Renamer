@@ -8,7 +8,7 @@ using System.Text.Json;
 /// </summary>
 public static class RuleFactory
 {
-    public static IRule Create(RuleDefinition def, bool allowExtensionChange = false)
+    public static IRule Create(RuleDefinition def, bool allowExtensionChange = false, int maxListRows = int.MaxValue)
     {
         var enabled = def.Enabled;
         return def.Type switch
@@ -22,9 +22,27 @@ public static class RuleFactory
             "Date" => CreateDate(def, enabled),
             "Extension" => CreateExtension(def, enabled, allowExtensionChange),
             "Template" => new TemplateRule { Enabled = enabled, Template = S(def, "template") ?? "{name}" },
+            "ListMap" => CreateListMap(def, enabled, maxListRows),
+            "ReplaceDict" => new ReplaceDictRule
+            {
+                Enabled = enabled,
+                IgnoreCase = !def.Params.ContainsKey("ignoreCase") || B(def, "ignoreCase"),
+                MaxRows = maxListRows,
+                Pairs = S(def, "pairs") ?? string.Empty
+            },
             _ => throw new ArgumentException($"Loại quy tắc không hỗ trợ: {def.Type}")
         };
     }
+
+    private static ListMapRule CreateListMap(RuleDefinition d, bool enabled, int maxListRows) => new()
+    {
+        Enabled = enabled,
+        Mode = Enum.TryParse<ListMapRule.ListMode>(S(d, "mode"), true, out var mode) ? mode : ListMapRule.ListMode.Map,
+        MatchBy = Enum.TryParse<ListMapRule.MatchTarget>(S(d, "matchBy"), true, out var by) ? by : ListMapRule.MatchTarget.Name,
+        IgnoreCase = !d.Params.ContainsKey("ignoreCase") || B(d, "ignoreCase"),
+        MaxRows = maxListRows,
+        Mapping = S(d, "mapping") ?? string.Empty
+    };
 
     private static FindReplaceRule CreateFindReplace(RuleDefinition d, bool enabled) => new()
     {

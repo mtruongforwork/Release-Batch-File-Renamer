@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 /// </summary>
 public sealed class TokenEngine
 {
-    private static readonly Regex TokenRegex = new(@"\{([^{}]+)\}", RegexOptions.Compiled);
+    private static readonly Regex TokenRegex = new(@"\{([^{}]+)\}", RegexOptions.Compiled, RegexLimits.Timeout);
 
     public string Expand(string template, FileItem file, RenameState state, RuleContext ctx, ICollection<string>? errors = null)
     {
@@ -23,7 +23,7 @@ public sealed class TokenEngine
             var value = Resolve(token, file, state, ctx, out var missing);
             if (value is null)
             {
-                errors?.Add(missing ?? $"Token không hợp lệ: {{{token}}}");
+                errors?.Add(missing ?? CoreText.Get("CoreInvalidToken", "Token không hợp lệ: {0}", "{" + token + "}"));
                 return match.Value; // giữ nguyên token
             }
             return value;
@@ -63,7 +63,7 @@ public sealed class TokenEngine
                 {
                     return FormatDate(DateTime.Parse(taken, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), arg);
                 }
-                missing = "Thiếu dữ liệu: {taken}";
+                missing = CoreText.Get("CoreMissingData", "Thiếu dữ liệu: {0}", "{taken}");
                 return null;
             }
             case "media":
@@ -73,7 +73,22 @@ public sealed class TokenEngine
                 {
                     return FormatDate(DateTime.Parse(media, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), arg);
                 }
-                missing = "Thiếu dữ liệu: {media}";
+                missing = CoreText.Get("CoreMissingData", "Thiếu dữ liệu: {0}", "{media}");
+                return null;
+            }
+            case "artist" or "album" or "title" or "track":
+            {
+                var metadata = ctx.MetadataFor(file);
+                if (metadata is not null && metadata.TryGetValue(name, out var tag))
+                {
+                    var clean = OrganizeTemplate.SanitizeSegment(tag);
+                    if (clean.Length > 0)
+                    {
+                        var width = name == "track" ? ParseInt(arg, 0) : 0;
+                        return width > 0 && clean.All(char.IsDigit) ? clean.PadLeft(width, '0') : clean;
+                    }
+                }
+                missing = CoreText.Get("CoreMissingData", "Thiếu dữ liệu: {0}", "{" + name + "}");
                 return null;
             }
             case "size":
@@ -84,7 +99,7 @@ public sealed class TokenEngine
                 return RandomString(ctx.RandomSeed, state.Index, len);
             }
             default:
-                missing = $"Token không hợp lệ: {{{token}}}";
+                missing = CoreText.Get("CoreInvalidToken", "Token không hợp lệ: {0}", "{" + token + "}");
                 return null;
         }
     }

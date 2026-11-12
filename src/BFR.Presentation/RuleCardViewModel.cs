@@ -14,7 +14,9 @@ public enum RuleParameterKind
     Text,
     Number,
     Toggle,
-    Choice
+    Choice,
+    /// <summary>Ô nhập nhiều dòng (danh sách dán từ Excel).</summary>
+    Multiline
 }
 
 /// <summary>
@@ -72,6 +74,9 @@ public static class RuleOptionLabels
         "Taken" => s.T("OptionTaken"),
         "Media" => s.T("OptionMedia"),
         "Now" => s.T("OptionNow"),
+        "Map" => s.T("OptionListMap"),
+        "ByOrder" => s.T("OptionListByOrder"),
+        "FileName" => s.T("OptionFileName"),
         _ => value
     };
 }
@@ -104,6 +109,9 @@ public sealed class RuleParameterViewModel : ObservableObject
     public string Label { get; }
 
     public RuleParameterKind Kind { get; }
+
+    /// <summary>True nếu tham số là danh sách có thể nhập từ tệp CSV/TXT (nút "Nhập từ tệp").</summary>
+    public bool CanImportFile => Kind == RuleParameterKind.Multiline && Key is "mapping" or "pairs";
 
     /// <summary>Các lựa chọn (giá trị thô + nhãn đã địa phương hóa).</summary>
     public IReadOnlyList<RuleParameterOption> Options { get; }
@@ -338,7 +346,8 @@ public sealed class RuleCardViewModel : ObservableObject
     /// <summary>Danh sách loại quy tắc có thể thêm (dùng cho flyout "+ Thêm quy tắc").</summary>
     public static IReadOnlyList<string> AllRuleTypes { get; } = new[]
     {
-        "FindReplace", "Numbering", "Trim", "Insert", "Case", "Sanitize", "Date", "Extension", "Template"
+        "FindReplace", "Numbering", "Trim", "Insert", "Case", "Sanitize", "Date", "Extension", "Template",
+        "ListMap", "ReplaceDict"
     };
 
     private static IEnumerable<RuleParameterViewModel> BuildParameters(RuleDefinition rule, IStringProvider s)
@@ -423,6 +432,20 @@ public sealed class RuleCardViewModel : ObservableObject
             case "Template":
                 yield return new RuleParameterViewModel(rule, "template", s.T("ParamTemplateText"), RuleParameterKind.Text, strings: s);
                 break;
+
+            case "ListMap":
+                yield return new RuleParameterViewModel(rule, "mode", s.T("ParamListMode"), RuleParameterKind.Choice,
+                    new[] { "Map", "ByOrder" }, s);
+                yield return new RuleParameterViewModel(rule, "matchBy", s.T("ParamListMatchBy"), RuleParameterKind.Choice,
+                    new[] { "Name", "FileName" }, s);
+                yield return new RuleParameterViewModel(rule, "ignoreCase", s.T("ParamFindReplaceIgnoreCase"), RuleParameterKind.Toggle, strings: s);
+                yield return new RuleParameterViewModel(rule, "mapping", s.T("ParamListMapping"), RuleParameterKind.Multiline, strings: s);
+                break;
+
+            case "ReplaceDict":
+                yield return new RuleParameterViewModel(rule, "ignoreCase", s.T("ParamFindReplaceIgnoreCase"), RuleParameterKind.Toggle, strings: s);
+                yield return new RuleParameterViewModel(rule, "pairs", s.T("ParamReplaceDictPairs"), RuleParameterKind.Multiline, strings: s);
+                break;
         }
     }
 }
@@ -444,6 +467,8 @@ public static class RuleTitles
                 "Date" => s.T("RuleTypeDate"),
                 "Extension" => s.T("RuleTypeExtension"),
                 "Template" => s.T("RuleTypeTemplate"),
+                "ListMap" => s.T("RuleTypeListMap"),
+                "ReplaceDict" => s.T("RuleTypeReplaceDict"),
                 _ => type
             };
 }
@@ -490,6 +515,8 @@ public static class RuleSummaries
             "Date" => s.F("RuleSummaryDate", O("source"), P("format")),
             "Extension" => s.F("RuleSummaryExtension", O("mode")),
             "Template" => s.F("RuleSummaryTemplate", P("template", "{name}")),
+            "ListMap" => s.F("RuleSummaryListMap", ListParser.CountRows(P("mapping")), O("mode")),
+            "ReplaceDict" => s.F("RuleSummaryReplaceDict", ListParser.CountRows(P("pairs"))),
             _ => string.Empty
         };
     }

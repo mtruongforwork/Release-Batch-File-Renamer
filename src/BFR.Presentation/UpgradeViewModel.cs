@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 /// <summary>Trạng thái của hộp thoại nâng cấp Pro.</summary>
 public enum UpgradeState
 {
-    /// <summary>Chưa dùng thử: có cả "Mua Pro" và "Dùng thử Pro 14 ngày".</summary>
+    /// <summary>Chưa dùng thử: có cả "Mua Pro" và "Dùng thử Pro 30 ngày".</summary>
     NotTrialed,
 
     /// <summary>Đang dùng thử: ẩn nút dùng thử, hiện số ngày còn lại.</summary>
@@ -260,6 +260,18 @@ public sealed class UpgradeViewModel : ObservableObject
         ProFeature.ReportExport => "FeatureReportExport",
         ProFeature.CommandLine => "FeatureCommandLine",
         ProFeature.RomanNumbering => "FeatureUnlimitedRules",
+        ProFeature.UnlimitedShelf => "FeatureUnlimitedShelf",
+        ProFeature.UnlimitedListRows => "FeatureUnlimitedListRows",
+        ProFeature.ListCsvImport => "FeatureListCsvImport",
+        ProFeature.OrganizeDeepTemplate => "FeatureOrganizeDeep",
+        ProFeature.DuplicatesUnlimited => "FeatureDuplicatesUnlimited",
+        ProFeature.SimilarImages or ProFeature.HardLinkDedupe => "FeatureSimilarImages",
+        ProFeature.ImageUnlimited => "FeatureImageUnlimited",
+        ProFeature.ExifWrite => "FeatureExifWrite",
+        ProFeature.ArchiveAdvanced => "FeatureArchiveAdvanced",
+        ProFeature.AnalyzeExport => "FeatureAnalyzeExport",
+        ProFeature.Workflow => "FeatureWorkflow",
+        ProFeature.QuarantineRetention => "FeatureQuarantineRetention",
         _ => "FeatureUnlimitedRules"
     };
 
@@ -311,6 +323,66 @@ public sealed class UpgradeViewModel : ObservableObject
                 s.T("FeatureNotIncluded"),
                 s.T("FeatureIncluded"),
                 free.AllowCommandLine,
+                true),
+            new(
+                s.T("FeatureUnlimitedShelf"),
+                s.F("FeatureLimitShelf", free.MaxShelfItems),
+                s.T("FeatureUnlimited"),
+                free.MaxShelfItems == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureUnlimitedListRows"),
+                s.F("FeatureLimitListRows", free.MaxListRows),
+                s.T("FeatureUnlimited"),
+                free.MaxListRows == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureListCsvImport"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowListCsvImport,
+                true),
+            new(
+                s.T("FeatureOrganizeDeep"),
+                s.F("FeatureLimitOrganizeDepth", free.MaxOrganizeDepth),
+                s.T("FeatureUnlimited"),
+                free.MaxOrganizeDepth == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureDuplicatesUnlimited"),
+                s.F("FeatureLimitDuplicates", free.MaxDuplicateFiles),
+                s.T("FeatureUnlimited"),
+                free.MaxDuplicateFiles == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureSimilarImages"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowSimilarImages,
+                true),
+            new(
+                s.T("FeatureImageUnlimited"),
+                s.F("FeatureLimitImages", free.MaxImagesPerBatch),
+                s.T("FeatureUnlimited"),
+                free.MaxImagesPerBatch == int.MaxValue,
+                true),
+            new(
+                s.T("FeatureArchiveAdvanced"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowArchiveAdvanced,
+                true),
+            new(
+                s.T("FeatureAnalyzeExport"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowAnalyzeExport,
+                true),
+            new(
+                s.T("FeatureWorkflow"),
+                s.T("FeatureNotIncluded"),
+                s.T("FeatureIncluded"),
+                free.AllowWorkflow,
                 true)
         };
     }

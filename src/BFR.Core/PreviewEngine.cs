@@ -14,6 +14,12 @@ public sealed class PreviewEngine
     private readonly ConflictDetector _detector;
     private readonly IMetadataProvider? _metadataProvider;
 
+    /// <summary>Tự thêm hậu tố " (2)"… khi tên mới trùng (B3). Mặc định tắt.</summary>
+    public bool AutoResolveConflicts { get; init; }
+
+    /// <summary>Số tệp đã được tự đổi tên khác ở lượt Run gần nhất.</summary>
+    public int AutoResolvedCount { get; private set; }
+
     public PreviewEngine(
         RulePipeline pipeline,
         NameValidator? validator = null,
@@ -49,6 +55,16 @@ public sealed class PreviewEngine
         }
 
         var raw = _pipeline.Run(files, ctx, ct);
+        AutoResolvedCount = 0;
+        if (AutoResolveConflicts)
+        {
+            var resolved = ConflictResolver.Resolve(raw.Items, item =>
+                outsideByDirectory is not null
+                    ? (outsideByDirectory.TryGetValue(ConflictDetector.NormalizeDirectory(item.File.Directory), out var names) ? names : null)
+                    : outsideBatchNames);
+            AutoResolvedCount = resolved.ResolvedCount;
+            raw = raw with { Items = resolved.Items };
+        }
         var conflicts = outsideByDirectory is not null
             ? _detector.Detect(raw.Items, outsideByDirectory)
             : _detector.Detect(raw.Items, outsideBatchNames ?? new HashSet<string>(System.StringComparer.OrdinalIgnoreCase));
@@ -76,7 +92,7 @@ public sealed class PreviewEngine
             if (issue != NameIssue.None)
             {
                 status = issue == NameIssue.PathTooLong ? PreviewStatus.PathTooLong : PreviewStatus.InvalidName;
-                detail = $"Tên không hợp lệ: {issue}";
+                detail = CoreText.Get("CoreInvalidName", "Tên không hợp lệ: {0}", issue);
             }
 
             var conflict = conflicts[i];
@@ -88,11 +104,18 @@ public sealed class PreviewEngine
                 detail = conflict.Message ?? conflict.Type.ToString();
             }
 
+            // Vùng hệ thống được bảo vệ (C10): ghi đè mọi trạng thái cần thay đổi để không bao giờ áp dụng.
+            if (status != PreviewStatus.Unchanged && ProtectedZones.Default.TryGetReason(item.File.FullPath, out _))
+            {
+                status = PreviewStatus.Protected;
+                detail = CoreText.Get("CoreProtectedZone", "Nằm trong vùng hệ thống được bảo vệ");
+            }
+
             items.Add(item with { Status = status, Detail = detail });
         }
 
         var hasBlocking = items.Any(i =>
-            i.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong);
+            i.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong or PreviewStatus.Protected);
 
         return new PreviewResult(items, hasBlocking);
     }

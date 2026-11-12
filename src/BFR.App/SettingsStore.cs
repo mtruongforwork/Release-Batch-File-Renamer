@@ -24,8 +24,37 @@ public sealed class AppSettings
     /// <summary>Preset dùng cho Watch Folder.</summary>
     public string? WatchPreset { get; set; }
 
+    /// <summary>
+    /// Lắc chuột khi đang kéo tệp để mở Shelf (dùng hook chuột toàn cục).
+    /// Mặc định TẮT theo nguyên tắc opt-in.
+    /// </summary>
+    public bool ShakeToOpenShelf { get; set; } = false;
+
+    /// <summary>Phím tắt toàn cục mở Shelf (B4). Mặc định TẮT.</summary>
+    public bool ShelfHotkeyEnabled { get; set; } = false;
+
+    /// <summary>Tổ hợp phím, ví dụ "Ctrl+Alt+Space" (xem <c>HotkeySpec.Presets</c>).</summary>
+    public string ShelfHotkey { get; set; } = "Ctrl+Shift+Space";
+
+    /// <summary>Phím tắt toàn cục mở menu tròn các công cụ. Mặc định TẮT (opt-in).</summary>
+    public bool RadialHotkeyEnabled { get; set; } = false;
+
+    public string RadialHotkey { get; set; } = "Ctrl+Alt+Q";
+
+    /// <summary>
+    /// Chạy nền ở khay hệ thống: đóng cửa sổ chính chỉ ẩn đi, ứng dụng vẫn chạy
+    /// (cần cho lắc chuột mở Shelf khi không mở cửa sổ). Mặc định TẮT.
+    /// </summary>
+    public bool RunInBackground { get; set; } = false;
+
     /// <summary>Giao diện: "System", "Light" hoặc "Dark".</summary>
     public string Theme { get; set; } = "System";
+
+    /// <summary>Bảng màu nhấn: "Aurora" (mặc định), "Mint" hoặc "Sunset".</summary>
+    public string AccentPalette { get; set; } = "Aurora";
+
+    /// <summary>Hiện linh vật Tem (trang chủ, trạng thái rỗng). Mặc định bật.</summary>
+    public bool ShowMascot { get; set; } = true;
 
     /// <summary>Số lần đổi tên thành công (dùng để gợi ý đánh giá Store sau 2 lần).</summary>
     public int SuccessfulRenameCount { get; set; } = 0;
@@ -35,6 +64,15 @@ public sealed class AppSettings
 
     /// <summary>Giá hiển thị của Pro (dự phòng khi Store không trả giá). Không hard-code trong mã nguồn.</summary>
     public string? ProPriceText { get; set; }
+
+    /// <summary>Số ngày giữ lịch sử, journal hoàn tác và nhật ký (C8). Chỉ nhận các giá trị trong <see cref="RetentionChoices"/>.</summary>
+    public int HistoryRetentionDays { get; set; } = 30;
+
+    public static readonly int[] RetentionChoices = { 7, 30, 90, 365 };
+
+    /// <summary>Đưa giá trị bất kỳ (kể cả từ tệp bị sửa) về một lựa chọn hợp lệ gần nhất; mặc định 30.</summary>
+    public static int NormalizeRetentionDays(int days) =>
+        Array.IndexOf(RetentionChoices, days) >= 0 ? days : 30;
 }
 
 /// <summary>

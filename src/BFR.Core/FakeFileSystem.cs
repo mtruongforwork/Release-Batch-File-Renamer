@@ -34,9 +34,15 @@ public sealed class FakeFileSystem : IFileSystem
         if (ThrowOnMove || FailOnMovePaths.Contains(f))
             throw new IOException(MoveExceptionMessage ?? "Lỗi giả lập");
         var t = Normalize(to);
-        if (!_files.TryRemove(f, out var content)) throw new FileNotFoundException("Tệp không tồn tại", from);
-        if (_files.ContainsKey(t) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
-        _files[t] = content;
+        // Kiểm tra trước khi gỡ nguồn: một lần Move thất bại không được làm mất tệp (giống hệ thống tệp thật).
+        if (!_files.ContainsKey(f)) throw new FileNotFoundException("Tệp không tồn tại", from);
+        // Đổi chữ hoa/thường của chính tệp đó không phải xung đột (hệ thống tệp thật cho phép).
+        if (!string.Equals(f, t, StringComparison.OrdinalIgnoreCase) && _files.ContainsKey(t) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
+        _files.TryRemove(f, out var content);
+        _files[t] = content!;
+        // Di chuyển giữ nguyên ngày giờ và thuộc tính (như hệ thống tệp thật); đích cũ bị ghi đè mất giá trị của nó.
+        if (_times.TryRemove(f, out var times)) _times[t] = times; else _times.TryRemove(t, out _);
+        if (_attributes.TryRemove(f, out var attrs)) _attributes[t] = attrs; else _attributes.TryRemove(t, out _);
         EnsureDirectory(ParentDirectory(t));
     }
 
@@ -46,6 +52,7 @@ public sealed class FakeFileSystem : IFileSystem
         if (prefix.Length > 0 && !prefix.EndsWith('/')) prefix += "/";
         return _files.Keys
             .Where(k => k.StartsWith(prefix))
+            .Where(k => recursive || !k[prefix.Length..].Contains('/'))
             .Where(k => MatchesPattern(System.IO.Path.GetFileName(k), pattern))
             .ToArray();
     }
@@ -114,6 +121,102 @@ public sealed class FakeFileSystem : IFileSystem
     public long GetLength(string path) => _files.TryGetValue(Normalize(path), out var b) ? b.Length : 0;
     public DateTime GetCreationTimeUtc(string path) => System.DateTime.UtcNow;
     public DateTime GetLastWriteTimeUtc(string path) => System.DateTime.UtcNow;
+
+    private readonly ConcurrentDictionary<string, FileTimes> _times = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, FileAttributes> _attributes = new(StringComparer.OrdinalIgnoreCase);
+
+    public void Copy(string from, string to, bool overwrite)
+    {
+        var f = Normalize(from);
+        var t = Normalize(to);
+        if (!_files.TryGetValue(f, out var content)) throw new FileNotFoundException("Tệp không tồn tại", from);
+        if (_files.ContainsKey(t) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
+        _files[t] = (byte[])content.Clone();
+        if (_times.TryGetValue(f, out var times)) _times[t] = times; else _times.TryRemove(t, out _);
+        if (_attributes.TryGetValue(f, out var attrs)) _attributes[t] = attrs; else _attributes.TryRemove(t, out _);
+        EnsureDirectory(ParentDirectory(t));
+    }
+
+    public FileTimes GetTimes(string path)
+    {
+        var p = Normalize(path);
+        if (!_files.ContainsKey(p) && !DirectoryExists(path)) throw new FileNotFoundException("Tệp không tồn tại", path);
+        var now = System.DateTime.UtcNow;
+        return _times.GetOrAdd(p, _ => FileTimes.From(now, now, now));
+    }
+
+    public void SetTimes(string path, FileTimes times)
+    {
+        var p = Normalize(path);
+        if (!_files.ContainsKey(p) && !DirectoryExists(path)) throw new FileNotFoundException("Tệp không tồn tại", path);
+        _times[p] = times;
+    }
+
+    public FileAttributes GetAttributes(string path)
+    {
+        var p = Normalize(path);
+        if (!_files.ContainsKey(p) && !DirectoryExists(path)) throw new FileNotFoundException("Tệp không tồn tại", path);
+        return _attributes.TryGetValue(p, out var a) ? a : FileAttributes.Normal;
+    }
+
+    public void SetAttributes(string path, FileAttributes attributes)
+    {
+        var p = Normalize(path);
+        if (!_files.ContainsKey(p) && !DirectoryExists(path)) throw new FileNotFoundException("Tệp không tồn tại", path);
+        _attributes[p] = attributes;
+    }
+
+    private readonly HashSet<string> _links = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Đánh dấu một đường dẫn là symlink/junction (cho test).</summary>
+    public void MarkLink(string path) => _links.Add(Normalize(path));
+
+    public bool IsLink(string path) => _links.Contains(Normalize(path));
+
+    public Stream OpenRead(string path) =>
+        _files.TryGetValue(Normalize(path), out var bytes)
+            ? new MemoryStream(bytes, writable: false)
+            : throw new FileNotFoundException("Tệp không tồn tại", path);
+
+    public Stream OpenWrite(string path)
+    {
+        var p = Normalize(path);
+        EnsureDirectory(ParentDirectory(p));
+        _files[p] = Array.Empty<byte>();
+        return new CommitStream(bytes => _files[p] = bytes);
+    }
+
+    /// <summary>Luồng ghi trong bộ nhớ, ghi kết quả vào hệ thống tệp giả khi đóng.</summary>
+    private sealed class CommitStream : MemoryStream
+    {
+        private readonly Action<byte[]> _commit;
+        private bool _done;
+
+        public CommitStream(Action<byte[]> commit) { _commit = commit; }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_done) { _done = true; _commit(ToArray()); }
+            base.Dispose(disposing);
+        }
+    }
+
+    /// <summary>Ghi nội dung nhị phân (cho test).</summary>
+    public void WriteAllBytes(string path, byte[] content)
+    {
+        var p = Normalize(path);
+        EnsureDirectory(ParentDirectory(p));
+        _files[p] = (byte[])content.Clone();
+    }
+
+    public bool IsDirectoryEmpty(string path)
+    {
+        var p = Normalize(path);
+        if (!DirectoryExists(path)) return false;
+        var prefix = p + "/";
+        return !_files.Keys.Any(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            && !_dirs.Any(d => d.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+    }
 
     static string Normalize(string p) => p.Replace('\\', '/').TrimEnd('/');
 

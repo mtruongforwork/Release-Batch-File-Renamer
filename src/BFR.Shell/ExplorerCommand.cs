@@ -66,15 +66,16 @@ public sealed class ExplorerCommand : IExplorerCommand
 
     public int GetFlags(out uint pFlags)
     {
-        // ECF_DEFAULT = 0
-        pFlags = 0;
+        // ECF_HASSUBCOMMANDS = 1: menu cha mở ra menu con (Mở trong BFR + các preset đổi tên nhanh).
+        pFlags = 1;
         return HResult.S_OK;
     }
 
     public int EnumSubCommands(out IntPtr ppEnum)
     {
-        ppEnum = IntPtr.Zero;
-        return HResult.E_NOTIMPL;
+        var commands = ExplorerSubCommand.BuildAll();
+        ppEnum = Marshal.GetComInterfaceForObject(new EnumExplorerCommand(commands), typeof(IEnumExplorerCommandServer));
+        return HResult.S_OK;
     }
 
     public int Invoke(IShellItemArray? psiItemArray, IntPtr pbc)
@@ -93,7 +94,7 @@ public sealed class ExplorerCommand : IExplorerCommand
     private static bool IsVietnamese() =>
         CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("vi", StringComparison.OrdinalIgnoreCase);
 
-    private static List<string> CollectPaths(IShellItemArray? itemArray)
+    internal static List<string> CollectPaths(IShellItemArray? itemArray)
     {
         var paths = new List<string>();
         if (itemArray is null) return paths;
@@ -182,10 +183,18 @@ public static class ExplorerCommandLauncher
         return filePath;
     }
 
-    public static int Launch(IReadOnlyCollection<string> paths)
+    public const string QuickArgument = "--quick";
+    public const string ToolArgument = "--tool";
+
+    /// <param name="quickKey">Khoá preset đổi tên nhanh; null = mở BFR bình thường.</param>
+    /// <param name="toolKey">Khoá công cụ tệp (organize, duplicates...); mở trang Công cụ với các tệp đã chọn.</param>
+    public static int Launch(IReadOnlyCollection<string> paths, string? quickKey = null, string? toolKey = null)
     {
         var app = FindAppExecutable();
         if (app is null) return HResult.E_FILE_NOT_FOUND;
+
+        // Đổi tên nhanh mà không có tệp nào được chọn (ví dụ bấm vào nền thư mục): không làm gì.
+        if ((quickKey is not null || toolKey is not null) && paths.Count == 0) return HResult.S_OK;
 
         string? listPath = null;
         try
@@ -202,6 +211,18 @@ public static class ExplorerCommandLauncher
                 listPath = WriteFileList(paths);
                 startInfo.ArgumentList.Add(FileListArgument);
                 startInfo.ArgumentList.Add(listPath);
+            }
+
+            if (quickKey is not null)
+            {
+                startInfo.ArgumentList.Add(QuickArgument);
+                startInfo.ArgumentList.Add(quickKey);
+            }
+
+            if (toolKey is not null)
+            {
+                startInfo.ArgumentList.Add(ToolArgument);
+                startInfo.ArgumentList.Add(toolKey);
             }
 
             Process.Start(startInfo);

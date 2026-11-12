@@ -89,7 +89,7 @@ Cổng nghiệm thu: **QA-09, QA-14, QA-15** và **IAP chạy đúng**.
 | **Tổng** | **127** | **127/127 pass** |
 
 Test mới của Giai đoạn 3 (`tests/BFR.Core.Tests/Phase3Tests.cs`, `Phase3CliTests.cs`):
-- Giấy phép: mặc định Free, sau khi mua thì Pro, dùng thử 14 ngày và không dùng lại được, giới hạn rule/depth/preset, móc dev chỉ hoạt động ngoài Store.
+- Giấy phép: mặc định Free, sau khi mua thì Pro, dùng thử 30 ngày và không dùng lại được, giới hạn rule/depth/preset, móc dev chỉ hoạt động ngoài Store.
 - IAP: Store báo đã mua → cấp Pro; mua thành công → ghi quyền; huỷ mua → giữ nguyên Free; Store không khả dụng → `NotSupported`.
 - QA-09: EXIF có/không → dùng đúng chuỗi dự phòng và ghi rõ nguồn; media có/không.
 - QA-14: tệp offline không bị đọc; phát hiện đúng thuộc tính placeholder.

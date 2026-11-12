@@ -25,7 +25,7 @@ public sealed class DateRule : IRule
 
         var (value, usedSource) = ResolveDate(file, ctx);
         var formatted = value.ToString(Format, CultureInfo.InvariantCulture);
-        if (usedSource != Source) trace.Add($"{Id}: dự phòng {usedSource}");
+        if (usedSource != Source) trace.Add($"{Id}: " + CoreText.Get("CoreDateFallback", "dự phòng {0}", usedSource));
 
         var result = Position switch
         {

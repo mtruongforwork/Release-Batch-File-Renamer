@@ -2,8 +2,9 @@
     [string]$WorkDir = "$env:TEMP\bfr-ui-smoke"
 )
 
-# Smoke test tự động cho luồng chính của giao diện v2.0:
-# Thêm tệp → Xem trước → Áp dụng (có xác nhận) → Hoàn tác.
+# Smoke test tự động cho luồng chính của giao diện v1.4 (thanh điều hướng trái, hộp thoại trong cửa sổ):
+# Thêm tệp → Xem trước → Áp dụng (có xác nhận) → Hoàn tác, Command Palette, Regex tester, thư viện quy tắc,
+# đổi thứ tự quy tắc và các trang Khay tệp / Lịch sử / Preset / Theo dõi / Cài đặt.
 # Dùng UI Automation (không cần FlaUI/WinAppDriver).
 
 $ErrorActionPreference = 'Stop'
@@ -99,11 +100,26 @@ foreach ($n in $names) { [System.IO.File]::WriteAllText((Join-Path $WorkDir $n),
 $list = Join-Path $WorkDir 'list.txt'
 $names | ForEach-Object { Join-Path $WorkDir $_ } | Set-Content -LiteralPath $list -Encoding UTF8
 
+# ---------------------------------------------------------------- bảo vệ dữ liệu thật của người dùng
+# App ghi lịch sử/nhật ký vào %LOCALAPPDATA%\BatchFileRenamer (dùng chung cả khi chạy MSIX). Sao lưu rồi khôi phục;
+# chạy bằng tier Pro để việc đổi tên thử không cắt bớt lịch sử của gói Free.
+$appData = Join-Path $env:LOCALAPPDATA 'BatchFileRenamer'
+$appBackup = Join-Path $env:TEMP ('bfr-smoke-backup-' + [guid]::NewGuid().ToString('N'))
+$hadAppData = Test-Path $appData
+if ($hadAppData) { Copy-Item $appData $appBackup -Recurse -Force }
+New-Item -ItemType Directory -Force $appData | Out-Null
+[System.IO.File]::WriteAllText((Join-Path $appData 'settings.json'),
+    '{"Language":"vi","Theme":"Light","CheckForUpdates":false,"ShelfHotkeyEnabled":false}',
+    (New-Object System.Text.UTF8Encoding($false)))
+$env:BFR_DEV_TIER = 'pro'
+
 # ---------------------------------------------------------------- chạy app
 Get-Process BatchFileRenamer -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 $exe = (Resolve-Path 'src\BFR.App\bin\Release\net8.0-windows10.0.19041.0\BatchFileRenamer.exe').Path
 $proc = Start-Process -FilePath $exe -ArgumentList ('--file-list "' + $list + '" --preset "Đánh số theo thứ tự"') -PassThru
-Start-Sleep -Seconds 7
+# Khởi động lạnh có thể chậm: chờ tới khi cửa sổ xuất hiện (tối đa 30 giây).
+for ($i = 0; $i -lt 60 -and -not (Get-AppWindow $proc.Id); $i++) { Start-Sleep -Milliseconds 500 }
+Start-Sleep -Seconds 3
 
 $failures = New-Object System.Collections.Generic.List[string]
 try {
@@ -123,17 +139,22 @@ try {
         if ($rows.Count -lt 3) { $failures.Add("Bảng xem trước thiếu dòng (có $($rows.Count)).") }
     }
 
-    # 2) Mở tuỳ chọn của thẻ quy tắc (accordion tại chỗ)
+    # 2) Mở tuỳ chọn của thẻ quy tắc (menu ⋯ → Mở tuỳ chọn): form tham số hiện tại chỗ
     $editsBefore = Count-Edits $win
-
-    $expand = Find-Descendant $win 'Mở tuỳ chọn của quy tắc'
-    if ($null -eq $expand) { $failures.Add("Không tìm thấy nút mở tuỳ chọn quy tắc.") }
+    $actions = Find-Button $win 'Rule actions'
+    if ($null -eq $actions) { $failures.Add("Không tìm thấy nút menu thao tác quy tắc.") }
     else {
-        Invoke-Element $expand
-        $opened = Wait-For { (Count-Edits $win) -gt $editsBefore }
-        $editsAfter = Count-Edits $win
-        if (-not $opened) { $failures.Add("Mở tuỳ chọn quy tắc không hiện form tham số (ô nhập: $editsBefore -> $editsAfter).") }
-        else { Write-Output "OK  mở rộng thẻ quy tắc tại chỗ (ô nhập: $editsBefore -> $editsAfter)" }
+        Invoke-Element $actions
+        $script:expand = $null
+        [void](Wait-For { $script:expand = Find-Descendant ([System.Windows.Automation.AutomationElement]::RootElement) 'Rule menu expand'; $null -ne $script:expand } 3000)
+        if ($null -eq $script:expand) { $failures.Add("Menu quy tắc thiếu mục mở tuỳ chọn.") }
+        else {
+            Invoke-Element $script:expand
+            $opened = Wait-For { (Count-Edits $win) -gt $editsBefore }
+            $editsAfter = Count-Edits $win
+            if (-not $opened) { $failures.Add("Mở tuỳ chọn quy tắc không hiện form tham số (ô nhập: $editsBefore -> $editsAfter).") }
+            else { Write-Output "OK  mở rộng thẻ quy tắc tại chỗ (ô nhập: $editsBefore -> $editsAfter)" }
+        }
     }
 
     # 3) Lọc + tìm kiếm
@@ -155,17 +176,13 @@ try {
         Invoke-Element $apply
         Start-Sleep -Seconds 2
 
-        $confirm = Get-AppWindow $proc.Id
-        $confirmWin = $root = [System.Windows.Automation.AutomationElement]::RootElement
-        $cond = New-Object System.Windows.Automation.PropertyCondition(
-            [System.Windows.Automation.AutomationElement]::NameProperty, 'Confirm apply renaming')
-        $dialog = $confirmWin.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)
-        if ($null -eq $dialog) { $failures.Add("Không mở hộp thoại xác nhận áp dụng.") }
+        # Hộp thoại xác nhận nằm trong cửa sổ chính (ContentDialog): nút chính tên "Áp dụng".
+        $script:applyBtn = $null
+        [void](Wait-For { $script:applyBtn = Find-Button $win 'Áp dụng'; $null -ne $script:applyBtn } 4000)
+        if ($null -eq $script:applyBtn) { $failures.Add("Không mở hộp thoại xác nhận áp dụng (thiếu nút Áp dụng).") }
         else {
-            Write-Output "OK  hộp thoại xác nhận: $($dialog.Current.Name)"
-            $applyBtn = Find-Descendant $dialog 'Áp dụng'
-            if ($null -eq $applyBtn) { $failures.Add("Hộp thoại xác nhận thiếu nút Áp dụng.") }
-            else { Invoke-Element $applyBtn }
+            Write-Output "OK  hộp thoại xác nhận áp dụng"
+            Invoke-Element $script:applyBtn
         }
         Start-Sleep -Seconds 4
 
@@ -232,23 +249,15 @@ public class BringToFront {
         Invoke-Element $addRule
         Start-Sleep -Milliseconds 900
 
-        # Chọn loại quy tắc "Tìm và thay" trong menu ngữ cảnh.
-        $menuItems = [System.Windows.Automation.AutomationElement]::RootElement.FindAll(
-            [System.Windows.Automation.TreeScope]::Descendants,
-            (New-Object System.Windows.Automation.AndCondition(
-                (New-Object System.Windows.Automation.PropertyCondition(
-                    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-                    [System.Windows.Automation.ControlType]::MenuItem)),
-                (New-Object System.Windows.Automation.PropertyCondition(
-                    [System.Windows.Automation.AutomationElement]::ProcessIdProperty, $proc.Id)))))
+        # Thư viện quy tắc (hộp thoại trong cửa sổ): bấm thẻ "Tìm và thay".
+        $card = Find-Button $win 'Rule card FindReplace'
         $chosen = $false
-        foreach ($item in $menuItems) {
-            if ($item.Current.Name -notmatch '^[-–—]{2,}$') { Invoke-Element $item; $chosen = $true; break }
-        }
+        if ($null -ne $card) { Invoke-Element $card; $chosen = $true }
         Start-Sleep -Milliseconds 1200
 
-        if (-not $chosen) { $failures.Add("Không chọn được loại quy tắc trong menu.") }
+        if (-not $chosen) { $failures.Add("Thư viện quy tắc không có thẻ Tìm và thay.") }
         else {
+            Write-Output "OK  thêm quy tắc từ thư viện thẻ"
             $regexBtn = Find-Button $win 'Open regex tester'
             if ($null -eq $regexBtn) { $failures.Add("Không tìm thấy nút Trình thử Regex trên thẻ quy tắc.") }
             else {
@@ -299,37 +308,57 @@ public class BringToFront {
         }
     }
 
-    # 8) Đổi thứ tự quy tắc bằng nút lên/xuống (A2)
-    $moveDown = Find-Button $win 'Move rule down'
-    if ($null -eq $moveDown) { $failures.Add("Không tìm thấy nút đưa quy tắc xuống.") }
+    # 8) Đổi thứ tự quy tắc: menu ⋯ → Đưa xuống
+    $actions = Find-Button $win 'Rule actions'
+    if ($null -eq $actions) { $failures.Add("Không tìm thấy menu thao tác quy tắc.") }
     else {
-        Invoke-Element $moveDown
-        Start-Sleep -Milliseconds 1200
-        Write-Output "OK  có nút đổi thứ tự quy tắc (kéo-thả + nút lên/xuống)"
+        Invoke-Element $actions
+        $script:moveDown = $null
+        [void](Wait-For { $script:moveDown = Find-Descendant ([System.Windows.Automation.AutomationElement]::RootElement) 'Rule menu move down'; $null -ne $script:moveDown } 3000)
+        if ($null -eq $script:moveDown) { $failures.Add("Menu quy tắc thiếu mục đưa xuống.") }
+        else {
+            Invoke-Element $script:moveDown
+            Start-Sleep -Milliseconds 1000
+            Write-Output "OK  đổi thứ tự quy tắc bằng menu"
+        }
     }
 
-    # 9) Trang cài đặt + nút kiểm tra cập nhật (A3)
-    $settingsBtn = Find-Button $win 'Open settings'
-    if ($null -eq $settingsBtn) { $failures.Add("Không tìm thấy nút cài đặt.") }
+    # 9) Các trang của thanh điều hướng trái: mỗi chức năng một trang
+    function Select-Nav([string]$name) {
+        $nav = Find-Descendant $win $name
+        if ($null -eq $nav) { return $false }
+        try { $nav.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select() }
+        catch { Invoke-Element $nav }
+        Start-Sleep -Milliseconds 900
+        return $true
+    }
+
+    foreach ($page in 'Nav shelf', 'Nav history', 'Nav presets', 'Nav watch folder') {
+        if (-not (Select-Nav $page)) { $failures.Add("Không tìm thấy mục điều hướng '$page'.") }
+        elseif ($proc.HasExited) { $failures.Add("App thoát khi mở trang '$page'.") }
+        else { Write-Output "OK  mở trang '$page'" }
+    }
+
+    if (-not (Select-Nav 'Nav settings')) { $failures.Add("Không tìm thấy mục điều hướng cài đặt.") }
     else {
-        Invoke-Element $settingsBtn
-        Start-Sleep -Seconds 2
-        $settings = Find-Dialog $win 'Settings window'
-        if ($null -eq $settings) { $failures.Add("Không mở được cửa sổ cài đặt.") }
+        $settings = Find-Descendant $win 'Settings window'
+        if ($null -eq $settings) { $failures.Add("Không mở được trang cài đặt.") }
         else {
-            Write-Output "OK  mở cửa sổ cài đặt"
+            Write-Output "OK  mở trang cài đặt"
             $checkNow = Find-Button $settings 'Check for updates now'
             if ($null -eq $checkNow) { $failures.Add("Trang cài đặt thiếu nút 'Kiểm tra ngay'.") }
             else { Write-Output "OK  trang cài đặt có nút kiểm tra cập nhật" }
-
-            $closeSettings = Find-Button $settings 'Close settings'
-            if ($null -ne $closeSettings) { Invoke-Element $closeSettings }
-            Start-Sleep -Milliseconds 900
         }
     }
+    [void](Select-Nav 'Nav rename')
 }
 finally {
     Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 800
+    # Khôi phục dữ liệu người dùng như trước khi chạy.
+    Remove-Item $appData -Recurse -Force -ErrorAction SilentlyContinue
+    if ($hadAppData) { Copy-Item $appBackup $appData -Recurse -Force; Remove-Item $appBackup -Recurse -Force -ErrorAction SilentlyContinue }
+    Remove-Item Env:\BFR_DEV_TIER -ErrorAction SilentlyContinue
 }
 
 Write-Output ''

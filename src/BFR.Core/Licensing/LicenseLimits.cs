@@ -35,6 +35,44 @@ public sealed record LicenseLimits
     /// <summary>Cho phép đánh số kiểu La Mã.</summary>
     public bool AllowRomanNumbering { get; init; }
 
+    /// <summary>Số dòng tối đa của danh sách đổi tên / từ điển thay thế.</summary>
+    public int MaxListRows { get; init; }
+
+    /// <summary>Cho phép nhập danh sách từ tệp CSV.</summary>
+    public bool AllowListCsvImport { get; init; }
+
+    /// <summary>Số tệp tối đa trong Shelf.</summary>
+    public int MaxShelfItems { get; init; }
+
+    // ----- v2.0: bộ công cụ tệp (spec §6.1) -----
+
+    /// <summary>Số cấp thư mục tối đa trong mẫu Organize.</summary>
+    public int MaxOrganizeDepth { get; init; }
+
+    /// <summary>Số tệp tối đa mỗi lần quét trùng lặp.</summary>
+    public int MaxDuplicateFiles { get; init; }
+
+    /// <summary>Ảnh gần giống và thay bản trùng bằng hard link.</summary>
+    public bool AllowSimilarImages { get; init; }
+
+    /// <summary>Số ảnh tối đa mỗi lô của Image Tools.</summary>
+    public int MaxImagesPerBatch { get; init; }
+
+    /// <summary>Ghi/xoá toàn bộ EXIF (Free chỉ được xoá GPS).</summary>
+    public bool AllowExifWrite { get; init; }
+
+    /// <summary>Archive: chia nhóm và đặt tên theo mẫu.</summary>
+    public bool AllowArchiveAdvanced { get; init; }
+
+    /// <summary>Analyze: xuất báo cáo.</summary>
+    public bool AllowAnalyzeExport { get; init; }
+
+    /// <summary>Workflow nhiều bước.</summary>
+    public bool AllowWorkflow { get; init; }
+
+    /// <summary>Số ngày tối đa người dùng được chọn để giữ khu cách ly (Free cố định 30 ngày, Pro chỉnh tới 90; khu cách ly không bao giờ dọn sớm hơn 30 ngày).</summary>
+    public int MaxQuarantineDays { get; init; }
+
     /// <summary>Giới hạn của bản miễn phí (PHẦN 3.6).</summary>
     public static LicenseLimits Free { get; } = new()
     {
@@ -47,7 +85,19 @@ public sealed record LicenseLimits
         AllowPresetImportExport = false,
         AllowReportExport = false,
         AllowCommandLine = false,
-        AllowRomanNumbering = false
+        AllowRomanNumbering = false,
+        MaxShelfItems = 50,
+        MaxListRows = 50,
+        AllowListCsvImport = false,
+        MaxOrganizeDepth = 2,
+        MaxDuplicateFiles = 1000,
+        AllowSimilarImages = false,
+        MaxImagesPerBatch = 20,
+        AllowExifWrite = false,
+        AllowArchiveAdvanced = false,
+        AllowAnalyzeExport = false,
+        AllowWorkflow = false,
+        MaxQuarantineDays = 30
     };
 
     /// <summary>Giới hạn của bản Pro: không giới hạn.</summary>
@@ -62,7 +112,19 @@ public sealed record LicenseLimits
         AllowPresetImportExport = true,
         AllowReportExport = true,
         AllowCommandLine = true,
-        AllowRomanNumbering = true
+        AllowRomanNumbering = true,
+        MaxShelfItems = int.MaxValue,
+        MaxListRows = int.MaxValue,
+        AllowListCsvImport = true,
+        MaxOrganizeDepth = int.MaxValue,
+        MaxDuplicateFiles = int.MaxValue,
+        AllowSimilarImages = true,
+        MaxImagesPerBatch = int.MaxValue,
+        AllowExifWrite = true,
+        AllowArchiveAdvanced = true,
+        AllowAnalyzeExport = true,
+        AllowWorkflow = true,
+        MaxQuarantineDays = 90
     };
 
     public static LicenseLimits For(LicenseTier tier) =>

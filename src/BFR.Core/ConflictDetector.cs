@@ -61,7 +61,7 @@ public sealed class ConflictDetector
             var issue = _validator.Validate(it.NewName);
             if (issue != NameIssue.None)
             {
-                results.Add(new ConflictInfo(ToConflictType(issue), it.File, it.NewName, $"Tên không hợp lệ: {issue}"));
+                results.Add(new ConflictInfo(ToConflictType(issue), it.File, it.NewName, CoreText.Get("CoreInvalidName", "Tên không hợp lệ: {0}", issue)));
                 continue;
             }
 
@@ -78,7 +78,7 @@ public sealed class ConflictDetector
             if (outside is not null && outside.Contains(it.NewName))
             {
                 results.Add(new ConflictInfo(ConflictType.CollisionOutsideBatch, it.File, it.NewName,
-                    "Tên mới trùng tệp/thư mục ngoài lô"));
+                    CoreText.Get("CoreCollisionOutside", "Tên mới trùng tệp/thư mục ngoài lô")));
                 continue;
             }
 
@@ -93,7 +93,7 @@ public sealed class ConflictDetector
                 foreach (var i in indexes)
                 {
                     results[i] = new ConflictInfo(ConflictType.DuplicateInBatch, items[i].File, items[i].NewName,
-                        $"Trùng tên trong lô: '{items[i].NewName}'");
+                        CoreText.Get("CoreDuplicateInBatch", "Trùng tên trong lô: '{0}'", items[i].NewName));
                 }
             }
         }

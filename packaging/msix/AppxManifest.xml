@@ -3,6 +3,7 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
@@ -14,7 +15,7 @@
   <Identity
     Name="MTDStudio.BFR-BatchFileRenamer"
     Publisher="CN=F6CFEAEE-C755-4C7E-BDC5-FD89DA169656"
-    Version="1.2.2.0"
+    Version="2.0.0.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
@@ -83,6 +84,13 @@
             </desktop10:ItemType>
           </desktop4:FileExplorerContextMenus>
         </desktop4:Extension>
+
+        <!-- Khởi động cùng Windows (chế độ chạy nền ở khay). Tắt mặc định; người dùng bật trong Cài đặt của BFR. -->
+        <uap5:Extension Category="windows.startupTask"
+                        Executable="BatchFileRenamer.exe"
+                        EntryPoint="Windows.FullTrustApplication">
+          <uap5:StartupTask TaskId="BFRStartup" Enabled="false" DisplayName="Batch File Renamer" />
+        </uap5:Extension>
 
         <!-- CLI bfr.exe với AppExecutionAlias -->
         <uap3:Extension Category="windows.appExecutionAlias"

@@ -55,7 +55,7 @@ public class UpgradeViewModelTests : IDisposable
         Assert.Equal(UpgradeState.Trialing, vm.State);
         Assert.False(vm.ShowTrialButton);
         Assert.True(vm.ShowTrialRemaining);
-        Assert.Equal(14, vm.TrialDaysRemaining);
+        Assert.Equal(30, vm.TrialDaysRemaining);
         Assert.False(string.IsNullOrWhiteSpace(vm.TrialRemainingText));
     }
 
@@ -71,7 +71,7 @@ public class UpgradeViewModelTests : IDisposable
 
         service.StartTrial();
 
-        now = now.AddDays(15);
+        now = now.AddDays(31);
         service.Evaluate();
 
         var vm = new UpgradeViewModel(new LicenseCoordinator(service), priceProvider: null);
@@ -110,7 +110,7 @@ public class UpgradeViewModelTests : IDisposable
     {
         var (_, vm) = Create();
 
-        Assert.Equal(7, vm.Features.Count);
+        Assert.Equal(17, vm.Features.Count);
         Assert.All(vm.Features, row => Assert.False(row.FreeHasIt));
         Assert.All(vm.Features, row => Assert.True(row.ProHasIt));
     }
@@ -157,5 +157,18 @@ public class UpgradeViewModelTests : IDisposable
         Assert.True(upgraded);
         Assert.Equal(LicenseTier.Pro, service.Status.Tier);
         Assert.True(service.HasUsedTrial);
+    }
+
+    [Fact]
+    public void ShelfRow_UsesRealFreeLimit_AndShelfHasContextKey()
+    {
+        var (_, vm) = Create();
+
+        var row = Assert.Single(vm.Features, r => r.Feature == "FeatureUnlimitedShelf");
+        Assert.Equal("FeatureLimitShelf(50)", row.FreeText);   // KeyOnlyStringProvider: "Key(arg)" — số lấy từ LicenseLimits.Free
+        Assert.False(row.FreeHasIt);
+        Assert.True(row.ProHasIt);
+        Assert.Equal("FeatureUnlimitedShelf", UpgradeViewModel.FeatureResourceKey(ProFeature.UnlimitedShelf));
+        Assert.Equal(50, LicenseLimits.Free.MaxShelfItems);
     }
 }

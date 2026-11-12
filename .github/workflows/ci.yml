@@ -37,6 +37,12 @@ jobs:
       - name: Run ViewModel Tests (UI layer, không phụ thuộc WPF)
         run: dotnet test tests/BFR.Presentation.Tests/BFR.Presentation.Tests.csproj -c Release --no-build --verbosity normal
 
+      - name: Run CLI Tests (v2.0 tool commands)
+        run: dotnet test tests/BFR.Cli.Tests/BFR.Cli.Tests.csproj -c Release --no-build --verbosity normal
+
+      - name: Run Media Tests (WIC image processor)
+        run: dotnet test tests/BFR.Media.Tests/BFR.Media.Tests.csproj -c Release --no-build --verbosity normal
+
       - name: Run Property-Based Tests (FsCheck 1000 runs)
         run: dotnet test tests/BFR.Core.PropertyTests/BFR.Core.PropertyTests.csproj -c Release --no-build --verbosity normal
 
@@ -69,7 +75,10 @@ jobs:
           try {
             & "$layout/bfr.exe" context-menu register --path "$layout/BatchFileRenamer.exe"
             if ($LASTEXITCODE -ne 0) { throw "Đăng ký COM thất bại." }
-            dotnet run --project tests/BFR.Shell.SmokeTest/BFR.Shell.SmokeTest.csproj -c Release --no-build
+            # Solution build dat dau ra o bin/x64/Release. dotnet run --no-build khong nhan Platform va se tim o bin/Release
+            # (bao thieu tep), nen chay thang tep exe da build.
+            $smoke = (Resolve-Path "tests/BFR.Shell.SmokeTest/bin/x64/Release/net8.0-windows/BFR.Shell.SmokeTest.exe").Path
+            & $smoke
             if ($LASTEXITCODE -ne 0) { throw "COM smoke test thất bại." }
           } finally {
             & "$layout/bfr.exe" context-menu unregister
@@ -97,6 +106,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "bfr license status thất bại." }
           & "$layout/bfr.exe" context-menu status
           if ($LASTEXITCODE -ne 0) { throw "bfr context-menu status thất bại." }
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          path: artifacts/msix-layout
+          format: spdx-json
+          output-file: artifacts/sbom.spdx.json
+          upload-artifact: false
 
       - name: Upload Packaging Artifacts
         if: always()

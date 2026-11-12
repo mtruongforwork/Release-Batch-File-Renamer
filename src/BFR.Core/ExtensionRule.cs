@@ -21,7 +21,7 @@ public sealed class ExtensionRule : IRule
 
         if (!AllowExtensionChange && Mode != ExtensionMode.Keep)
         {
-            trace.Add($"{Id}: Đổi đuôi bị tắt (AllowExtensionChange=false)");
+            trace.Add($"{Id}: " + CoreText.Get("CoreExtDisabled", "Đổi đuôi bị tắt (AllowExtensionChange=false)"));
             return state with { Trace = trace };
         }
 

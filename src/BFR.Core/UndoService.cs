@@ -27,8 +27,11 @@ public sealed class UndoService
         var result = new UndoResult();
         if (!_fs.FileExists(journalPath)) return result;
 
+        // Mỗi seq có thể có dòng pending, done và (khi khôi phục) done lần nữa: chỉ lấy một dòng done cho mỗi seq.
         var steps = ReadSteps(journalPath, _fs)
-            .Where(s => s.Type == "step" && s.Status == "done" && s.From is not null && s.To is not null)
+            .Where(s => s.Type == "step" && s.Status == "done")
+            .GroupBy(s => s.Seq)
+            .Select(g => g.Last())
             .OrderByDescending(s => s.Seq)
             .ToList();
 
@@ -36,31 +39,16 @@ public sealed class UndoService
 
         foreach (var step in steps)
         {
-            var to = step.To!;
-            var from = step.From!;
-
-            if (!_fs.FileExists(to))
+            var error = OperationUndo.Undo(_fs, step);
+            if (error is null)
             {
-                result.Failed++;
-                result.Errors.Add((to, "Tệp tại vị trí mới không còn tồn tại"));
-                continue;
-            }
-            if (_fs.FileExists(from))
-            {
-                result.Failed++;
-                result.Errors.Add((from, "Tên cũ đã bị chiếm"));
-                continue;
-            }
-
-            try
-            {
-                _fs.Move(to, from, overwrite: false);
                 result.Undone++;
             }
-            catch (Exception ex)
+            else
             {
                 result.Failed++;
-                result.Errors.Add((to, ex.Message));
+                // Báo lỗi theo đường dẫn người dùng nhận ra: với di chuyển lỗi thường nằm ở vị trí mới.
+                result.Errors.Add((step.IsMoveLike && step.Op != nameof(OperationKind.Quarantine) ? (step.To ?? step.From ?? string.Empty) : (step.From ?? step.To ?? string.Empty), error));
             }
         }
 

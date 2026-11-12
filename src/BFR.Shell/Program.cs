@@ -101,7 +101,7 @@ public static class ComServerLifetime
             Directory.CreateDirectory(directory);
             File.AppendAllText(
                 Path.Combine(directory, "shell-server.log"),
-                $"{DateTime.Now:O} [pid {Environment.ProcessId}] {message}{Environment.NewLine}");
+                $"{DateTime.Now:O} [pid {Environment.ProcessId}] {BFR.Core.LogRedactor.Redact(message)}{Environment.NewLine}");
         }
         catch
         {

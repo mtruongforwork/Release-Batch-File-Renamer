@@ -65,7 +65,7 @@ public sealed class MainViewModel : ObservableObject
 
         _metadataTier = license.Status.Tier;
         _metadataProvider = license.Status.Tier == LicenseTier.Pro
-            ? new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader())
+            ? new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader(), new AudioTagReader())
             : null;
 
         Presets = new ObservableCollection<Preset>(BuiltInPresets.All);
@@ -75,6 +75,8 @@ public sealed class MainViewModel : ObservableObject
         ApplyCommand = new RelayCommand(async () => await ApplyAsync(), () => CanApply);
         UndoCommand = new RelayCommand(async () => await UndoLastAsync(), () => CanUndo);
         ClearCommand = new RelayCommand(ClearList);
+        ResolveConflictsCommand = new RelayCommand(() => AutoResolveConflicts = true);
+        StopAutoResolveCommand = new RelayCommand(() => AutoResolveConflicts = false);
         SelectAllCommand = new RelayCommand(() => SetAllSelected(true));
         ClearSelectionCommand = new RelayCommand(() => SetAllSelected(false));
 
@@ -122,6 +124,11 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand UndoCommand { get; }
 
     public RelayCommand ClearCommand { get; }
+
+    /// <summary>Bật tự xử lý trùng tên (thêm " (2)", " (3)"…) rồi tính lại xem trước.</summary>
+    public RelayCommand ResolveConflictsCommand { get; }
+
+    public RelayCommand StopAutoResolveCommand { get; }
 
     public RelayCommand SelectAllCommand { get; }
 
@@ -209,9 +216,45 @@ public sealed class MainViewModel : ObservableObject
 
     public int UnchangedCount => Rows.Count(r => r.Status == PreviewStatus.Unchanged);
 
-    public int ErrorCount => Rows.Count(r => r.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong);
+    public int ErrorCount => Rows.Count(r => r.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong or PreviewStatus.Protected);
 
     public int SelectedCount => Rows.Count(r => r.IsSelected);
+
+    /// <summary>Số tệp đang bị trùng tên (xung đột) trong xem trước hiện tại.</summary>
+    public int ConflictCount => Rows.Count(r => r.Status == PreviewStatus.Conflict);
+
+    public bool HasConflicts => ConflictCount > 0;
+
+    /// <summary>Dòng chữ của khung cảnh báo trùng tên.</summary>
+    public string ConflictBannerText => _strings.F("ConflictBannerText", ConflictCount);
+
+    /// <summary>Dòng chữ của khung thông tin sau khi bật tự xử lý trùng tên.</summary>
+    public string AutoResolvedText => _strings.F("ConflictAutoResolvedText", AutoResolvedCount);
+
+    /// <summary>Số tệp đã được tự thêm hậu tố ở lượt xem trước gần nhất (khi bật tự xử lý).</summary>
+    public int AutoResolvedCount
+    {
+        get => _autoResolvedCount;
+        private set { if (Set(ref _autoResolvedCount, value)) { Raise(nameof(HasAutoResolved)); } }
+    }
+
+    private int _autoResolvedCount;
+
+    public bool HasAutoResolved => AutoResolveConflicts && AutoResolvedCount > 0;
+
+    /// <summary>Tự thêm hậu tố " (2)"… khi tên mới trùng (B3).</summary>
+    public bool AutoResolveConflicts
+    {
+        get => _autoResolve;
+        set
+        {
+            if (!Set(ref _autoResolve, value)) return;
+            Raise(nameof(HasAutoResolved));
+            _ = RebuildAsync();
+        }
+    }
+
+    private bool _autoResolve;
 
     public bool CanApply => WillChangeCount > 0 && ErrorCount == 0 && !IsBusy;
 
@@ -292,8 +335,13 @@ public sealed class MainViewModel : ObservableObject
         }
 
         var definition = new RuleDefinition { Type = type, Enabled = true };
+        ApplyDefaultParams(definition);
         _preset.Rules.Add(definition);
         var card = new RuleCardViewModel(definition, _strings, MoveRule);
+        // Quy tắc vừa thêm mở sẵn để nhập tham số ngay (đặc biệt ListMap/ReplaceDict cần dán dữ liệu).
+        card.IsExpanded = true;
+        // Như LoadPreset: sửa tham số của thẻ vừa thêm phải làm mới xem trước.
+        card.Changed += (_, _) => ScheduleRebuild();
         Rules.Add(card);
         RefreshRuleOrder();
         _ = RebuildAsync();
@@ -405,8 +453,11 @@ public sealed class MainViewModel : ObservableObject
     {
         try
         {
-            await Task.Delay(150, cts.Token).ConfigureAwait(false);
-            if (!cts.IsCancellationRequested) await RebuildAsync().ConfigureAwait(false);
+            // Không ConfigureAwait(false): RebuildAsync sửa ObservableCollection đang gắn với DataGrid,
+            // nên phải tiếp tục trên luồng giao diện (ném NotSupportedException ở luồng nền sẽ bị nuốt
+            // ở dưới và bảng xem trước đứng im dù số đếm đã đổi).
+            await Task.Delay(150, cts.Token);
+            if (!cts.IsCancellationRequested) await RebuildAsync();
             CheckProDateSource();
         }
         catch (OperationCanceledException)
@@ -455,7 +506,7 @@ public sealed class MainViewModel : ObservableObject
 
         // Id của quy tắc trong vết là Id của IRule đã biên dịch, nên ánh xạ theo thứ tự
         // của chuỗi quy tắc (preset giữ nguyên thứ tự).
-        var compiled = new PresetCompiler().Compile(_preset).Rules.ToList();
+        var compiled = new PresetCompiler().Compile(_preset, _license.License.MaxListRows).Rules.ToList();
         var titlesById = new Dictionary<string, string>(StringComparer.Ordinal);
         for (int i = 0; i < compiled.Count && i < Rules.Count; i++)
         {
@@ -497,13 +548,16 @@ public sealed class MainViewModel : ObservableObject
         _cts?.Cancel();
         var cts = new CancellationTokenSource();
         _cts = cts;
+        var autoResolve = _autoResolve;
+        var maxListRows = _license.License.MaxListRows;
+        NotifyListLimit(maxListRows);
 
         IsBusy = true;
         BusyText = _strings.T("StatusCalculating");
 
         try
         {
-            var (scanned, preview) = await Task.Run(() =>
+            var (scanned, preview, autoResolved) = await Task.Run(() =>
             {
                 var scanner = new FileScanner();
                 var items = scanner.Scan(sources, new ScanOptions
@@ -521,17 +575,18 @@ public sealed class MainViewModel : ObservableObject
                 items = SortItems(items, SortBy);
 
                 var context = new RuleContext(DateTime.Now, Guid.NewGuid().ToString("N"));
-                var pipeline = new PresetCompiler().Compile(_preset);
+                var pipeline = new PresetCompiler().Compile(_preset, maxListRows);
                 var outside = BuildOutsideIndex(items);
-                var result = new PreviewEngine(pipeline, metadataProvider: _metadataProvider)
-                    .Run(items, context, null, cts.Token, outside);
+                var engine = new PreviewEngine(pipeline, metadataProvider: _metadataProvider) { AutoResolveConflicts = autoResolve };
+                var result = engine.Run(items, context, null, cts.Token, outside);
 
-                return (items, result);
+                return (items, result, engine.AutoResolvedCount);
             }, cts.Token).ConfigureAwait(true);
 
             if (cts.IsCancellationRequested) return;
 
             _preview = preview;
+            AutoResolvedCount = autoResolved;
 
             // Giữ trạng thái chọn/bỏ chọn của người dùng giữa các lượt tính lại;
             // tệp mới xuất hiện mặc định được chọn.
@@ -614,7 +669,10 @@ public sealed class MainViewModel : ObservableObject
             Rows.Where(r => !r.IsSelected).Select(r => r.File.FullPath),
             StringComparer.OrdinalIgnoreCase);
 
-        var result = new Dictionary<string, IReadOnlySet<string>>(StringComparer.OrdinalIgnoreCase);
+        // Khoá PHẢI là tên thư mục đã chuẩn hoá: ConflictDetector tra cứu bằng NormalizeDirectory
+        // (chữ thường, dấu '/'). Dùng khoá thô thì không bao giờ khớp và mọi va chạm với tệp
+        // ngoài lô đều không được phát hiện.
+        var result = new Dictionary<string, IReadOnlySet<string>>(StringComparer.Ordinal);
 
         foreach (var directory in all.Select(f => f.Directory).Distinct(StringComparer.OrdinalIgnoreCase))
         {
@@ -635,7 +693,14 @@ public sealed class MainViewModel : ObservableObject
                 // Thư mục không truy cập được: bỏ qua.
             }
 
-            result[directory] = names;
+            // Tệp trong lô nhưng bị bỏ chọn vẫn giữ tên cũ nên cũng chiếm chỗ (FR-A6).
+            foreach (var path in unselected)
+            {
+                if (string.Equals(Path.GetDirectoryName(path), directory, StringComparison.OrdinalIgnoreCase))
+                    names.Add(Path.GetFileName(path));
+            }
+
+            result[ConflictDetector.NormalizeDirectory(directory)] = names;
         }
 
         return result;
@@ -660,7 +725,7 @@ public sealed class MainViewModel : ObservableObject
         {
             PreviewFilter.WillChange => row.Status == PreviewStatus.Ok && !string.Equals(row.NewName, row.OldName, StringComparison.Ordinal),
             PreviewFilter.Unchanged => row.Status == PreviewStatus.Unchanged,
-            PreviewFilter.Problems => row.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong,
+            PreviewFilter.Problems => row.Status is PreviewStatus.Conflict or PreviewStatus.InvalidName or PreviewStatus.PathTooLong or PreviewStatus.Protected,
             _ => true
         };
 
@@ -750,7 +815,7 @@ public sealed class MainViewModel : ObservableObject
         try
         {
             var steps = new RenamePlanner().Plan(pairs);
-            var result = await Task.Run(() => new RenameExecutor(_fs, _journalDir).Execute(steps, "1.2.2"))
+            var result = await Task.Run(() => new RenameExecutor(_fs, _journalDir).Execute(steps, AppVersion.Current))
                 .ConfigureAwait(true);
 
             _history.Add(new HistoryEntry
@@ -765,7 +830,7 @@ public sealed class MainViewModel : ObservableObject
                 JournalPath = result.JournalPath
             });
 
-            _history.PruneAndLimit(TimeSpan.FromDays(30), _license.License.MaxUndoEntries);
+            _history.PruneAndLimit(_license.License.MaxUndoEntries);
 
             _lastReport = Rows
                 .Where(r => r.Status == PreviewStatus.Ok && r.IsSelected)
@@ -838,6 +903,66 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    // ----------------------------------------------------------------- Danh sách (B2)
+
+    private bool _listLimitNotified;
+
+    /// <summary>
+    /// Báo một lần khi danh sách vượt hạn mức Free (50 dòng): phần dư bị bỏ qua và hiện hộp thoại nâng cấp.
+    /// Khi trở lại trong hạn mức thì cho phép báo lại.
+    /// </summary>
+    private void NotifyListLimit(int maxListRows)
+    {
+        var over = maxListRows != int.MaxValue && _preset.Rules.Any(r =>
+            r.Enabled && r.Type is "ListMap" or "ReplaceDict"
+            && ListParser.CountRows(ReadRuleText(r)) > maxListRows);
+
+        if (over && !_listLimitNotified)
+        {
+            _listLimitNotified = true;
+            ProLimitReached?.Invoke(this, ProFeature.UnlimitedListRows);
+        }
+        else if (!over)
+        {
+            _listLimitNotified = false;
+        }
+    }
+
+    private static string ReadRuleText(RuleDefinition rule)
+    {
+        var key = rule.Type == "ListMap" ? "mapping" : "pairs";
+        return rule.Params.TryGetValue(key, out var e) && e.ValueKind == System.Text.Json.JsonValueKind.String
+            ? e.GetString() ?? string.Empty
+            : string.Empty;
+    }
+
+    /// <summary>Tham số mặc định để giao diện và bộ dựng quy tắc khớp nhau (ví dụ "bỏ qua hoa/thường" bật sẵn).</summary>
+    private static void ApplyDefaultParams(RuleDefinition rule)
+    {
+        System.Text.Json.JsonElement E(object v) => System.Text.Json.JsonSerializer.SerializeToElement(v);
+        switch (rule.Type)
+        {
+            case "ListMap":
+                rule.Params["mode"] = E("Map");
+                rule.Params["matchBy"] = E("Name");
+                rule.Params["ignoreCase"] = E(true);
+                rule.Params["mapping"] = E(string.Empty);
+                break;
+            case "ReplaceDict":
+                rule.Params["ignoreCase"] = E(true);
+                rule.Params["pairs"] = E(string.Empty);
+                break;
+        }
+    }
+
+    /// <summary>Kiểm tra giấy phép trước khi nhập danh sách từ tệp CSV; hiện hộp thoại nâng cấp nếu là Free.</summary>
+    public bool CanImportListFile()
+    {
+        if (_license.License.Allows(ProFeature.ListCsvImport)) return true;
+        ProLimitReached?.Invoke(this, ProFeature.ListCsvImport);
+        return false;
+    }
+
     // ----------------------------------------------------------------- Misc
 
     public event EventHandler<ProFeature>? ProLimitReached;
@@ -857,6 +982,11 @@ public sealed class MainViewModel : ObservableObject
         Raise(nameof(UnchangedCount));
         Raise(nameof(ErrorCount));
         Raise(nameof(SelectedCount));
+        Raise(nameof(ConflictCount));
+        Raise(nameof(HasConflicts));
+        Raise(nameof(ConflictBannerText));
+        Raise(nameof(AutoResolvedText));
+        Raise(nameof(HasAutoResolved));
         Raise(nameof(AreAllRowsSelected));
         Raise(nameof(CanApply));
         Raise(nameof(CanUndo));

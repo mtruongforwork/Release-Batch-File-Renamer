@@ -80,14 +80,14 @@ Kế hoạch: `docs/Plan/BFR_UIUX_REBUILD_PLAN.md` · Quyết định công ngh�
 - Header: *"Nâng cấp lên Batch File Renamer Pro"* + *"Mua một lần, dùng trọn đời"*.
 - **Bảng so sánh Free vs Pro** (7 dòng) — nội dung **sinh từ `LicenseLimits` thật** nên không lệch với logic:
   Chuỗi quy tắc · Ngày chụp EXIF & ngày tạo media · Quét đệ quy · Hoàn tác nhiều bước · Lưu preset · Xuất báo cáo · Công cụ dòng lệnh.
-- Nút chính **"Mua Pro"** (kèm giá lấy từ Store, hoặc từ cấu hình `ProPriceText` — **không hard-code giá**), nút phụ **"Dùng thử Pro 14 ngày"**, nút **"Để sau"**.
+- Nút chính **"Mua Pro"** (kèm giá lấy từ Store, hoặc từ cấu hình `ProPriceText` — **không hard-code giá**), nút phụ **"Dùng thử Pro 30 ngày"**, nút **"Để sau"**.
 - Liên kết **"Tôi đã có mã kích hoạt"** → mở ô nhập mã + nút *Kích hoạt*, có thông báo lỗi rõ ràng (rỗng / sai định dạng / sai checksum).
 
 ### 4.3 Bốn trạng thái (có unit test)
 
 | Trạng thái | Hành vi | Ảnh |
 | :--- | :--- | :--- |
-| **Chưa dùng thử** | Hiện cả *Mua Pro* và *Dùng thử Pro 14 ngày* | `docs/ui-upgrade/upgrade-1-not-trialed.png` |
+| **Chưa dùng thử** | Hiện cả *Mua Pro* và *Dùng thử Pro 30 ngày* | `docs/ui-upgrade/upgrade-1-not-trialed.png` |
 | **Đang dùng thử** | Ẩn nút dùng thử, hiện dải xanh *"Còn 13 ngày dùng thử Pro."* | `docs/ui-upgrade/upgrade-2-trialing.png` |
 | **Hết hạn dùng thử** | Chỉ còn *Mua Pro* + *Nhập mã kích hoạt* | `docs/ui-upgrade/upgrade-3-trial-expired.png` |
 | **Đã là Pro** | Nút *Nâng cấp Pro* trên thanh trên biến thành **badge "Pro"**, bấm vào mở **màn hình thông tin license** | `docs/ui-upgrade/upgrade-4-license-info.png` |

@@ -14,8 +14,8 @@ public sealed class LicenseService
     /// <summary>Product ID của add-on Pro mua đứt trọn đời (khớp với Partner Center).</summary>
     public const string ProProductId = "BFR_PRO_LIFETIME";
 
-    /// <summary>Thời gian dùng thử Pro (14 ngày, một lần cho mỗi cài đặt).</summary>
-    public static readonly TimeSpan TrialDuration = TimeSpan.FromDays(14);
+    /// <summary>Thời gian dùng thử Pro (30 ngày, một lần cho mỗi cài đặt).</summary>
+    public static readonly TimeSpan TrialDuration = TimeSpan.FromDays(30);
 
     private readonly LicenseStore _store;
     private readonly Func<DateTime> _clock;
@@ -100,7 +100,7 @@ public sealed class LicenseService
     }
 
     /// <summary>
-    /// Bắt đầu dùng thử Pro 14 ngày nếu chưa dùng. Trả về true nếu lần này bắt đầu mới.
+    /// Bắt đầu dùng thử Pro 30 ngày nếu chưa dùng. Trả về true nếu lần này bắt đầu mới.
     /// </summary>
     public bool StartTrial()
     {
@@ -156,7 +156,7 @@ public sealed class LicenseService
         }
     }
 
-    /// <summary>True nếu bản cài này cho phép dùng thử Pro 14 ngày.</summary>
+    /// <summary>True nếu bản cài này cho phép dùng thử Pro 30 ngày.</summary>
     public bool IsTrialAvailable { get; }
 
     /// <summary>True nếu người dùng đã từng bắt đầu dùng thử (kể cả khi đã hết hạn).</summary>
@@ -194,6 +194,18 @@ public sealed class LicenseService
             ProFeature.ReportExport => limits.AllowReportExport,
             ProFeature.CommandLine => limits.AllowCommandLine,
             ProFeature.RomanNumbering => limits.AllowRomanNumbering,
+            ProFeature.UnlimitedShelf => limits.MaxShelfItems == int.MaxValue,
+            ProFeature.UnlimitedListRows => limits.MaxListRows == int.MaxValue,
+            ProFeature.ListCsvImport => limits.AllowListCsvImport,
+            ProFeature.OrganizeDeepTemplate => limits.MaxOrganizeDepth == int.MaxValue,
+            ProFeature.DuplicatesUnlimited => limits.MaxDuplicateFiles == int.MaxValue,
+            ProFeature.SimilarImages or ProFeature.HardLinkDedupe => limits.AllowSimilarImages,
+            ProFeature.ImageUnlimited => limits.MaxImagesPerBatch == int.MaxValue,
+            ProFeature.ExifWrite => limits.AllowExifWrite,
+            ProFeature.ArchiveAdvanced => limits.AllowArchiveAdvanced,
+            ProFeature.AnalyzeExport => limits.AllowAnalyzeExport,
+            ProFeature.Workflow => limits.AllowWorkflow,
+            ProFeature.QuarantineRetention => limits.MaxQuarantineDays > QuarantineStore.DefaultRetentionDays,
             _ => true
         };
 
@@ -204,6 +216,15 @@ public sealed class LicenseService
 
     public bool Allows(ProFeature feature) => Check(feature).Allowed;
 
+    /// <summary>Số cấp thư mục tối đa của mẫu Organize.</summary>
+    public int MaxOrganizeDepth => Limits.MaxOrganizeDepth;
+
+    /// <summary>Số tệp tối đa mỗi lần quét trùng lặp.</summary>
+    public int MaxDuplicateFiles => Limits.MaxDuplicateFiles;
+
+    /// <summary>Số ảnh tối đa mỗi lô Image Tools.</summary>
+    public int MaxImagesPerBatch => Limits.MaxImagesPerBatch;
+
     /// <summary>Số quy tắc tối đa được phép dùng.</summary>
     public int MaxRules => Limits.MaxRules;
 
@@ -212,6 +233,12 @@ public sealed class LicenseService
 
     /// <summary>Số preset người dùng tối đa được lưu.</summary>
     public int MaxSavedPresets => Limits.MaxSavedPresets;
+
+    /// <summary>Số dòng tối đa của danh sách đổi tên (Free: 50, Pro: không giới hạn).</summary>
+    public int MaxListRows => Limits.MaxListRows;
+
+    /// <summary>Số tệp tối đa trong Shelf (Free: 50, Pro: không giới hạn).</summary>
+    public int MaxShelfItems => Limits.MaxShelfItems;
 
     /// <summary>Số mục lịch sử còn giữ để hoàn tác.</summary>
     public int MaxUndoEntries => Limits.MaxUndoEntries;
@@ -305,6 +332,19 @@ public static class FeatureMessages
         ProFeature.ReportExport => "Xuất báo cáo CSV/JSON là tính năng Pro.",
         ProFeature.CommandLine => "Công cụ dòng lệnh bfr là tính năng Pro.",
         ProFeature.RomanNumbering => "Đánh số kiểu La Mã là tính năng Pro.",
+        ProFeature.UnlimitedShelf => "Bản Free giữ tối đa 50 tệp trong Shelf. Nâng cấp Pro để không giới hạn.",
+        ProFeature.UnlimitedListRows => "Bản Free dùng tối đa 50 dòng trong danh sách đổi tên. Nâng cấp Pro để không giới hạn.",
+        ProFeature.ListCsvImport => "Nhập danh sách từ tệp CSV là tính năng Pro.",
+        ProFeature.OrganizeDeepTemplate => "Bản Free sắp xếp tối đa 2 cấp thư mục. Nâng cấp Pro để không giới hạn.",
+        ProFeature.DuplicatesUnlimited => "Bản Free quét tối đa 1.000 tệp mỗi lần tìm trùng. Nâng cấp Pro để không giới hạn.",
+        ProFeature.SimilarImages => "Tìm ảnh gần giống là tính năng Pro.",
+        ProFeature.HardLinkDedupe => "Thay bản trùng bằng hard link là tính năng Pro.",
+        ProFeature.ImageUnlimited => "Bản Free xử lý tối đa 20 ảnh mỗi lô. Nâng cấp Pro để không giới hạn.",
+        ProFeature.ExifWrite => "Ghi và xoá toàn bộ EXIF là tính năng Pro. Xoá GPS luôn miễn phí.",
+        ProFeature.ArchiveAdvanced => "Nén chia nhóm và đặt tên theo mẫu là tính năng Pro.",
+        ProFeature.AnalyzeExport => "Xuất báo cáo phân tích là tính năng Pro.",
+        ProFeature.Workflow => "Workflow nhiều bước là tính năng Pro.",
+        ProFeature.QuarantineRetention => "Chỉnh thời gian giữ khu cách ly là tính năng Pro. Bản Free giữ 30 ngày.",
         _ => "Tính năng này cần bản Pro."
     };
 }

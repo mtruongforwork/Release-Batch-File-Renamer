@@ -28,6 +28,9 @@ public static class Program
         measurements.Add(MeasureScan(10_000, limitMs: 2_000));
         measurements.Add(MeasureApply(1_000));
         measurements.Add(MeasureWatchPlanner(100_000, limitMs: 1_000));
+        measurements.Add(MeasureListMap(10_000, limitMs: 500));
+        measurements.Add(MeasureReplaceDict(10_000, pairs: 500, limitMs: 1_500));
+        measurements.Add(MeasureAutoResolve(100_000, limitMs: 3_000));
 
         var sb = new StringBuilder();
         sb.AppendLine("# Báo cáo hiệu năng — Batch File Renamer (Giai đoạn 4)");
@@ -213,6 +216,77 @@ public static class Program
             sw.Elapsed.TotalMilliseconds,
             limitMs,
             $"{planner.PendingCount:N0} tệp đang chờ");
+    }
+
+    /// <summary>Đổi tên theo danh sách (v1.4 B2): 10.000 dòng ánh xạ cho 10.000 tệp.</summary>
+    private static Measurement MeasureListMap(int count, double limitMs)
+    {
+        var files = BuildItems(count);
+        var mapping = new StringBuilder();
+        for (int i = 0; i < count; i++) mapping.Append("file").Append(i).Append('\t').Append("new_").Append(i).Append('\n');
+
+        var pipeline = new RulePipeline();
+        pipeline.Add(new ListMapRule { Mode = ListMapRule.ListMode.Map, Mapping = mapping.ToString() });
+
+        var ctx = new RuleContext(DateTime.Now, "perf");
+        var sw = Stopwatch.StartNew();
+        var result = pipeline.Run(files, ctx);
+        sw.Stop();
+
+        var changed = result.Items.Count(i => i.NewName.StartsWith("new_", StringComparison.Ordinal));
+        return new Measurement(
+            $"Đổi tên theo danh sách {count:N0} dòng (v1.4 B2)",
+            $"{count:N0} tệp < {limitMs:F0} ms",
+            sw.Elapsed.TotalMilliseconds,
+            changed == count ? limitMs : double.MaxValue,
+            $"{changed:N0}/{count:N0} tệp được ánh xạ đúng");
+    }
+
+    /// <summary>Từ điển thay thế (v1.4 B2): nhiều cặp tìm → thay chạy một lượt trên nhiều tệp.</summary>
+    private static Measurement MeasureReplaceDict(int fileCount, int pairs, double limitMs)
+    {
+        var files = BuildItems(fileCount);
+        var dict = new StringBuilder();
+        for (int i = 0; i < pairs; i++) dict.Append("zz").Append(i).Append('\t').Append("yy").Append(i).Append('\n');
+        dict.Append("file\tdoc\n");
+
+        var pipeline = new RulePipeline();
+        pipeline.Add(new ReplaceDictRule { Pairs = dict.ToString() });
+
+        var ctx = new RuleContext(DateTime.Now, "perf");
+        var sw = Stopwatch.StartNew();
+        var result = pipeline.Run(files, ctx);
+        sw.Stop();
+
+        var changed = result.Items.Count(i => i.NewName.StartsWith("doc", StringComparison.Ordinal));
+        return new Measurement(
+            $"Từ điển thay thế {pairs:N0} cặp x {fileCount:N0} tệp (v1.4 B2)",
+            $"< {limitMs:F0} ms",
+            sw.Elapsed.TotalMilliseconds,
+            changed == fileCount ? limitMs : double.MaxValue,
+            $"{changed:N0}/{fileCount:N0} tệp được thay");
+    }
+
+    /// <summary>Tự xử lý trùng tên (v1.4 B3): 100.000 tệp cùng đổi về một tên.</summary>
+    private static Measurement MeasureAutoResolve(int count, double limitMs)
+    {
+        var files = BuildItems(count);
+        var pipeline = new RulePipeline();
+        pipeline.Add(new FindReplaceRule { Pattern = "file[0-9]+", Replacement = "same", IsRegex = true });
+
+        var engine = new PreviewEngine(pipeline) { AutoResolveConflicts = true };
+        var ctx = new RuleContext(DateTime.Now, "perf");
+        var sw = Stopwatch.StartNew();
+        var result = engine.Run(files, ctx);
+        sw.Stop();
+
+        var distinct = result.Items.Select(i => i.NewName.ToLowerInvariant()).Distinct().Count();
+        return new Measurement(
+            $"Tự xử lý trùng tên {count:N0} tệp (v1.4 B3)",
+            $"< {limitMs:F0} ms",
+            sw.Elapsed.TotalMilliseconds,
+            distinct == count ? limitMs : double.MaxValue,
+            $"{distinct:N0}/{count:N0} tên khác nhau sau khi xử lý ({engine.AutoResolvedCount:N0} tệp được thêm hậu tố)");
     }
 
     private static List<FileItem> BuildItems(int count, string extension = "jpg")

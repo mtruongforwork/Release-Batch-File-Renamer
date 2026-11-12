@@ -48,6 +48,7 @@ public sealed class ParameterKindToVisibilityConverter : IValueConverter
             "Toggle" => wanted == "Toggle" ? Visibility.Visible : Visibility.Collapsed,
             "Text" or "Number" => wanted == "Text" ? Visibility.Visible : Visibility.Collapsed,
             "Choice" => wanted == "Choice" ? Visibility.Visible : Visibility.Collapsed,
+            "Multiline" => wanted == "Multiline" ? Visibility.Visible : Visibility.Collapsed,
             _ => Visibility.Collapsed
         };
     }

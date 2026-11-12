@@ -1,6 +1,7 @@
 <Window x:Class="BFR.App.RegexTesterWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Title="Regex tester"
         Width="780" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
@@ -73,8 +74,8 @@
                            Foreground="{DynamicResource TextSecondary}" Margin="0,0,10,0" />
                 <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,10,0" Text="{Binding Input, UpdateSourceTrigger=PropertyChanged}"
                          Style="{StaticResource AppTextBoxStyle}" AutomationProperties.Name="Regex test string" />
-                <Button Grid.Row="2" Grid.Column="2" Content="{Binding UseSelectedLabel}"
-                        Style="{StaticResource SecondaryButtonStyle}" Click="UseSelected_Click"
+                <ui:Button Grid.Row="2" Grid.Column="2" Content="{Binding UseSelectedLabel}"
+                        Appearance="Secondary" Click="UseSelected_Click" Padding="14,6"
                         AutomationProperties.Name="Use selected name" />
             </Grid>
 
@@ -139,7 +140,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" Content="{Binding ApplyAllLabel}" Style="{StaticResource PrimaryButtonStyle}"
+                <ui:Button Grid.Column="0" Content="{Binding ApplyAllLabel}" Appearance="Primary"
                         Click="ApplyAll_Click" AutomationProperties.Name="Apply regex to all files" />
 
                 <ComboBox Grid.Column="1" Margin="16,0,12,0" VerticalAlignment="Center" Width="240"

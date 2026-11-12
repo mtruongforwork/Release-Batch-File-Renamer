@@ -18,4 +18,29 @@ public interface IFileSystem
     long GetLength(string path);
     DateTime GetCreationTimeUtc(string path);
     DateTime GetLastWriteTimeUtc(string path);
+
+    // --- Mở rộng cho các công cụ ngoài đổi tên (Organize, Folder Tools, Metadata, Archive...) ---
+
+    /// <summary>Sao chép tệp (không ghi đè nếu <paramref name="overwrite"/> = false).</summary>
+    void Copy(string from, string to, bool overwrite);
+
+    FileTimes GetTimes(string path);
+    void SetTimes(string path, FileTimes times);
+    FileAttributes GetAttributes(string path);
+    void SetAttributes(string path, FileAttributes attributes);
+
+    /// <summary>True nếu thư mục tồn tại và không chứa tệp hay thư mục con nào.</summary>
+    bool IsDirectoryEmpty(string path);
+
+    /// <summary>True nếu đường dẫn là symlink/junction (không đi theo khi duyệt cây).</summary>
+    bool IsLink(string path) => false;
+
+    /// <summary>Mở tệp để đọc tuần tự (băm, đọc magic bytes). Người gọi đóng luồng.</summary>
+    Stream OpenRead(string path);
+
+    /// <summary>Mở luồng ghi (tạo mới hoặc cắt ngắn tệp, tạo thư mục cha nếu cần). Người gọi đóng luồng.</summary>
+    Stream OpenWrite(string path);
+
+    /// <summary>Ghi tệp nhị phân (tạo thư mục cha nếu cần). Dùng cho tệp tạm do công cụ dựng.</summary>
+    void WriteAllBytes(string path, byte[] content);
 }

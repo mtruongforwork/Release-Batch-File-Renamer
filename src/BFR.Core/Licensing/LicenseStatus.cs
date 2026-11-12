@@ -9,7 +9,7 @@ public sealed record LicenseStatus
 {
     public LicenseTier Tier { get; init; } = LicenseTier.Free;
 
-    /// <summary>True nếu đang trong thời gian dùng thử Pro 14 ngày.</summary>
+    /// <summary>True nếu đang trong thời gian dùng thử Pro 30 ngày.</summary>
     public bool IsTrial { get; init; }
 
     /// <summary>Thời điểm hết hạn dùng thử (UTC), null nếu không dùng thử.</summary>

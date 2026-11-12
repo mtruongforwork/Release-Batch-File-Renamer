@@ -1,6 +1,7 @@
 namespace BFR.Shell.SmokeTest;
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 /// <summary>
@@ -54,11 +55,15 @@ public static class Program
 
             hr = command.GetFlags(out var flags);
             RequireHr("GetFlags", hr);
-            if (flags != 0)
+            const uint EcfHasSubCommands = 0x1;
+            if (flags != EcfHasSubCommands)
             {
-                Console.Error.WriteLine($"GetFlags trả về {flags}, mong đợi 0 (ECF_DEFAULT).");
+                Console.Error.WriteLine($"GetFlags trả về {flags}, mong đợi {EcfHasSubCommands} (ECF_HASSUBCOMMANDS).");
                 return 1;
             }
+
+            var subResult = CheckSubCommands(command);
+            if (subResult != 0) return subResult;
 
             hr = command.GetCanonicalName(out var canonical);
             RequireHr("GetCanonicalName", hr);
@@ -76,6 +81,85 @@ public static class Program
             Console.Error.WriteLine("COM smoke test FAIL: " + ex);
             return 1;
         }
+    }
+
+    /// <summary>
+    /// Duyệt menu con qua COM thật: Next/Skip/Reset/Clone, tiêu đề, cờ, tên chuẩn, và Next một lần lấy cả danh sách.
+    /// </summary>
+    private static int CheckSubCommands(IExplorerCommand parent)
+    {
+        string[] expectedKeys = { "Open", "number", "ascii", "date", "clean", "lower" };
+
+        int hr = parent.EnumSubCommands(out var enumPtr);
+        RequireHr("EnumSubCommands", hr);
+        if (enumPtr == IntPtr.Zero) { Console.Error.WriteLine("EnumSubCommands trả về con trỏ rỗng."); return 1; }
+
+        var enumerator = (IEnumExplorerCommand)Marshal.GetObjectForIUnknown(enumPtr);
+        Marshal.Release(enumPtr);
+
+        var titles = new List<string>();
+        var names = new HashSet<Guid>();
+        while (true)
+        {
+            hr = enumerator.Next(1, out var child, out var fetched);
+            if (hr == 1 || fetched == 0) break;   // S_FALSE: hết danh sách
+            RequireHr("Next", hr);
+
+            RequireHr("child.GetTitle", child.GetTitle(IntPtr.Zero, out var tp));
+            var t = Marshal.PtrToStringUni(tp);
+            if (tp != IntPtr.Zero) Marshal.FreeCoTaskMem(tp);
+            if (string.IsNullOrWhiteSpace(t)) { Console.Error.WriteLine("Lệnh con có tiêu đề rỗng."); return 1; }
+            titles.Add(t);
+
+            RequireHr("child.GetFlags", child.GetFlags(out var cf));
+            if (cf != 0) { Console.Error.WriteLine($"Lệnh con '{t}' có cờ {cf}, mong đợi 0."); return 1; }
+
+            RequireHr("child.GetState", child.GetState(IntPtr.Zero, 1, out var cs));
+            if (cs != 0) { Console.Error.WriteLine($"Lệnh con '{t}' có state {cs}, mong đợi 0."); return 1; }
+
+            RequireHr("child.GetCanonicalName", child.GetCanonicalName(out var g));
+            if (!names.Add(g)) { Console.Error.WriteLine($"Tên chuẩn trùng: {g}."); return 1; }
+
+            if (child.EnumSubCommands(out var none) >= 0 || none != IntPtr.Zero)
+            {
+                Console.Error.WriteLine($"Lệnh con '{t}' không được có menu con.");
+                return 1;
+            }
+        }
+
+        if (titles.Count != expectedKeys.Length)
+        {
+            Console.Error.WriteLine($"Mong đợi {expectedKeys.Length} lệnh con, nhận {titles.Count}: {string.Join(" | ", titles)}");
+            return 1;
+        }
+
+        // Reset rồi lấy cả danh sách trong MỘT lần gọi Next.
+        RequireHr("Reset", enumerator.Reset());
+        var all = new IExplorerCommand[expectedKeys.Length + 2];
+        hr = ((IEnumExplorerCommandMany)enumerator).Next((uint)all.Length, all, out var got);
+        if (got != expectedKeys.Length || hr != 1)
+        {
+            Console.Error.WriteLine($"Next({all.Length}) trả về {got} phần tử, hr={hr}; mong đợi {expectedKeys.Length} và S_FALSE.");
+            return 1;
+        }
+
+        // Skip và Clone giữ đúng vị trí.
+        RequireHr("Reset", enumerator.Reset());
+        RequireHr("Skip", enumerator.Skip(2));
+        RequireHr("Clone", enumerator.Clone(out var cloneObj));
+        hr = cloneObj.Next(1, out var third, out var f3);
+        RequireHr("Clone.Next", hr);
+        third.GetTitle(IntPtr.Zero, out var tp3);
+        var thirdTitle = Marshal.PtrToStringUni(tp3);
+        if (tp3 != IntPtr.Zero) Marshal.FreeCoTaskMem(tp3);
+        if (thirdTitle != titles[2])
+        {
+            Console.Error.WriteLine($"Sau Skip(2)+Clone, phần tử đầu là '{thirdTitle}', mong đợi '{titles[2]}'.");
+            return 1;
+        }
+
+        Console.WriteLine($"Menu con PASS: {titles.Count} lệnh: {string.Join(" | ", titles)}");
+        return 0;
     }
 
     private static void RequireHr(string method, int hr)
@@ -100,4 +184,24 @@ public interface IExplorerCommand
     [PreserveSig] int Invoke(IntPtr psiItemArray, IntPtr pbc);
     [PreserveSig] int GetFlags(out uint pFlags);
     [PreserveSig] int EnumSubCommands(out IntPtr ppEnum);
+}
+
+[ComImport]
+[Guid("a88826f8-186f-4987-aade-ea0cef8fbfe8")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IEnumExplorerCommand
+{
+    [PreserveSig] int Next(uint celt, [MarshalAs(UnmanagedType.Interface)] out IExplorerCommand pUICommand, out uint pceltFetched);
+    [PreserveSig] int Skip(uint celt);
+    [PreserveSig] int Reset();
+    [PreserveSig] int Clone([MarshalAs(UnmanagedType.Interface)] out IEnumExplorerCommand ppenum);
+}
+
+/// <summary>Cùng IID với IEnumExplorerCommand nhưng Next nhận mảng, để kiểm tra lấy nhiều lệnh trong một lần gọi.</summary>
+[ComImport]
+[Guid("a88826f8-186f-4987-aade-ea0cef8fbfe8")]
+[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IEnumExplorerCommandMany
+{
+    [PreserveSig] int Next(uint celt, [Out, MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.Interface, SizeParamIndex = 0)] IExplorerCommand[] rgelt, out uint pceltFetched);
 }

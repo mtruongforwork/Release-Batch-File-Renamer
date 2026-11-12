@@ -34,11 +34,9 @@ public sealed class PresetStore
         {
             try
             {
-                var json = _fs.ReadAllText(file);
-                var preset = JsonSerializer.Deserialize<Preset>(json, JsonOptions);
-                if (preset is not null) list.Add(preset);
+                list.Add(PresetValidator.ReadFile(_fs, file));
             }
-            catch (JsonException) { /* bỏ qua preset hỏng */ }
+            catch (InvalidDataException) { /* bỏ qua preset hỏng hoặc vượt giới hạn */ }
         }
         return list;
     }
@@ -50,8 +48,7 @@ public sealed class PresetStore
         else path = Path.Combine(_directory, SanitizeFileName(nameOrPath) + ".bfrpreset");
 
         if (!_fs.FileExists(path)) return null;
-        var json = _fs.ReadAllText(path);
-        return JsonSerializer.Deserialize<Preset>(json, JsonOptions);
+        return PresetValidator.ReadFile(_fs, path);
     }
 
     public void Save(Preset preset)
@@ -68,16 +65,9 @@ public sealed class PresetStore
     public string ToJson(Preset preset) => JsonSerializer.Serialize(preset, JsonOptions);
 
     /// <summary>Nhập preset từ chuỗi JSON (dùng cho chia sẻ).</summary>
-    public Preset FromJson(string json) =>
-        JsonSerializer.Deserialize<Preset>(json, JsonOptions)
-        ?? throw new InvalidDataException("Preset không hợp lệ");
+    public Preset FromJson(string json) => PresetValidator.Parse(json);
 
-    public Preset Import(string path)
-    {
-        var json = _fs.ReadAllText(path);
-        return JsonSerializer.Deserialize<Preset>(json, JsonOptions)
-               ?? throw new InvalidDataException("Preset không hợp lệ");
-    }
+    public Preset Import(string path) => PresetValidator.ReadFile(_fs, path);
 
     /// <summary>Xoá preset khỏi thư viện cục bộ (trả về true nếu đã xoá).</summary>
     public bool Delete(string name)

@@ -52,6 +52,18 @@ public static class ThemeManager
 
         EnsureStylesLoaded(app);
 
+        // Đồng bộ theme của WPF-UI (FluentWindow, TitleBar, control gốc) với theme riêng của BFR.
+        // updateAccent: màu accent hệ thống để chữ trên nút Primary luôn đủ tương phản ở cả sáng/tối.
+        // Bộ token mới (Themes/Bfr) đi cùng theme cũ trong lúc chuyển đổi từng màn hình sang giao diện mới.
+        // Gọi trước để biết có đang ở tương phản cao hay không (khi đó WPF-UI dùng theme HighContrast, không Mica).
+        BfrTheme.Apply(IsDark, BfrTheme.ParseAccent(SettingsStore.Load().AccentPalette));
+
+        Wpf.Ui.Appearance.ApplicationThemeManager.Apply(
+            BfrTheme.IsHighContrast ? Wpf.Ui.Appearance.ApplicationTheme.HighContrast
+                : IsDark ? Wpf.Ui.Appearance.ApplicationTheme.Dark : Wpf.Ui.Appearance.ApplicationTheme.Light,
+            BfrTheme.IsHighContrast ? Wpf.Ui.Controls.WindowBackdropType.None : Wpf.Ui.Controls.WindowBackdropType.Mica,
+            updateAccent: !BfrTheme.IsHighContrast);
+
         var uri = new Uri($"Themes/Theme.{(IsDark ? "Dark" : "Light")}.xaml", UriKind.Relative);
         var dictionary = new ResourceDictionary { Source = uri };
 
@@ -72,6 +84,16 @@ public static class ThemeManager
         {
             app.Resources.MergedDictionaries.Add(dictionary);
         }
+
+        // Nút Primary, mục chọn của WPF-UI theo bảng màu nhấn của BFR thay vì màu nhấn của Windows.
+        if (Application.Current.TryFindResource("BfrAcc1Color") is Color brand && !BfrTheme.IsHighContrast)
+        {
+            Wpf.Ui.Appearance.ApplicationAccentColorManager.Apply(
+                brand, IsDark ? Wpf.Ui.Appearance.ApplicationTheme.Dark : Wpf.Ui.Appearance.ApplicationTheme.Light);
+        }
+
+        // Sau khi từ điển Theme.* đã hoán đổi: ghi đè khoá cũ bằng màu của token mới.
+        LegacyBridge.Apply();
 
         foreach (Window window in Application.Current.Windows)
         {
@@ -118,12 +140,16 @@ public static class ThemeManager
             var handle = new WindowInteropHelper(window).Handle;
             if (handle == IntPtr.Zero) return;
 
-            var dark = IsDark ? 1 : 0;
+            var dark = IsDark && !BfrTheme.IsHighContrast ? 1 : 0;
             DwmSetWindowAttribute(handle, DwmwaUseImmersiveDarkMode, ref dark, sizeof(int));
+
+            // Tương phản cao: nền đặc của hệ thống, không Mica (Mica làm mờ độ tương phản chữ).
+            if (BfrTheme.IsHighContrast) window.SetResourceReference(Window.BackgroundProperty, "AppBackground");
+            else window.ClearValue(Window.BackgroundProperty);
 
             if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22621))
             {
-                var backdrop = DwmSystemBackdropMica;
+                var backdrop = BfrTheme.IsHighContrast ? 1 : DwmSystemBackdropMica;
                 DwmSetWindowAttribute(handle, DwmwaSystemBackdropType, ref backdrop, sizeof(int));
             }
         }

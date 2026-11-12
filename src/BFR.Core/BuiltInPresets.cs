@@ -1,5 +1,6 @@
 namespace BFR.Core;
 
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
@@ -9,6 +10,26 @@ using System.Text.Json;
 public static class BuiltInPresets
 {
     private static JsonElement E(object? value) => JsonSerializer.SerializeToElement(value);
+
+    // Tên preset dựng sẵn là khoá ổn định (lưu trong tệp, dùng ở --preset); chỉ phần hiển thị được dịch.
+    private static readonly Dictionary<string, string> DisplayKeys = new(StringComparer.Ordinal)
+    {
+        ["Dọn dẹp tên tệp"] = "PresetBuiltinClean",
+        ["Bỏ dấu tiếng Việt + gạch nối"] = "PresetBuiltinAscii",
+        ["Đánh số theo thứ tự"] = "PresetBuiltinNumber",
+        ["Ảnh theo ngày chụp"] = "PresetBuiltinDate",
+        ["Chữ thường toàn bộ"] = "PresetBuiltinLower",
+        ["Thêm tiền tố thư mục cha"] = "PresetBuiltinParent",
+        ["Chuẩn hóa Unicode (NFC)"] = "PresetBuiltinNfc"
+    };
+
+    /// <summary>Tên hiển thị theo ngôn ngữ giao diện; preset của người dùng giữ nguyên tên.</summary>
+    public static string DisplayName(string name) =>
+        DisplayKeys.TryGetValue(name, out var key) ? CoreText.TryGet(key + "Name") ?? name : name;
+
+    /// <summary>Mô tả hiển thị theo ngôn ngữ giao diện, hoặc mô tả gốc nếu chưa có bản dịch.</summary>
+    public static string DisplayDescription(string name, string description) =>
+        DisplayKeys.TryGetValue(name, out var key) ? CoreText.TryGet(key + "Desc") ?? description : description;
 
     public static IReadOnlyList<Preset> All { get; } = new List<Preset>
     {

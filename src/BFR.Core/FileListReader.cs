@@ -61,7 +61,9 @@ public static class FileListReader
         }
         finally
         {
-            if (fs is null || fs is RealFileSystem)
+            // Chỉ xoá tệp danh sách do BFR tạo trong thư mục tạm riêng; đường dẫn từ nguồn ngoài
+            // (IPC, dòng lệnh) không được phép khiến BFR xoá tệp tuỳ ý của người dùng.
+            if ((fs is null || fs is RealFileSystem) && PathGuard.IsBfrTempFile(filePath))
             {
                 try
                 {

@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Bảng màu tối. Màu (Color) tách khỏi cọ (Brush) để test tương phản đọc được trực tiếp giá trị màu. -->
+
+    <Color x:Key="BfrBgBaseColor">#FF0E0F13</Color>
+    <Color x:Key="BfrSurface1Color">#FF16181F</Color>
+    <Color x:Key="BfrSurface2Color">#FF1D2029</Color>
+    <Color x:Key="BfrGlassColor">#0FFFFFFF</Color>
+    <Color x:Key="BfrLineColor">#17FFFFFF</Color>
+    <Color x:Key="BfrFgColor">#FFF2F2F7</Color>
+    <Color x:Key="BfrFg2Color">#FFA3A6B5</Color>
+    <Color x:Key="BfrFg3Color">#FF8A8EA0</Color>
+    <Color x:Key="BfrOkColor">#FF3DDC97</Color>
+    <Color x:Key="BfrWarnColor">#FFFFB74D</Color>
+    <Color x:Key="BfrBadColor">#FFFF6B6B</Color>
+    <Color x:Key="BfrOkSoftColor">#243DDC97</Color>
+    <Color x:Key="BfrWarnSoftColor">#24FFB74D</Color>
+    <Color x:Key="BfrBadSoftColor">#24FF6B6B</Color>
+    <Color x:Key="BfrShadowColor">#FF000000</Color>
+    <Color x:Key="BfrOnAccentColor">#FFFFFFFF</Color>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=System.Runtime" x:Key="BfrShadowOpacity">0.38</sys:Double>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=System.Runtime" x:Key="BfrGlowOpacity">0.22</sys:Double>
+
+    <SolidColorBrush x:Key="BfrBgBase" Color="{DynamicResource BfrBgBaseColor}" />
+    <SolidColorBrush x:Key="BfrSurface1" Color="{DynamicResource BfrSurface1Color}" />
+    <SolidColorBrush x:Key="BfrSurface2" Color="{DynamicResource BfrSurface2Color}" />
+    <SolidColorBrush x:Key="BfrGlass" Color="{DynamicResource BfrGlassColor}" />
+    <SolidColorBrush x:Key="BfrLine" Color="{DynamicResource BfrLineColor}" />
+    <SolidColorBrush x:Key="BfrFg" Color="{DynamicResource BfrFgColor}" />
+    <SolidColorBrush x:Key="BfrFg2" Color="{DynamicResource BfrFg2Color}" />
+    <SolidColorBrush x:Key="BfrFg3" Color="{DynamicResource BfrFg3Color}" />
+    <SolidColorBrush x:Key="BfrOk" Color="{DynamicResource BfrOkColor}" />
+    <SolidColorBrush x:Key="BfrWarn" Color="{DynamicResource BfrWarnColor}" />
+    <SolidColorBrush x:Key="BfrBad" Color="{DynamicResource BfrBadColor}" />
+    <SolidColorBrush x:Key="BfrOkSoft" Color="{DynamicResource BfrOkSoftColor}" />
+    <SolidColorBrush x:Key="BfrWarnSoft" Color="{DynamicResource BfrWarnSoftColor}" />
+    <SolidColorBrush x:Key="BfrBadSoft" Color="{DynamicResource BfrBadSoftColor}" />
+    <SolidColorBrush x:Key="BfrOnAccent" Color="{DynamicResource BfrOnAccentColor}" />
+
+    <!-- Chữ nhấn (liên kết, focus ring) lấy từ bảng màu nhấn, biến thể dành cho nền tối. -->
+    <SolidColorBrush x:Key="BfrAccFg" Color="{DynamicResource BfrAccFgDarkColor}" />
+</ResourceDictionary>

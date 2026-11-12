@@ -5,6 +5,8 @@
 
 # Chụp ảnh từng trạng thái của hộp thoại nâng cấp Pro.
 # Mỗi trạng thái được tạo bằng cách ghi license.json rồi mở app và bấm nút nâng cấp.
+# Hộp thoại nằm TRONG cửa sổ chính (ContentDialog) nên ảnh chụp là cả cửa sổ chính.
+# Dữ liệu thật trong %LOCALAPPDATA%\BatchFileRenamer được sao lưu và khôi phục khi xong.
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
@@ -29,6 +31,19 @@ $appData = Join-Path $env:LOCALAPPDATA 'BatchFileRenamer'
 $licenseFile = Join-Path $appData 'license.json'
 $settingsFile = Join-Path $appData 'settings.json'
 $exe = Join-Path $repo 'src\BFR.App\bin\Release\net8.0-windows10.0.19041.0\BatchFileRenamer.exe'
+
+# ---- bảo vệ dữ liệu thật: sao lưu rồi khôi phục ở cuối
+$backupDir = Join-Path $env:TEMP ('bfr-capture-backup-' + [guid]::NewGuid().ToString('N'))
+$hadAppData = Test-Path $appData
+if ($hadAppData) { Copy-Item $appData $backupDir -Recurse -Force }
+Remove-Item Env:\BFR_DEV_TIER -ErrorAction SilentlyContinue   # cần đúng tier Free/Trial theo license.json
+
+function Restore-AppData {
+    Get-Process BatchFileRenamer -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 800
+    Remove-Item $appData -Recurse -Force -ErrorAction SilentlyContinue
+    if ($hadAppData) { Copy-Item $backupDir $appData -Recurse -Force; Remove-Item $backupDir -Recurse -Force -ErrorAction SilentlyContinue }
+}
 
 function Write-License([hashtable]$state) {
     New-Item -ItemType Directory -Force $appData | Out-Null
@@ -72,7 +87,9 @@ function Start-App {
     Get-Process BatchFileRenamer -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Milliseconds 800
     $proc = Start-Process -FilePath $exe -PassThru
-    Start-Sleep -Seconds 6
+    # Khởi động lạnh có thể chậm: chờ tới khi cửa sổ xuất hiện (tối đa 30 giây).
+    for ($i = 0; $i -lt 60 -and -not (Get-AppWindow $proc.Id); $i++) { Start-Sleep -Milliseconds 500 }
+    Start-Sleep -Seconds 2
     return $proc
 }
 
@@ -105,33 +122,18 @@ function Capture-State {
         }
 
         if ($Context) {
-            # Chạm vào tính năng Pro: thêm quy tắc thứ 4 (Free chỉ cho 3) để mở hộp thoại nâng cấp.
-            for ($i = 0; $i -lt 4; $i++) {
+            # Chạm vào tính năng Pro: thêm quy tắc từ thư viện thẻ cho tới khi vượt giới hạn Free (3 quy tắc).
+            foreach ($type in 'FindReplace', 'Trim', 'Case', 'Insert', 'Sanitize', 'Date') {
+                if (Find-ByName $win 'Upgrade to Pro dialog' ([System.Windows.Automation.ControlType]::Custom)) { break }
                 $addRule = Find-ByName $win 'Add rule button' ([System.Windows.Automation.ControlType]::Button)
                 if (-not $addRule) { break }
-
                 $addRule.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
-                Start-Sleep -Milliseconds 700
+                Start-Sleep -Milliseconds 900
 
-                # Chọn loại quy tắc đầu tiên trong menu ngữ cảnh (menu là popup riêng).
-                $menuTypeCond = New-Object System.Windows.Automation.PropertyCondition(
-                    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-                    [System.Windows.Automation.ControlType]::MenuItem)
-                $menuPidCond = New-Object System.Windows.Automation.PropertyCondition(
-                    [System.Windows.Automation.AutomationElement]::ProcessIdProperty, $proc.Id)
-                $menuCond = New-Object System.Windows.Automation.AndCondition($menuTypeCond, $menuPidCond)
-
-                $menuItem = $null
-                $desktop = [System.Windows.Automation.AutomationElement]::RootElement
-                foreach ($candidate in $desktop.FindAll([System.Windows.Automation.TreeScope]::Descendants, $menuCond)) {
-                    if ($candidate.Current.IsEnabled -and $candidate.Current.Name -notmatch '^-{3,}$') {
-                        $menuItem = $candidate
-                        break
-                    }
-                }
-                if (-not $menuItem) { break }
-                $menuItem.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
-                Start-Sleep -Milliseconds 700
+                $card = Find-ByName $win "Rule card $type" ([System.Windows.Automation.ControlType]::Button)
+                if (-not $card) { break }
+                $card.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+                Start-Sleep -Milliseconds 900
             }
         }
         else {
@@ -141,15 +143,14 @@ function Capture-State {
 
         Start-Sleep -Seconds 2
 
-        # Hộp thoại là cửa sổ con của cửa sổ chính (Owner). Chờ tới khi xuất hiện.
+        # Hộp thoại là nội dung trong cửa sổ chính: tìm phần tử có tên tương ứng.
         $dialog = $null
         for ($attempt = 0; $attempt -lt 20 -and -not $dialog; $attempt++) {
-            foreach ($candidate in $win.FindAll([System.Windows.Automation.TreeScope]::Descendants,
-                (New-Object System.Windows.Automation.PropertyCondition(
-                    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-                    [System.Windows.Automation.ControlType]::Window)))) {
-                $n = $candidate.Current.Name
-                if ($n -eq 'Upgrade to Pro dialog' -or $n -eq 'License information') { $dialog = $candidate; break }
+            foreach ($wanted in 'Upgrade to Pro dialog', 'License information') {
+                $cond = New-Object System.Windows.Automation.PropertyCondition(
+                    [System.Windows.Automation.AutomationElement]::NameProperty, $wanted)
+                $dialog = $win.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)
+                if ($dialog) { break }
             }
 
             if (-not $dialog) {
@@ -164,19 +165,10 @@ function Capture-State {
         }
 
         if (-not $dialog) { throw "Không mở được hộp thoại nâng cấp." }
+        Start-Sleep -Milliseconds 600
 
-        # Đợi hộp thoại vẽ xong (handle hợp lệ) rồi mới chụp.
-        for ($i = 0; $i -lt 20; $i++) {
-            $h = [IntPtr]$dialog.Current.NativeWindowHandle
-            if ($h -ne [IntPtr]::Zero) {
-                $r = New-Object CapUpgrade+RECT
-                [CapUpgrade]::GetWindowRect($h, [ref]$r) | Out-Null
-                if (($r.Right - $r.Left) -gt 0) { break }
-            }
-            Start-Sleep -Milliseconds 250
-        }
-
-        Save-Window ([IntPtr]$dialog.Current.NativeWindowHandle) (Join-Path $outPath "$name.png")
+        # Chụp cả cửa sổ chính (hộp thoại vẽ ngay bên trong).
+        Save-Window ([IntPtr]$win.Current.NativeWindowHandle) (Join-Path $outPath "$name.png")
     }
     finally {
         Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
@@ -184,6 +176,7 @@ function Capture-State {
     }
 }
 
+try {
 $now = (Get-Date).ToUniversalTime()
 
 # 1) Chưa dùng thử: có cả "Mua Pro" và "Dùng thử Pro 14 ngày"
@@ -211,4 +204,6 @@ Capture-State -Name 'upgrade-4-license-info' -license @{
 # 5) Ngữ cảnh: chạm tính năng Pro khi đang ở cấp Free
 Capture-State -Name 'upgrade-5-context' -license @{} -Context
 
+}
+finally { Restore-AppData }
 Write-Host "Đã lưu ảnh tại: $outPath" -ForegroundColor Green

@@ -16,6 +16,11 @@ public sealed class FindReplaceRule : IRule
     public bool IsRegex { get; set; } = false;
     public bool IgnoreCase { get; set; } = false;
     public bool ReplaceAll { get; set; } = true;
+
+    private sealed record CachedRegex(string Pattern, bool IgnoreCase, Regex Regex);
+
+    // Ghi/đọc một tham chiếu là nguyên tử; hai luồng cùng dựng chỉ tốn thêm một lần dựng.
+    private volatile CachedRegex? _regexCache;
     public ApplyScope Scope { get; set; } = ApplyScope.Name; // Tên / Đuôi / Cả hai
 
     public RenameState Apply(FileItem file, RenameState state, RuleContext ctx)
@@ -42,6 +47,19 @@ public sealed class FindReplaceRule : IRule
 
         return state with { Name = targetName, Extension = targetExt, Trace = trace };
 
+        // Dựng Regex một lần cho mỗi (mẫu, hoa/thường): trước đây dựng lại (RegexOptions.Compiled) cho TỪNG tệp,
+        // mỗi lần vài ms nên 10.000 tệp mất cả chục giây.
+        Regex GetRegex()
+        {
+            var cached = _regexCache;
+            if (cached is not null && cached.Pattern == Pattern && cached.IgnoreCase == IgnoreCase) return cached.Regex;
+
+            var options = IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
+            var created = new Regex(Pattern, options, RegexLimits.Timeout);
+            _regexCache = new CachedRegex(Pattern, IgnoreCase, created);
+            return created;
+        }
+
         string ApplyOne(string input, FileItem f)
         {
             if (string.IsNullOrEmpty(input)) return input;
@@ -49,8 +67,7 @@ public sealed class FindReplaceRule : IRule
             {
                 if (IsRegex)
                 {
-                    var options = IgnoreCase ? RegexOptions.Compiled | RegexOptions.IgnoreCase : RegexOptions.Compiled;
-                    var regex = new Regex(Pattern, options, TimeSpan.FromMilliseconds(250));
+                    var regex = GetRegex();
                     var result = ReplaceAll ? regex.Replace(input, replacement) : regex.Replace(input, replacement, 1);
                     return result;
                 }
@@ -66,13 +83,13 @@ public sealed class FindReplaceRule : IRule
             catch (RegexMatchTimeoutException)
             {
                 // Không treo ứng dụng; giữ nguyên và đánh dấu trong trace
-                trace.Add($"{Id}: Regex quá chậm (timeout)");
+                trace.Add($"{Id}: " + CoreText.Get("CoreRegexTimeout", "Regex quá chậm (timeout)"));
                 return input;
             }
             catch (ArgumentException)
             {
                 // Mẫu không hợp lệ; giữ nguyên
-                trace.Add($"{Id}: Mẫu Regex không hợp lệ");
+                trace.Add($"{Id}: " + CoreText.Get("CoreRegexInvalid", "Mẫu Regex không hợp lệ"));
                 return input;
             }
         }

@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Bảng màu nhấn Sunset. Cặp Acc1 → Acc2 là gradient của nút chính, ô đang chọn, tiến trình:
+         chữ trắng trên cả hai đầu phải đạt tương phản 4.5:1 (có test). Glow chỉ dùng cho đốm sáng nền, không chứa chữ. -->
+
+    <Color x:Key="BfrAcc1Color">#FFC93F0A</Color>
+    <Color x:Key="BfrAcc2Color">#FFC2255C</Color>
+    <Color x:Key="BfrGlow1Color">#FFFF8A3D</Color>
+    <Color x:Key="BfrGlow2Color">#FFFF4D7D</Color>
+    <Color x:Key="BfrAccFgDarkColor">#FFFFAB76</Color>
+    <Color x:Key="BfrAccFgLightColor">#FFB8400C</Color>
+    <Color x:Key="BfrAcc1SoftColor">#42C93F0A</Color>
+    <Color x:Key="BfrAcc2SoftColor">#2EC2255C</Color>
+
+    <LinearGradientBrush x:Key="BfrAccGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{DynamicResource BfrAcc1Color}" Offset="0" />
+        <GradientStop Color="{DynamicResource BfrAcc2Color}" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="BfrAccGradientSoft" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{DynamicResource BfrAcc1SoftColor}" Offset="0" />
+        <GradientStop Color="{DynamicResource BfrAcc2SoftColor}" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="BfrAcc1" Color="{DynamicResource BfrAcc1Color}" />
+    <SolidColorBrush x:Key="BfrAcc2" Color="{DynamicResource BfrAcc2Color}" />
+    <SolidColorBrush x:Key="BfrGlow1" Color="{DynamicResource BfrGlow1Color}" />
+    <SolidColorBrush x:Key="BfrGlow2" Color="{DynamicResource BfrGlow2Color}" />
+</ResourceDictionary>

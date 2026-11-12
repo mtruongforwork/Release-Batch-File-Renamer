@@ -128,7 +128,7 @@
       <p class="eyebrow">Batch File Renamer</p>
       <h1>Chính sách quyền riêng tư</h1>
       <p class="meta">
-        Ngày có hiệu lực: <strong>20/10/2026</strong><br>
+        Ngày có hiệu lực: <strong>12/11/2026</strong><br>
         Ứng dụng: Batch File Renamer (BFR) · Nhà phát triển: Batch File Renamer Team
       </p>
       <nav class="lang-nav" aria-label="Chọn ngôn ngữ">
@@ -166,8 +166,19 @@
           </li>
           <li>
             <strong>Nhật ký hoàn tác:</strong> được lưu tại <code>%LocalAppData%\BatchFileRenamer\journal</code>
-            để hỗ trợ Hoàn tác và khôi phục sau sự cố. Bạn có thể xóa thư mục này bất kỳ lúc nào;
-            việc xóa sẽ làm mất khả năng hoàn tác các lần đổi tên trước đó.
+            để hỗ trợ Hoàn tác và khôi phục sau sự cố. Lịch sử và nhật ký hoàn tác tự động bị xóa sau thời hạn bạn chọn
+            trong Cài đặt (7, 30, 90 hoặc 365 ngày; mặc định 30 ngày). Bạn cũng có thể bấm
+            <strong>Xoá lịch sử và dữ liệu hoàn tác ngay</strong> trong Cài đặt, hoặc xóa thư mục này bất kỳ lúc nào;
+            việc xóa sẽ làm mất khả năng hoàn tác các lần đổi tên trước đó. Nhật ký lỗi nghiêm trọng (nếu có)
+            được ghi cục bộ với đường dẫn tệp đã được che.
+          </li>
+          <li>
+            <strong>Đổi tên nhanh từ menu Explorer (v1.4):</strong> các mục con của menu chuột phải chuyển danh sách tệp và
+            tên mẫu đổi tên cho ứng dụng cục bộ; kết quả hiện ở thông báo nhỏ, không có dữ liệu nào rời khỏi máy.
+          </li>
+          <li>
+            <strong>Tệp danh sách (CSV/TSV/TXT) do bạn chọn (v1.4):</strong> nội dung chỉ được đọc cục bộ vào ô nhập của
+            quy tắc “Đổi tên theo danh sách” và lưu cùng preset nếu bạn lưu; không được gửi đi.
           </li>
           <li>
             <strong>Danh sách tệp tạm từ Explorer:</strong> khi bạn chọn nhiều tệp, COM server cục bộ ghi danh sách
@@ -183,14 +194,40 @@
           trong phiên đăng nhập hiện tại và không mở ra Internet.
         </p>
 
-        <h3>4. Quyền thực thi và menu Explorer</h3>
+        <h3>4. Theo dõi chuột để mở Shelf (tuỳ chọn, mặc định TẮT)</h3>
+        <p>
+          Chỉ khi bạn <strong>bật</strong> “Lắc chuột khi đang kéo tệp để mở Shelf” trong Cài đặt, BFR mới cài một
+          hook chuột toàn hệ thống của Windows (<code>WH_MOUSE_LL</code>) để nhận ra cử chỉ lắc trong lúc bạn giữ nút chuột trái.
+        </p>
+        <ul>
+          <li>Ứng dụng chỉ dùng <strong>vị trí con trỏ và trạng thái nút chuột trái</strong>, xử lý ngay trong bộ nhớ để nhận diện cử chỉ.</li>
+          <li>Ứng dụng <strong>không ghi lại, không lưu và không gửi đi</strong> lịch sử di chuyển hay thao tác chuột.</li>
+          <li>Hook <strong>không đọc bàn phím</strong>, nội dung cửa sổ, nội dung màn hình hay nội dung tệp bạn đang kéo.</li>
+          <li>Thao tác bắt đầu bên trong cửa sổ của BFR được bỏ qua.</li>
+          <li>Khi bạn tắt tuỳ chọn (mặc định) hoặc thoát ứng dụng, hook được gỡ ngay.</li>
+        </ul>
+        <p>
+          <strong>Phím tắt toàn cục để mở Shelf (v1.4, tuỳ chọn, mặc định TẮT).</strong> Chỉ khi bạn bật tuỳ chọn trong Cài đặt,
+          BFR đăng ký một tổ hợp phím toàn hệ thống bằng API <code>RegisterHotKey</code> của Windows.
+        </p>
+        <ul>
+          <li>Hệ điều hành chỉ báo cho BFR khi <strong>đúng tổ hợp bạn đã chọn</strong> được nhấn. BFR <strong>không cài hook bàn phím</strong> và <strong>không nhận hay ghi lại các phím khác</strong>.</li>
+          <li>Khi bạn tắt tuỳ chọn hoặc thoát ứng dụng, tổ hợp phím được huỷ đăng ký ngay.</li>
+        </ul>
+        <h3>5. Chạy nền và khởi động cùng Windows (tuỳ chọn, mặc định TẮT)</h3>
+        <ul>
+          <li><strong>Chạy nền:</strong> khi bật, đóng cửa sổ chỉ ẩn BFR vào khay hệ thống; chọn “Thoát” trong menu khay để thoát hẳn. Chạy nền không tạo thêm kết nối mạng.</li>
+          <li><strong>Khởi động cùng Windows:</strong> bản Microsoft Store đăng ký một tác vụ khởi động (<code>StartupTask</code>) mà bạn có thể bật/tắt trong Cài đặt Windows &gt; Ứng dụng &gt; Khởi động; bản portable ghi một mục vào khoá <code>Run</code> của tài khoản người dùng hiện tại. Tắt tuỳ chọn sẽ gỡ mục đó.</li>
+          <li><strong>Cài đặt của ứng dụng</strong> (ngôn ngữ, giao diện và các tuỳ chọn trên) được lưu cục bộ trong <code>%LocalAppData%\BatchFileRenamer\settings.json</code>.</li>
+        </ul>
+        <h3>6. Quyền thực thi và menu Explorer</h3>
         <p>
           Gói MSIX khai báo năng lực <code>runFullTrust</code> vì ứng dụng cần đổi tên tệp trên đĩa và tích hợp
           menu ngữ cảnh File Explorer. Ứng dụng chạy với quyền người dùng thông thường
           (<code>asInvoker</code>), không yêu cầu quyền Quản trị viên.
         </p>
 
-        <h3>5. Mua trong ứng dụng (Microsoft Store IAP)</h3>
+        <h3>7. Mua trong ứng dụng (Microsoft Store IAP)</h3>
         <p>
           Khi bạn kiểm tra hoặc mua gói <strong>Pro (mua đứt trọn đời)</strong>, ứng dụng dùng API
           <code>Windows.Services.Store</code> của hệ điều hành để <strong>kiểm tra giấy phép và thực hiện giao dịch
@@ -204,7 +241,7 @@
           <li>Bản ZIP (portable) không dùng Store IAP và luôn ở cấp Free.</li>
         </ul>
 
-        <h3>6. Kiểm tra cập nhật (bản portable, tuỳ chọn)</h3>
+        <h3>8. Kiểm tra cập nhật (bản portable, tuỳ chọn)</h3>
         <p>
           Khi bạn <strong>bật</strong> chức năng “Kiểm tra cập nhật” (mặc định <strong>TẮT</strong>) hoặc bấm nút kiểm tra,
           ứng dụng gọi <strong>một URL công khai do bạn cấu hình</strong> (mặc định là API “latest release” của GitHub)
@@ -215,26 +252,26 @@
           <li>Nếu không bật hoặc máy ngoại tuyến, ứng dụng <strong>không</strong> thực hiện kết nối này.</li>
           <li>Bản cài từ Microsoft Store được Store cập nhật tự động nên không dùng chức năng này.</li>
         </ul>
-        <h3>7. Thời gian lưu trữ và lựa chọn của bạn</h3>
+        <h3>9. Thời gian lưu trữ và lựa chọn của bạn</h3>
         <p>
           BFR không có cơ sở dữ liệu đám mây và không lưu dữ liệu ngoài máy của bạn. Nhật ký hoàn tác và tệp tạm
           chỉ tồn tại cục bộ cho đến khi bạn xóa hoặc ứng dụng dọn dẹp. Gỡ cài đặt ứng dụng không tự động xóa
           nhật ký trong <code>%LocalAppData%</code>; bạn có thể xóa thủ công nếu muốn.
         </p>
 
-        <h3>8. Trẻ em và dữ liệu nhạy cảm</h3>
+        <h3>10. Trẻ em và dữ liệu nhạy cảm</h3>
         <p>
           BFR không hướng tới trẻ em và không cố ý thu thập dữ liệu của trẻ em. Vì ứng dụng không thu thập
           dữ liệu cá nhân, không có hồ sơ người dùng nào được tạo.
         </p>
 
-        <h3>9. Thay đổi chính sách</h3>
+        <h3>11. Thay đổi chính sách</h3>
         <p>
           Nếu chính sách thay đổi, phiên bản mới sẽ được công bố tại trang này kèm ngày có hiệu lực mới.
           Các thay đổi quan trọng sẽ được ghi rõ trong ghi chú phát hành.
         </p>
 
-        <h3>10. Liên hệ</h3>
+        <h3>12. Liên hệ</h3>
         <p>
           Câu hỏi về quyền riêng tư: vui lòng mở issue tại kho mã nguồn chính thức của dự án
           hoặc gửi email tới địa chỉ liên hệ được công bố trên trang Store của ứng dụng.
@@ -270,8 +307,19 @@
           </li>
           <li>
             <strong>Undo journal:</strong> stored at <code>%LocalAppData%\BatchFileRenamer\journal</code> to support
-            Undo and crash recovery. You may delete this folder at any time; doing so removes the ability to undo
-            previous rename operations.
+            Undo and crash recovery. History and undo journals are deleted automatically after the retention period you
+            choose in Settings (7, 30, 90 or 365 days; default 30). You can also press
+            <strong>Clear history and undo data now</strong> in Settings, or delete this folder at any time; doing so
+            removes the ability to undo previous rename operations. Crash reports (if any) are written locally with
+            file paths redacted.
+          </li>
+          <li>
+            <strong>Quick rename from the Explorer menu (v1.4):</strong> the right-click submenu items pass the file list and a
+            preset name to the local app; the result is shown as a small notification and no data leaves your device.
+          </li>
+          <li>
+            <strong>List files (CSV/TSV/TXT) you choose (v1.4):</strong> the content is only read locally into the input box of
+            the “Rename by list” rule and saved with the preset if you save one; it is never transmitted.
           </li>
           <li>
             <strong>Temporary Explorer file list:</strong> when you select many files, the local COM server writes
@@ -287,14 +335,40 @@
           current user session, and is not exposed to the Internet.
         </p>
 
-        <h3>4. Execution permissions and Explorer integration</h3>
+        <h3>4. Mouse monitoring to open Shelf (optional, off by default)</h3>
+        <p>
+          Only when you <strong>turn on</strong> “Shake the mouse while dragging files to open Shelf” in Settings does BFR install a
+          system-wide Windows mouse hook (<code>WH_MOUSE_LL</code>) to recognise the shake gesture while you hold the left mouse button.
+        </p>
+        <ul>
+          <li>The app uses only the <strong>pointer position and left-button state</strong>, processed in memory to recognise the gesture.</li>
+          <li>The app <strong>never records, stores or transmits</strong> your mouse movement or clicks.</li>
+          <li>The hook <strong>does not read the keyboard</strong>, window contents, screen contents or the contents of files you are dragging.</li>
+          <li>Gestures that start inside a BFR window are ignored.</li>
+          <li>When you turn the option off (the default) or quit the app, the hook is removed immediately.</li>
+        </ul>
+        <p>
+          <strong>Global hotkey to open Shelf (v1.4, optional, off by default).</strong> Only when you turn the option on in Settings
+          does BFR register a system-wide key combination through the Windows <code>RegisterHotKey</code> API.
+        </p>
+        <ul>
+          <li>The operating system notifies BFR only when <strong>exactly the combination you chose</strong> is pressed. BFR <strong>installs no keyboard hook</strong> and <strong>does not receive or record any other keys</strong>.</li>
+          <li>When you turn the option off or quit the app, the combination is unregistered immediately.</li>
+        </ul>
+        <h3>5. Background mode and start with Windows (optional, off by default)</h3>
+        <ul>
+          <li><strong>Background mode:</strong> when enabled, closing the window only hides BFR to the system tray; choose “Exit” in the tray menu to quit. Background mode makes no additional network connections.</li>
+          <li><strong>Start with Windows:</strong> the Microsoft Store build registers a startup task (<code>StartupTask</code>) that you can toggle in Windows Settings &gt; Apps &gt; Startup; the portable build writes an entry under the current user’s <code>Run</code> key. Turning the option off removes it.</li>
+          <li><strong>App settings</strong> (language, theme and the options above) are stored locally in <code>%LocalAppData%\BatchFileRenamer\settings.json</code>.</li>
+        </ul>
+        <h3>6. Execution permissions and Explorer integration</h3>
         <p>
           The MSIX package declares the <code>runFullTrust</code> capability because the app must rename files on
           disk and integrate with the File Explorer context menu. The app runs as a standard user process
           (<code>asInvoker</code>) and never requests Administrator privileges.
         </p>
 
-        <h3>5. In-app purchase (Microsoft Store IAP)</h3>
+        <h3>7. In-app purchase (Microsoft Store IAP)</h3>
         <p>
           When you check or buy the <strong>Pro (lifetime) add-on</strong>, the app uses the operating system's
           <code>Windows.Services.Store</code> API to <strong>verify the license and complete the purchase directly
@@ -308,7 +382,7 @@
           <li>The portable ZIP distribution does not use Store IAP and always stays on the Free tier.</li>
         </ul>
 
-        <h3>6. Update check (portable build, opt-in)</h3>
+        <h3>8. Update check (portable build, opt-in)</h3>
         <p>
           When you <strong>enable</strong> “Check for updates” (off by default) or press the check button, the app calls
           <strong>a public URL configured by you</strong> (by default the GitHub “latest release” API) to read the newest
@@ -319,26 +393,27 @@
           <li>If the option is off or the machine is offline, the app makes <strong>no</strong> such connection.</li>
           <li>The Microsoft Store build updates automatically and does not use this feature.</li>
         </ul>
-        <h3>7. Retention and your choices</h3>
+        <h3>9. Retention and your choices</h3>
         <p>
           BFR has no cloud database and stores no data outside your machine. Undo journals and temporary files
-          remain local until deleted or cleaned up by the app. Uninstalling the app does not automatically delete
-          journals under <code>%LocalAppData%</code>; you may remove them manually.
+          remain local until the retention period you choose in Settings expires or you clear them with
+          <strong>Clear history and undo data now</strong>. Uninstalling the app does not automatically delete
+          journals under <code>%LocalAppData%</code>; use the clear button first, or remove them manually.
         </p>
 
-        <h3>8. Children and sensitive data</h3>
+        <h3>10. Children and sensitive data</h3>
         <p>
           BFR is not directed at children and does not knowingly collect children’s data. Because the app does not
           collect personal data, no user profile is created.
         </p>
 
-        <h3>9. Policy changes</h3>
+        <h3>11. Policy changes</h3>
         <p>
           If this policy changes, the new version will be published on this page with a new effective date.
           Material changes will be noted in the release notes.
         </p>
 
-        <h3>10. Contact</h3>
+        <h3>12. Contact</h3>
         <p>
           Privacy questions: please open an issue in the project’s official source repository or use the contact
           address published on the app’s Store listing.
@@ -347,7 +422,7 @@
     </main>
 
     <footer>
-      Batch File Renamer · Chính sách quyền riêng tư / Privacy Policy · Cập nhật 20/10/2026
+      Batch File Renamer · Chính sách quyền riêng tư / Privacy Policy · Cập nhật 12/11/2026
     </footer>
   </div>
 </body>

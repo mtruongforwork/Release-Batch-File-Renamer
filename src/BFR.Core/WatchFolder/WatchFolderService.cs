@@ -33,8 +33,8 @@ public sealed record WatchFolderLogEntry(
 public sealed class WatchFolderService : IDisposable
 {
     private readonly WatchFolderOptions _options;
-    private readonly Preset _preset;
-    private readonly WatchFolderProcessor _processor;
+    private readonly string _label;
+    private readonly Func<IReadOnlyList<string>, WatchFolderResult> _process;
     private readonly IFileSystem _fs;
     private readonly Action<WatchFolderLogEntry>? _logger;
     private readonly WatchFolderPlanner _planner = new();
@@ -54,8 +54,26 @@ public sealed class WatchFolderService : IDisposable
         Action<WatchFolderLogEntry>? logger = null)
     {
         _options = options;
-        _preset = preset;
-        _processor = processor;
+        _label = preset.Name;
+        _process = batch => processor.Process(batch, preset, options);
+        _fs = fs;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Theo dõi với một bộ xử lý lô tuỳ ý (ví dụ chạy cả workflow cho mỗi lô tệp mới).
+    /// <paramref name="label"/> chỉ dùng để ghi nhật ký.
+    /// </summary>
+    public WatchFolderService(
+        WatchFolderOptions options,
+        string label,
+        Func<IReadOnlyList<string>, WatchFolderResult> process,
+        IFileSystem fs,
+        Action<WatchFolderLogEntry>? logger = null)
+    {
+        _options = options;
+        _label = label;
+        _process = process;
         _fs = fs;
         _logger = logger;
     }
@@ -106,7 +124,7 @@ public sealed class WatchFolderService : IDisposable
 
         _watcher.EnableRaisingEvents = true;
         IsRunning = true;
-        Log("info", $"Đang theo dõi: {_options.Folder} (preset: {_preset.Name})");
+        Log("info", CoreText.Get("CoreWatchStart", "Đang theo dõi: {0} (preset: {1})", _options.Folder, _label));
     }
 
     /// <summary>Dừng theo dõi.</summary>
@@ -127,7 +145,7 @@ public sealed class WatchFolderService : IDisposable
         _timer?.Dispose();
         _timer = null;
 
-        Log("info", "Đã dừng theo dõi.");
+        Log("info", CoreText.Get("CoreWatchStop", "Đã dừng theo dõi."));
     }
 
     private void OnFileEvent(object sender, FileSystemEventArgs e)
@@ -151,7 +169,7 @@ public sealed class WatchFolderService : IDisposable
 
     private void OnError(object sender, ErrorEventArgs e)
     {
-        Log("error", $"Lỗi theo dõi: {e.GetException().Message}");
+        Log("error", CoreText.Get("CoreWatchError", "Lỗi theo dõi: {0}", e.GetException().Message));
     }
 
     private void OnTick()
@@ -167,7 +185,8 @@ public sealed class WatchFolderService : IDisposable
             lock (_gate)
             {
                 batch = ready
-                    .Where(p => !_seen.Contains(p) && !_produced.Contains(p))
+                    // Sự kiện của thư mục (ví dụ thư mục do Organize vừa tạo) và tệp đã biến mất không tạo lô rỗng.
+                    .Where(p => !_seen.Contains(p) && !_produced.Contains(p) && _fs.FileExists(p))
                     .ToList();
 
                 foreach (var path in batch) _seen.Add(path);
@@ -180,15 +199,15 @@ public sealed class WatchFolderService : IDisposable
                 batch = batch.Take(_options.MaxFilesPerBatch).ToList();
             }
 
-            Log("info", $"Phát hiện {batch.Count} tệp mới, đang áp dụng preset…");
+            Log("info", CoreText.Get("CoreWatchDetected", "Phát hiện {0} tệp mới, đang áp dụng preset…", batch.Count));
 
-            var result = _processor.Process(batch, _preset, _options);
+            var result = _process(batch);
             ProcessedBatches++;
             RenamedFiles += result.Renamed;
 
             foreach (var (path, error) in result.Errors)
             {
-                Log("warn", $"Bỏ qua: {error}", path);
+                Log("warn", CoreText.Get("CoreWatchSkipped", "Bỏ qua: {0}", error), path);
             }
 
             // Ghi nhớ các tệp mới sinh ra để không xử lý lại (chống lặp).
@@ -198,13 +217,13 @@ public sealed class WatchFolderService : IDisposable
             }
 
             Log(result.Failed > 0 ? "warn" : "info",
-                $"Hoàn tất lô: đổi {result.Renamed}, không đổi {result.Unchanged}, bỏ qua {result.Skipped}, lỗi {result.Failed}");
+                CoreText.Get("CoreWatchBatchDone", "Hoàn tất lô: đổi {0}, không đổi {1}, bỏ qua {2}, lỗi {3}", result.Renamed, result.Unchanged, result.Skipped, result.Failed));
 
             BatchProcessed?.Invoke(this, result);
         }
         catch (Exception ex)
         {
-            Log("error", "Lỗi khi xử lý lô: " + ex.Message);
+            Log("error", CoreText.Get("CoreWatchBatchError", "Lỗi khi xử lý lô: {0}", ex.Message));
         }
     }
 
