@@ -497,6 +497,7 @@
     <sys:String x:Key="TitleMinimize">Thu nhỏ</sys:String>
     <sys:String x:Key="TitleMaximize">Phóng to</sys:String>
     <sys:String x:Key="TitleClose">Đóng</sys:String>
+    <sys:String x:Key="HomeRadial">Menu tròn</sys:String>
     <sys:String x:Key="TemName">Tem, linh vật của BFR</sys:String>
     <sys:String x:Key="NavShelf">Khay tệp</sys:String>
     <sys:String x:Key="NavHistory">Lịch sử</sys:String>

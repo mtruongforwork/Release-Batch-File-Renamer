@@ -497,6 +497,7 @@
     <sys:String x:Key="TitleMinimize">Minimize</sys:String>
     <sys:String x:Key="TitleMaximize">Maximize</sys:String>
     <sys:String x:Key="TitleClose">Close</sys:String>
+    <sys:String x:Key="HomeRadial">Radial menu</sys:String>
     <sys:String x:Key="TemName">Tem, the BFR mascot</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">History</sys:String>

@@ -497,6 +497,7 @@
     <sys:String x:Key="TitleMinimize">Réduire</sys:String>
     <sys:String x:Key="TitleMaximize">Agrandir</sys:String>
     <sys:String x:Key="TitleClose">Fermer</sys:String>
+    <sys:String x:Key="HomeRadial">Menu radial</sys:String>
     <sys:String x:Key="TemName">Tem, la mascotte de BFR</sys:String>
     <sys:String x:Key="NavShelf">Shelf</sys:String>
     <sys:String x:Key="NavHistory">Historique</sys:String>

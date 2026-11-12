@@ -17,13 +17,15 @@ internal sealed class HomePage : PageBase
     private readonly Action<string> _navigate;
     private readonly Action<IReadOnlyList<string>> _dropFiles;
     private readonly Action<string> _openTool;
+    private readonly Action _openRadial;
     private ContentControl? _drop;
 
-    public HomePage(Action<string> navigate, Action<IReadOnlyList<string>> dropFiles, Action<string> openTool)
+    public HomePage(Action<string> navigate, Action<IReadOnlyList<string>> dropFiles, Action<string> openTool, Action openRadial)
     {
         _navigate = navigate;
         _dropFiles = dropFiles;
         _openTool = openTool;
+        _openRadial = openRadial;
         Content = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = Build() };
     }
 
@@ -39,6 +41,12 @@ internal sealed class HomePage : PageBase
         titles.Children.Add(new TextBlock { Text = Loc.T("HomeTitle"), Style = S("BfrTitleText") });
         titles.Children.Add(new TextBlock { Text = Loc.T("HomeSubtitle"), Style = S("BfrBodyText"), Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("BfrFg2"), Margin = new Thickness(0, 2, 0, 0), TextWrapping = TextWrapping.Wrap });
         header.Children.Add(titles);
+
+        // Menu tròn: mặc định chỉ có phím tắt (tắt sẵn) nên cần một lối mở thấy được.
+        var radial = new Button { Content = Loc.T("HomeRadial"), Style = S("BfrSecondaryButton"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(28, 0, 0, 0) };
+        radial.Click += (_, _) => _openRadial();
+        System.Windows.Automation.AutomationProperties.SetName(radial, Loc.T("HomeRadial"));
+        header.Children.Add(radial);
         root.Children.Add(header);
 
         var grid = new Grid();

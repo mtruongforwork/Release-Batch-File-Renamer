@@ -497,6 +497,7 @@
     <sys:String x:Key="TitleMinimize">最小化</sys:String>
     <sys:String x:Key="TitleMaximize">最大化</sys:String>
     <sys:String x:Key="TitleClose">关闭</sys:String>
+    <sys:String x:Key="HomeRadial">环形菜单</sys:String>
     <sys:String x:Key="TemName">Tem，BFR 吉祥物</sys:String>
     <sys:String x:Key="NavShelf">文件架</sys:String>
     <sys:String x:Key="NavHistory">历史</sys:String>

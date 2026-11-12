@@ -1016,7 +1016,8 @@ public partial class MainWindow : FluentWindow
                 page = new HomePage(
                     NavigateTo,
                     dropped => { NavigateTo("Rename"); EnqueuePaths(dropped); },
-                    toolKey => OpenTool(toolKey, Array.Empty<string>()));
+                    toolKey => OpenTool(toolKey, Array.Empty<string>()),
+                    ShowRadialAtCursor);
                 break;
             case "Shelf":
                 page = new ShelfPage(_shelfModel, batch => { NavigateTo("Rename"); EnqueuePaths(batch); }, feature => ShowUpgradeDialog(feature));
