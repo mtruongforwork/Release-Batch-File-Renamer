@@ -82,7 +82,8 @@ public sealed class OrganizeTool : ITool
             ToolText.Name(i.File.FullPath),
             i.Status switch
             {
-                OrganizeStatus.Ready or OrganizeStatus.Unchanged => ToolText.Relative(root, i.TargetPath),
+                OrganizeStatus.Ready => "→ " + ToolText.Relative(root, i.TargetPath),
+                OrganizeStatus.Unchanged => ToolText.Relative(root, i.TargetPath),
                 _ => i.Message ?? i.Status.ToString()
             },
             i.Status switch

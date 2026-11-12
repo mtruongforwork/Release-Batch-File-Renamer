@@ -36,7 +36,7 @@ internal sealed class ToolView : UserControl
           </Grid>
           <DataTemplate.Triggers>
             <DataTrigger Binding="{Binding State}" Value="Header">
-              <Setter TargetName="Primary" Property="FontWeight" Value="SemiBold" />
+              <Setter TargetName="Primary" Property="FontFamily" Value="{DynamicResource BfrFontHeading}" />
               <Setter TargetName="Primary" Property="Foreground" Value="{DynamicResource Accent}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding State}" Value="Warning">
