@@ -15,7 +15,7 @@ public sealed class FolderTool : ITool
     public string Key => "folders";
     public string TitleKey => "ToolFoldersTitle";
     public string DescriptionKey => "ToolFoldersDesc";
-    public string Icon => "";
+    public string Icon => "";
     public bool ReadOnly => false;
     public bool AcceptsFiles => true;
 

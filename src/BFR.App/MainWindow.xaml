@@ -300,6 +300,13 @@
                                 <TextBlock Text="{DynamicResource NavRename}" FontSize="10.5" Margin="0,5,0,0" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </RadioButton>
+                        <RadioButton x:Name="NavTools" Style="{StaticResource NavRailItemStyle}" GroupName="Nav" Tag="Tools"
+                                     Checked="Nav_Checked" ToolTip="{DynamicResource NavTools}" AutomationProperties.Name="Nav tools">
+                            <StackPanel>
+                                <TextBlock Text="&#xE90F;" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource NavTools}" FontSize="10.5" Margin="0,5,0,0" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </RadioButton>
                         <RadioButton x:Name="NavShelf" Style="{StaticResource NavRailItemStyle}" GroupName="Nav" Tag="Shelf"
                                      Checked="Nav_Checked" ToolTip="{DynamicResource NavShelf}" AutomationProperties.Name="Nav shelf">
                             <StackPanel>

@@ -14,7 +14,7 @@ public sealed class OrganizeTool : ITool
     public string Key => "organize";
     public string TitleKey => "ToolOrganizeTitle";
     public string DescriptionKey => "ToolOrganizeDesc";
-    public string Icon => "";
+    public string Icon => "";
     public bool ReadOnly => false;
     public bool AcceptsFiles => true;
 

@@ -272,7 +272,7 @@ Kế thừa A8–A14: bàn phím đầy đủ, Narrator, High Contrast, 4 ngôn 
 | Archive: chia nhóm, tên theo mẫu | Không | Có |
 | Analyze: xuất báo cáo | Không | Có |
 | Workflow | Không | Có |
-| Giữ khu cách ly | 7 ngày | Tuỳ chỉnh tới 90 ngày |
+| Giữ khu cách ly | 30 ngày (cố định) | Tuỳ chỉnh tới 90 ngày |
 | Các giới hạn cũ (rule, preset, undo, Shelf, danh sách) | Giữ như v1.4 | Giữ như v1.4 |
 
 `ProFeature` thêm: `OrganizeDeepTemplate`, `DuplicatesUnlimited`, `SimilarImages`, `HardLinkDedupe`, `ImageUnlimited`, `ExifWrite`, `ArchiveAdvanced`, `AnalyzeExport`, `Workflow`, `QuarantineRetention`.

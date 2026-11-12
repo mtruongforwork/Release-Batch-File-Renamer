@@ -18,6 +18,7 @@
     <ProjectReference Include="..\BFR.Core\BFR.Core.csproj" />
     <ProjectReference Include="..\BFR.Presentation\BFR.Presentation.csproj" />
     <ProjectReference Include="..\BFR.Store\BFR.Store.csproj" />
+    <ProjectReference Include="..\BFR.Media\BFR.Media.csproj" />
   </ItemGroup>
 
   <!-- Theme dùng chung phải nạp được bằng URI tương đối (ThemeManager hoán đổi

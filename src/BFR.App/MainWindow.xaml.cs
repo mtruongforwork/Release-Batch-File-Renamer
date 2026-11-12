@@ -801,6 +801,7 @@ public partial class MainWindow : FluentWindow
 
     private RadioButton NavButton(string key) => key switch
     {
+        "Tools" => NavTools,
         "Shelf" => NavShelf,
         "History" => NavHistory,
         "Presets" => NavPresets,
@@ -881,6 +882,11 @@ public partial class MainWindow : FluentWindow
                     NavigateTo("Rename");
                 };
                 page = presets;
+                break;
+            case "Tools":
+                page = new ToolsPage(_fs, _license.License, new HistoryStore(_fs, AppData("history.json")), AppData("journal"), AppVersion.Current,
+                    new CompositeMetadataProvider(new ExifMetadataReader(), new MediaMetadataReader(), new AudioTagReader()),
+                    new BFR.Media.WicImageProcessor(), feature => ShowUpgradeDialog(feature));
                 break;
             case "Watch":
                 page = new WatchFolderPage(new PresetStore(_fs, AppData("presets")), _license.License);
