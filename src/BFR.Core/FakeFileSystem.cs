@@ -39,6 +39,9 @@ public sealed class FakeFileSystem : IFileSystem
         if (_files.ContainsKey(t) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
         _files.TryRemove(f, out var content);
         _files[t] = content!;
+        // Di chuyển giữ nguyên ngày giờ và thuộc tính (như hệ thống tệp thật); đích cũ bị ghi đè mất giá trị của nó.
+        if (_times.TryRemove(f, out var times)) _times[t] = times; else _times.TryRemove(t, out _);
+        if (_attributes.TryRemove(f, out var attrs)) _attributes[t] = attrs; else _attributes.TryRemove(t, out _);
         EnsureDirectory(ParentDirectory(t));
     }
 
@@ -128,6 +131,8 @@ public sealed class FakeFileSystem : IFileSystem
         if (!_files.TryGetValue(f, out var content)) throw new FileNotFoundException("Tệp không tồn tại", from);
         if (_files.ContainsKey(t) && !overwrite) throw new IOException("Tệp đích đã tồn tại");
         _files[t] = (byte[])content.Clone();
+        if (_times.TryGetValue(f, out var times)) _times[t] = times; else _times.TryRemove(t, out _);
+        if (_attributes.TryGetValue(f, out var attrs)) _attributes[t] = attrs; else _attributes.TryRemove(t, out _);
         EnsureDirectory(ParentDirectory(t));
     }
 
